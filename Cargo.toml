@@ -1,0 +1,39 @@
+[package]
+name = "exex"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+reth = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-exex = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-node-api = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-primitives = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-provider = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-tracing = { git = "https://github.com/paradigmxyz/reth.git" }
+
+eyre = "0.6.12"
+futures = "0.3.30"
+alloy-sol-types = {version = "0.7.2", features = ["json"]}
+rusqlite = { version = "0.31.0", features = ["bundled"] }
+
+tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
+rand = "0.8.5"
+reqwest-oauth1 = "0.2.4"
+reqwest = { version = "0.11.10" }
+log = "0.4.21"
+env_logger = "0.11.3"
+serde = "1.0.203"
+serde_json = "1.0.117"
+dotenv = "0.15.0"
+# twitter-v2 = "0.1.8"
+
+[dev-dependencies]
+reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
+reth-testing-utils = { git = "https://github.com/paradigmxyz/reth.git" }
+
+[patch.crates-io]
+revm = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }

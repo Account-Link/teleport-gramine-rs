@@ -5,10 +5,19 @@ use rusqlite::Connection;
 pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
     connection.execute(
         r#"
-            CREATE TABLE IF NOT EXISTS twitter_tokens (
+            CREATE TABLE IF NOT EXISTS twitter_access_tokens (
                 id               INTEGER PRIMARY KEY,
                 access_token     TEXT NOT NULL,
                 access_secret    TEXT NOT NULL
+            );
+            "#,
+        (),
+    )?;
+    connection.execute(
+        r#"
+            CREATE TABLE IF NOT EXISTS twitter_oauth_tokens (
+                oauth_token           TEXT PRIMARY KEY,
+                oauth_token_secret    TEXT NOT NULL
             );
             "#,
         (),
@@ -17,7 +26,7 @@ pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
     Ok(())
 }
 
-pub async fn add_user_tokens(
+pub async fn add_access_tokens(
     connection: &mut Connection,
     user_id: u64,
     access_token: String,
@@ -25,7 +34,7 @@ pub async fn add_user_tokens(
 ) -> rusqlite::Result<()> {
     connection.execute(
         r#"
-            INSERT INTO twitter_tokens (id, access_token, access_secret)
+            INSERT INTO twitter_access_tokens (id, access_token, access_secret)
             VALUES (?1, ?2, ?3)
             "#,
         rusqlite::params![user_id, access_token, access_secret],
@@ -34,7 +43,7 @@ pub async fn add_user_tokens(
     Ok(())
 }
 
-pub async fn get_user_tokens<P: AsRef<Path>>(
+pub async fn get_access_tokens<P: AsRef<Path>>(
     db_url: P,
     user_id: u64,
 ) -> rusqlite::Result<(String, String)> {
@@ -42,7 +51,7 @@ pub async fn get_user_tokens<P: AsRef<Path>>(
     let mut stmt = connection.prepare(
         r#"
             SELECT access_token, access_secret
-            FROM twitter_tokens
+            FROM twitter_access_tokens
             WHERE id = ?1
             "#,
     )?;
@@ -71,7 +80,7 @@ mod tests {
         let db_url = tempfile::NamedTempFile::new()?;
         let mut connection = Connection::open(db_url.path()).expect("Failed to open database");
         create_tables(&mut connection).expect("Failed to create tables");
-        add_user_tokens(
+        add_access_tokens(
             &mut connection,
             1,
             "access_token".to_string(),
@@ -79,7 +88,7 @@ mod tests {
         )
         .await
         .expect("Failed to add user tokens");
-        let (access_token, access_secret) = get_user_tokens(db_url.path(), 1)
+        let (access_token, access_secret) = get_access_tokens(db_url.path(), 1)
             .await
             .expect("Failed to get user tokens");
         assert_eq!(access_token, "access_token");

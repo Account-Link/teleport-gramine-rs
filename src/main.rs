@@ -32,7 +32,7 @@ async fn teleport_exex<Node: FullNodeComponents>(
                         if safe {
                             let x_id = redeem.x_id.into_limbs()[0];
                             let (access_token, access_secret) =
-                                db::get_user_tokens(db_url.clone(), x_id).await?;
+                                db::get_access_tokens(db_url.clone(), x_id).await?;
                             send_tweet(access_token, access_secret, redeem.content.to_string())
                                 .await;
                         }

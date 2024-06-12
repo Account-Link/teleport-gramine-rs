@@ -75,5 +75,5 @@ pub async fn callback(Query(query): Query<CallbackQuery>) -> Redirect {
     .unwrap();
 
     //todo: change to actual redirect url
-    Redirect::temporary("https://teleport-exex.com")
+    Redirect::temporary("http://localhost:4000/mint?success=true")
 }

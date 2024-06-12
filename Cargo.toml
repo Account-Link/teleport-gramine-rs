@@ -27,10 +27,12 @@ serde = "1.0.203"
 serde_json = "1.0.117"
 dotenv = "0.15.0"
 openai-rust = "1.5.2"
+oauth1-twitter = "0.2.1"
 
 [dev-dependencies]
 reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
 reth-testing-utils = { git = "https://github.com/paradigmxyz/reth.git" }
+tempfile = "3.8"
 
 [patch.crates-io]
 revm = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }

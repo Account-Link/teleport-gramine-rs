@@ -1,11 +1,15 @@
 use std::str::FromStr;
 
 use alloy_sol_types::{sol, SolEventInterface};
+use db::create_tables;
+use futures::Future;
 use reth_exex::{ExExContext, ExExEvent};
 use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
 use reth_primitives::{Address, Log, SealedBlockWithSenders, TransactionSigned};
 use reth_provider::Chain;
+use rusqlite::Connection;
+mod db;
 mod oai;
 mod twitter;
 
@@ -13,7 +17,10 @@ sol!(NFT, "src/abi.json");
 use twitter::send_tweet;
 use NFT::NFTEvents;
 
-async fn teleport_exex<Node: FullNodeComponents>(mut ctx: ExExContext<Node>) -> eyre::Result<()> {
+async fn teleport_exex<Node: FullNodeComponents>(
+    mut ctx: ExExContext<Node>,
+    db_url: String,
+) -> eyre::Result<()> {
     while let Some(notification) = ctx.notifications.recv().await {
         if let Some(committed_chain) = notification.committed_chain() {
             let events = decode_chain_into_events(&committed_chain);
@@ -23,8 +30,10 @@ async fn teleport_exex<Node: FullNodeComponents>(mut ctx: ExExContext<Node>) -> 
                     NFTEvents::Redeem(redeem) => {
                         let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                         if safe {
-                            //todo: get access token + secret
-                            send_tweet("".to_string(), "".to_string(), redeem.content.to_string())
+                            let x_id = redeem.x_id.into_limbs()[0];
+                            let (access_token, access_secret) =
+                                db::get_user_tokens(db_url.clone(), x_id).await?;
+                            send_tweet(access_token, access_secret, redeem.content.to_string())
                                 .await;
                         }
                     }
@@ -69,11 +78,23 @@ fn decode_chain_into_events(
         })
 }
 
+async fn init<Node: FullNodeComponents>(
+    ctx: ExExContext<Node>,
+    db_url: String,
+) -> eyre::Result<impl Future<Output = eyre::Result<()>>> {
+    let mut connection = Connection::open(db_url.clone())?;
+    create_tables(&mut connection)?;
+    Ok(teleport_exex(ctx, db_url))
+}
+
 fn main() -> eyre::Result<()> {
     reth::cli::Cli::parse_args().run(|builder, _| async move {
         let handle = builder
             .node(EthereumNode::default())
-            .install_exex("Teleport", |ctx| async move { Ok(teleport_exex(ctx)) })
+            .install_exex("Teleport", |ctx| async move {
+                let db_url = std::env::var("DB_URL").expect("DB_URL not set");
+                init(ctx, db_url).await
+            })
             .launch()
             .await?;
 

@@ -1,13 +1,12 @@
 use std::str::FromStr;
 
 use alloy_sol_types::{sol, SolEventInterface};
-use llama::is_tweet_safe;
 use reth_exex::{ExExContext, ExExEvent};
 use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
 use reth_primitives::{Address, Log, SealedBlockWithSenders, TransactionSigned};
 use reth_provider::Chain;
-mod llama;
+mod oai;
 mod twitter;
 
 sol!(NFT, "src/abi.json");
@@ -22,7 +21,7 @@ async fn teleport_exex<Node: FullNodeComponents>(mut ctx: ExExContext<Node>) -> 
             for (_block, _tx, _log, event) in events {
                 match event {
                     NFTEvents::Redeem(redeem) => {
-                        let safe = is_tweet_safe(&redeem.content, &redeem.policy).await;
+                        let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                         if safe {
                             //todo: get access token + secret
                             send_tweet("".to_string(), "".to_string(), redeem.content.to_string())

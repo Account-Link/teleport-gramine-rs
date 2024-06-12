@@ -30,6 +30,7 @@ openai-rust = "1.5.2"
 url = "2.5.1"
 serde_urlencoded = "0.7.1"
 serde_qs = "0.13.0"
+axum = "0.7.5"
 
 [dev-dependencies]
 reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }

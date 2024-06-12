@@ -1,6 +1,5 @@
 use reqwest_oauth1::OAuthClientProvider;
 use serde::{Deserialize, Serialize};
-use url::Url;
 
 #[derive(Debug, Serialize)]
 struct Tweet {
@@ -51,7 +50,7 @@ struct CallbackUrlQuery {
     oauth_verifier: String,
 }
 
-pub async fn get_user_id(access_token: String, access_secret: String) -> u64 {
+pub async fn get_user_id(access_token: String, access_secret: String) -> String {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
@@ -65,7 +64,7 @@ pub async fn get_user_id(access_token: String, access_secret: String) -> u64 {
         .await
         .expect("Failed to get user info");
     let user_info: UserInfoResponse = resp.json().await.expect("Failed to parse user info");
-    let id: u64 = user_info.data.id.parse().expect("Failed to parse user id");
+    let id = user_info.data.id.clone();
     log::info!("{:?}", user_info);
     log::info!("User id: {}", id);
     id
@@ -90,11 +89,11 @@ pub async fn send_tweet(access_token: String, access_secret: String, tweet: Stri
     log::info!("{:?}", resp.text().await);
 }
 
-pub async fn request_oauth_token() -> eyre::Result<(String, String)> {
+pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, String)> {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-    let callback_url = "http://127.0.0.1:5000/login/callback";
+    let callback_url = format!("http://0.0.0.0:3000/callback?teleport_id={}", teleport_id);
     let secrets = reqwest_oauth1::Secrets::new(app_key, app_secret);
     let query = RequestTokenRequestQuery {
         oauth_callback: callback_url.to_string(),
@@ -123,18 +122,16 @@ pub async fn request_oauth_token() -> eyre::Result<(String, String)> {
 pub async fn authorize_token(
     oauth_token: String,
     oauth_token_secret: String,
-    callback_url: Url,
+    oauth_verifier: String,
 ) -> eyre::Result<(String, String)> {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-    let callback_url_query = callback_url.query().unwrap_or_default();
-    let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query)?;
-    assert_eq!(callback_url_query.oauth_token, oauth_token);
+    // let callback_url_query = callback_url.query().unwrap_or_default();
+    // let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query)?;
+    // assert_eq!(callback_url_query.oauth_token, oauth_token);
 
-    let query = AccessTokenRequestQuery {
-        oauth_verifier: callback_url_query.oauth_verifier.to_owned(),
-    };
+    let query = AccessTokenRequestQuery { oauth_verifier };
 
     let secrets = reqwest_oauth1::Secrets::new(app_key, app_secret)
         .token(oauth_token.to_owned(), oauth_token_secret.to_owned());
@@ -166,22 +163,27 @@ pub async fn authorize_token(
 mod tests {
     use super::*;
 
-    #[ignore]
     #[tokio::test]
     async fn e2e_oauth_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let tokens = request_oauth_token().await.unwrap();
+        let tokens = request_oauth_token(1.to_string()).await.unwrap();
         log::info!("{:?}", tokens);
         let url = format!(
             "https://api.twitter.com/oauth/authenticate?oauth_token={}",
             tokens.0.clone()
         );
+        // teleport-exex.com/new?teleport_id=123
+        // 302 redirect -> teleport-tdx.com/ret?teleport_id=123
         log::info!("Please visit: {}", url);
         let mut callback_url = String::new();
         std::io::stdin().read_line(&mut callback_url).unwrap();
-        let url = Url::parse(&callback_url).unwrap();
-        let tokens = authorize_token(tokens.0, tokens.1, url).await.unwrap();
+        let url = url::Url::parse(&callback_url).unwrap();
+        let callback_url_query = url.query().unwrap_or_default();
+        let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query).unwrap();
+        let tokens = authorize_token(tokens.0, tokens.1, callback_url_query.oauth_verifier)
+            .await
+            .unwrap();
         log::info!("{:?}", tokens);
     }
 

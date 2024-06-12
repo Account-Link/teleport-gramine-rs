@@ -3,6 +3,7 @@ use std::str::FromStr;
 use alloy_sol_types::{sol, SolEventInterface};
 use db::create_tables;
 use futures::Future;
+use listener::{callback, new_user};
 use reth_exex::{ExExContext, ExExEvent};
 use reth_node_api::FullNodeComponents;
 use reth_node_ethereum::EthereumNode;
@@ -10,6 +11,7 @@ use reth_primitives::{Address, Log, SealedBlockWithSenders, TransactionSigned};
 use reth_provider::Chain;
 use rusqlite::Connection;
 mod db;
+mod listener;
 mod oai;
 mod twitter;
 
@@ -87,17 +89,32 @@ async fn init<Node: FullNodeComponents>(
     Ok(teleport_exex(ctx, db_url))
 }
 
-fn main() -> eyre::Result<()> {
-    reth::cli::Cli::parse_args().run(|builder, _| async move {
-        let handle = builder
-            .node(EthereumNode::default())
-            .install_exex("Teleport", |ctx| async move {
-                let db_url = std::env::var("DB_URL").expect("DB_URL not set");
-                init(ctx, db_url).await
-            })
-            .launch()
-            .await?;
+// fn main() -> eyre::Result<()> {
+//     reth::cli::Cli::parse_args().run(|builder, _| async move {
+//         let handle = builder
+//             .node(EthereumNode::default())
+//             .install_exex("Teleport", |ctx| async move {
+//                 let db_url = std::env::var("DB_URL").expect("DB_URL not set");
+//                 init(ctx, db_url).await
+//             })
+//             .launch()
+//             .await?;
 
-        handle.wait_for_node_exit().await
-    })
+//         handle.wait_for_node_exit().await
+//     })
+// }
+
+#[tokio::main]
+async fn main() {
+    // build our application with a route
+    env_logger::init();
+    dotenv::dotenv().ok();
+    let db_url = std::env::var("DB_URL").expect("DB_URL not set");
+    let mut connection = Connection::open(db_url).expect("Failed to open database");
+    create_tables(&mut connection).expect("Failed to create tables");
+    let app = axum::Router::new()
+        .route("/new", axum::routing::get(new_user))
+        .route("/callback", axum::routing::get(callback));
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    axum::serve(listener, app).await.unwrap();
 }

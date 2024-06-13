@@ -1,0 +1,49 @@
+# Copyright (C) 2023 Gramine contributors
+# SPDX-License-Identifier: BSD-3-Clause
+
+# Rust manifest example
+
+libos.entrypoint = "{{ self_exe }}"
+loader.entrypoint = "file:{{ gramine.libos }}"
+loader.log_level = "{{ log_level }}"
+
+
+loader.env.LD_LIBRARY_PATH = "/lib:/lib/x86_64-linux-gnu"
+loader.env.MALLOC_ARENA_MAX = "1"
+loader.env.TWITTER_CONSUMER_KEY = { passthrough = true }
+loader.env.TWITTER_CONSUMER_SECRET = { passthrough = true }
+loader.env.TEST_ACCESS_TOKEN = { passthrough = true }
+loader.env.TEST_ACCESS_SECRET = { passthrough = true }
+loader.env.HUGGINGFACE_API_KEY = { passthrough = true }
+loader.env.HUGGINGFACE_API_URL = { passthrough = true }
+loader.env.OPENAI_API_KEY = { passthrough = true }
+loader.env.DB_URL = { passthrough = true }
+loader.env.WS_RPC_URL = { passthrough = true }
+loader.env.RUST_BACKTRACE = "full"
+loader.env.RUST_LOG = "info"
+
+fs.mounts = [
+  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+]
+
+sys.enable_extra_runtime_domain_names_conf = true
+
+sgx.debug = true
+sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+
+sgx.trusted_files = [
+  "file:{{ gramine.libos }}",
+  "file:{{ self_exe }}",
+  "file:{{ gramine.runtimedir() }}/",
+  "file:{{ arch_libdir }}/",
+]
+
+# The maximum number of threads in a single process needs to be declared in advance.
+# You need to account for:
+# - one main thread
+# - the tokio worker threads
+# - any threads and threadpools you might be starting
+# - helper threads internal to Gramine — see:
+#   https://gramine.readthedocs.io/en/stable/manifest-syntax.html#number-of-threads
+sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '8' }}

@@ -1,0 +1,72 @@
+[libos]
+entrypoint = "target/release/exex"
+
+[loader]
+entrypoint = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+log_level = "error"
+
+[loader.env]
+LD_LIBRARY_PATH = "/lib:/lib/x86_64-linux-gnu"
+MALLOC_ARENA_MAX = "1"
+RUST_BACKTRACE = "full"
+RUST_LOG = "info"
+
+[loader.env.TWITTER_CONSUMER_KEY]
+passthrough = true
+
+[loader.env.TWITTER_CONSUMER_SECRET]
+passthrough = true
+
+[loader.env.TEST_ACCESS_TOKEN]
+passthrough = true
+
+[loader.env.TEST_ACCESS_SECRET]
+passthrough = true
+
+[loader.env.HUGGINGFACE_API_KEY]
+passthrough = true
+
+[loader.env.HUGGINGFACE_API_URL]
+passthrough = true
+
+[loader.env.OPENAI_API_KEY]
+passthrough = true
+
+[loader.env.DB_URL]
+passthrough = true
+
+[loader.env.WS_RPC_URL]
+passthrough = true
+
+[fs]
+mounts = [
+    { path = "/lib", uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
+    { path = "/lib/x86_64-linux-gnu", uri = "file:/lib/x86_64-linux-gnu" },
+]
+
+[sys]
+enable_extra_runtime_domain_names_conf = true
+
+[sgx]
+debug = true
+edmm_enable = false
+trusted_files = [
+    { uri = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so" },
+    { uri = "file:target/release/exex" },
+    { uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/" },
+    { uri = "file:/lib/x86_64-linux-gnu/" },
+]
+max_threads = 8
+isvprodid = 0
+isvsvn = 0
+remote_attestation = "none"
+enable_stats = false
+enclave_size = "256M"
+use_exinfo = false
+
+[sgx.cpu_features]
+avx = "unspecified"
+avx512 = "unspecified"
+amx = "unspecified"
+mpx = "disabled"
+pkru = "disabled"

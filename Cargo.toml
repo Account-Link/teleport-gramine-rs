@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-reth = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-exex = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-node-api = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-primitives = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-provider = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-tracing = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-exex = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-node-api = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-primitives = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-provider = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-tracing = { git = "https://github.com/paradigmxyz/reth.git" }
 
 eyre = "0.6.12"
 futures = "0.3.30"
@@ -43,8 +43,8 @@ alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features
 futures-util = "0.3"
 
 [dev-dependencies]
-reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
-reth-testing-utils = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
+# reth-testing-utils = { git = "https://github.com/paradigmxyz/reth.git" }
 tempfile = "3.8"
 
 [patch.crates-io]

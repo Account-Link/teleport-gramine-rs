@@ -1,7 +1,6 @@
-use db::create_tables;
+use db::{create_tables, open_connection};
 use endpoints::{callback, new_user, SharedState};
 use listener::subscribe_to_events;
-use rusqlite::Connection;
 mod db;
 mod endpoints;
 mod listener;
@@ -16,7 +15,7 @@ async fn main() {
     let db_url = std::env::var("DB_URL").expect("DB_URL not set");
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
 
-    let mut connection = Connection::open(db_url.clone()).expect("Failed to open database");
+    let mut connection = open_connection(db_url.clone()).expect("Failed to open database");
     create_tables(&mut connection).expect("Failed to create tables");
 
     let shared_state = SharedState {
@@ -30,5 +29,7 @@ async fn main() {
     tokio::spawn(async move {
         axum::serve(listener, app).await.unwrap();
     });
-    subscribe_to_events(db_url, ws_rpc_url).await.unwrap();
+    subscribe_to_events(&mut connection, ws_rpc_url)
+        .await
+        .unwrap();
 }

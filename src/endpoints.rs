@@ -2,11 +2,10 @@ use axum::{
     extract::{Query, State},
     response::Redirect,
 };
-use rusqlite::Connection;
 use serde::Deserialize;
 
 use crate::{
-    db::{add_access_tokens, add_oauth_tokens, get_oauth_tokens_by_teleport_id},
+    db::{add_access_tokens, add_oauth_tokens, get_oauth_tokens_by_teleport_id, open_connection},
     twitter::{authorize_token, get_user_id, request_oauth_token},
 };
 
@@ -33,7 +32,7 @@ pub async fn new_user(
 ) -> Redirect {
     let teleport_id = query.teleport_id;
     let mut connection =
-        Connection::open(shared_state.db_url).expect("Failed to open database connection");
+        open_connection(shared_state.db_url.clone()).expect("Failed to open database");
     let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
         .await
         .expect("Failed to request oauth token");
@@ -63,10 +62,10 @@ pub async fn callback(
     let oauth_verifier = query.oauth_verifier;
     let teleport_id = query.teleport_id;
     let mut connection =
-        Connection::open(shared_state.db_url.clone()).expect("Failed to open database connection");
+        open_connection(shared_state.db_url.clone()).expect("Failed to open database");
 
     let (oauth_token_from_db, oauth_token_secret) =
-        get_oauth_tokens_by_teleport_id(shared_state.db_url, teleport_id.clone())
+        get_oauth_tokens_by_teleport_id(&mut connection, teleport_id.clone())
             .await
             .expect("Failed to get oauth tokens");
     assert_eq!(oauth_token, oauth_token_from_db);

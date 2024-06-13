@@ -1,6 +1,13 @@
-use std::path::Path;
-
 use rusqlite::Connection;
+
+pub fn open_connection(db_url: String) -> rusqlite::Result<Connection> {
+    if db_url == "memory" {
+        let connection = Connection::open_in_memory()?;
+        log::info!("Opened in-memory database connection");
+        return Ok(connection);
+    }
+    Connection::open(db_url)
+}
 
 pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
     connection.execute(
@@ -70,11 +77,10 @@ pub async fn add_oauth_tokens(
     Ok(())
 }
 
-pub async fn get_oauth_tokens_by_teleport_id<P: AsRef<Path>>(
-    db_url: P,
+pub async fn get_oauth_tokens_by_teleport_id(
+    connection: &mut Connection,
     teleport_id: String,
 ) -> rusqlite::Result<(String, String)> {
-    let connection = Connection::open(db_url)?;
     let mut stmt = connection.prepare(
         r#"
             SELECT oauth_token, oauth_token_secret
@@ -96,11 +102,10 @@ pub async fn get_oauth_tokens_by_teleport_id<P: AsRef<Path>>(
     Ok((oauth_token, oauth_token_secret))
 }
 
-pub async fn get_access_tokens<P: AsRef<Path>>(
-    db_url: P,
+pub async fn get_access_tokens(
+    connection: &mut Connection,
     user_id: u64,
 ) -> rusqlite::Result<(String, String)> {
-    let connection = Connection::open(db_url)?;
     let mut stmt = connection.prepare(
         r#"
             SELECT access_token, access_secret
@@ -130,8 +135,7 @@ mod tests {
     async fn db_test() -> eyre::Result<()> {
         env_logger::init();
         dotenv::dotenv().ok();
-        let db_url = tempfile::NamedTempFile::new()?;
-        let mut connection = Connection::open(db_url.path()).expect("Failed to open database");
+        let mut connection = Connection::open_in_memory()?;
         create_tables(&mut connection).expect("Failed to create tables");
         add_access_tokens(
             &mut connection,
@@ -142,7 +146,7 @@ mod tests {
         )
         .await
         .expect("Failed to add user tokens");
-        let (access_token, access_secret) = get_access_tokens(db_url.path(), 1)
+        let (access_token, access_secret) = get_access_tokens(&mut connection, 1)
             .await
             .expect("Failed to get user tokens");
         assert_eq!(access_token, "access_token");

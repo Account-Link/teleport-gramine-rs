@@ -7,6 +7,7 @@ use alloy::rpc::types::Filter;
 use alloy_sol_types::sol;
 use alloy_sol_types::SolEventInterface;
 use futures_util::stream::StreamExt;
+use rusqlite::Connection;
 use NFT::NFTEvents;
 
 use crate::db;
@@ -15,7 +16,7 @@ use crate::twitter::send_tweet;
 
 sol!(NFT, "src/abi.json");
 
-pub async fn subscribe_to_events(db_url: String, ws_rpc_url: String) -> eyre::Result<()> {
+pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
 
@@ -39,7 +40,7 @@ pub async fn subscribe_to_events(db_url: String, ws_rpc_url: String) -> eyre::Re
                     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                     if safe {
                         let x_id = redeem.x_id.into_limbs()[0];
-                        let tokens = db::get_access_tokens(db_url.clone(), x_id).await.ok();
+                        let tokens = db::get_access_tokens(db, x_id).await.ok();
                         if let Some((access_token, access_secret)) = tokens {
                             send_tweet(access_token, access_secret, redeem.content.to_string())
                                 .await;

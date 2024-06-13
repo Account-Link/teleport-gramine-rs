@@ -14,8 +14,6 @@ struct UserInfoResponse {
 #[derive(Debug, Deserialize)]
 struct UserInfo {
     id: String,
-    name: String,
-    username: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

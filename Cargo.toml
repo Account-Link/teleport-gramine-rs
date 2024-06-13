@@ -31,6 +31,16 @@ url = "2.5.1"
 serde_urlencoded = "0.7.1"
 serde_qs = "0.13.0"
 axum = "0.7.5"
+alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features = [
+    "provider-ws",
+    "providers",
+    "rpc-client-ws",
+    "rpc-types-eth",
+    "rpc-types",
+
+] }
+
+futures-util = "0.3"
 
 [dev-dependencies]
 reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }

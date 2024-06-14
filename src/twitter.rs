@@ -11,9 +11,11 @@ struct UserInfoResponse {
     data: UserInfo,
 }
 
-#[derive(Debug, Deserialize)]
-struct UserInfo {
-    id: String,
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserInfo {
+    pub id: String,
+    pub name: String,
+    pub username: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -47,7 +49,7 @@ struct CallbackUrlQuery {
     oauth_verifier: String,
 }
 
-pub async fn get_user_x_id(access_token: String, access_secret: String) -> String {
+pub async fn get_user_x_info(access_token: String, access_secret: String) -> UserInfo {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
@@ -61,10 +63,10 @@ pub async fn get_user_x_id(access_token: String, access_secret: String) -> Strin
         .await
         .expect("Failed to get user info");
     let user_info: UserInfoResponse = resp.json().await.expect("Failed to parse user info");
-    let id = user_info.data.id.clone();
+    let user_info = user_info.data;
+    // let id = user_info.data.id.clone();
     log::info!("{:?}", user_info);
-    log::info!("User id: {}", id);
-    id
+    user_info
 }
 
 pub async fn send_tweet(access_token: String, access_secret: String, tweet: String) {

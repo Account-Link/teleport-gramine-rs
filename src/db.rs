@@ -61,7 +61,7 @@ pub async fn add_user(connection: &mut Connection, user: User) -> eyre::Result<(
     connection.execute(
         r#"
             REPLACE INTO twitter_access_tokens (x_id, teleport_id, access_token, access_secret, address)
-            VALUES (?1, ?2, ?3, ?4)
+            VALUES (?1, ?2, ?3, ?4, ?5)
             "#,
         rusqlite::params![
             user.x_id,
@@ -85,7 +85,7 @@ pub async fn add_oauth_user(
     connection.execute(
         r#"
             REPLACE INTO twitter_oauth_tokens (teleport_id, oauth_token, oauth_token_secret, address)
-            VALUES (?1, ?2, ?3)
+            VALUES (?1, ?2, ?3, ?4)
             "#,
         rusqlite::params![oauth_user.teleport_id, oauth_user.oauth_token, oauth_user.oauth_token_secret, oauth_user.address],
     )?;

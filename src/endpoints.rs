@@ -11,7 +11,7 @@ use crate::{
         open_connection, OAuthUser, User,
     },
     listener::mint_nft,
-    twitter::{authorize_token, get_user_x_id, request_oauth_token},
+    twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
 
 #[derive(Deserialize)]
@@ -87,10 +87,10 @@ pub async fn callback(
         authorize_token(oauth_token, oauth_user.oauth_token_secret, oauth_verifier)
             .await
             .unwrap();
-    let x_id = get_user_x_id(access_token.clone(), access_secret.clone()).await;
+    let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
 
     let user = User {
-        x_id,
+        x_id: x_info.id.clone(),
         teleport_id,
         access_token,
         access_secret,
@@ -99,7 +99,14 @@ pub async fn callback(
 
     add_user(&mut connection, user).await.unwrap();
 
-    Redirect::temporary("http://localhost:4000/mint?success=true")
+    let encoded_x_info =
+        serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
+    let url_with_params = format!(
+        "http://localhost:4000/create?success=true&{}",
+        encoded_x_info
+    );
+
+    Redirect::temporary(&url_with_params)
 }
 
 pub async fn mint(

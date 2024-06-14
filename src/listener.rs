@@ -65,17 +65,16 @@ pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyr
 
 pub async fn mint_nft(
     wallet: EthereumWallet,
-    ws_rpc_url: String,
+    rpc_url: String,
     recipient: String,
     x_id: String,
     policy: String,
 ) -> eyre::Result<String> {
-    let ws = WsConnect::new(ws_rpc_url);
+    let rpc_url = rpc_url.parse()?;
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
         .wallet(wallet)
-        .on_ws(ws)
-        .await?;
+        .on_http(rpc_url);
 
     let nft = NFT::new(NFT_ADDRESS, provider);
     let recipient = Address::from_str(&recipient)?;
@@ -98,7 +97,7 @@ mod tests {
     async fn test_mint_nft() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL must be set");
+        let rpc_url = std::env::var("RPC_URL").expect("RPC_URL must be set");
         let recipient_address = address!("36e7Fda8CC503D5Ec7729A42eb86EF02Af315Bf9");
         let mnemonic =
             std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC must be set");
@@ -112,7 +111,7 @@ mod tests {
         let wallet = EthereumWallet::from(signer);
         mint_nft(
             wallet,
-            ws_rpc_url,
+            rpc_url,
             recipient_address.to_string(),
             1.to_string(),
             "policy".to_string(),

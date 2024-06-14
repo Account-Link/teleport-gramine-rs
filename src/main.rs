@@ -15,6 +15,7 @@ async fn main() {
 
     let db_url = std::env::var("DB_URL").expect("DB_URL not set");
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
+    let rpc_url = std::env::var("RPC_URL").expect("RPC_URL not set");
     let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
 
     let signer = MnemonicBuilder::<English>::default()
@@ -29,8 +30,8 @@ async fn main() {
 
     let shared_state = SharedState {
         db_url: db_url.clone(),
-        ws_rpc_url: ws_rpc_url.clone(),
         wallet: signer.into(),
+        rpc_url,
     };
     let app = axum::Router::new()
         .route("/new", axum::routing::get(new_user))

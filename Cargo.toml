@@ -36,10 +36,12 @@ alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features
     "rpc-client-ws",
     "rpc-types-eth",
     "rpc-types",
+    "json-rpc",
     "contract",
     "sol-types",
     "signer-local",
-    "signer-mnemonic"
+    "signer-mnemonic",
+    "transport-http"
 ] }
 
 futures-util = "0.3"

@@ -205,6 +205,6 @@ mod tests {
         let access_secret = std::env::var("TEST_ACCESS_SECRET")
             .expect("TEST_ACCESS_SECRET not set")
             .to_string();
-        get_user_x_id(access_token, access_secret).await;
+        get_user_x_info(access_token, access_secret).await;
     }
 }

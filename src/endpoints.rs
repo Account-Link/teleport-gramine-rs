@@ -36,7 +36,7 @@ pub struct MintQuery {
 #[derive(Clone)]
 pub struct SharedState {
     pub db_url: String,
-    pub ws_rpc_url: String,
+    pub rpc_url: String,
     pub wallet: EthereumWallet,
 }
 
@@ -121,7 +121,7 @@ pub async fn mint(
 
     mint_nft(
         shared_state.wallet,
-        shared_state.ws_rpc_url,
+        shared_state.rpc_url,
         user.address,
         user.x_id,
         query.policy,

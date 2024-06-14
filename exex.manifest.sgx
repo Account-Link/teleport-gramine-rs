@@ -53,6 +53,8 @@ mounts = [
     { path = "/lib", uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
     { path = "/lib/x86_64-linux-gnu", uri = "file:/lib/x86_64-linux-gnu" },
     { path = "/tmp", type = "tmpfs" },
+    { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },
+    { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },
 ]
 
 [fs.insecure__keys]
@@ -11930,7 +11932,7 @@ sha256 = "2b23d2fe14e7c8a9e7593c5276b0803a208ad87a50604453dd483f97267f16cd"
 
 [[sgx.trusted_files]]
 uri = "file:target/release/exex"
-sha256 = "e1a285b09923de286e8648f838b6a449ca251714bb6f3cd57bac87c5f92f64fb"
+sha256 = "18e8af206538a784c99704199576ebf7c8a8c87780c06fd328af1a213facc26d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/runtime/glibc/crt1.o"
@@ -23994,11 +23996,2211 @@ sha256 = "eddd24c66083d89b1e5bcd4bf3b1930751bf087b0f3e1bde59afd10923892576"
 
 [[sgx.trusted_files]]
 uri = "file:teleport.env"
-sha256 = "5b095c4e160dcab108b801f07ac411b7c59cf833240fbe2a0db5255094d449d6"
+sha256 = "2cd4f0e3021448009b2b8b81370b4c3b83a385c6187a2444bc39995c7aec691c"
 
 [[sgx.trusted_files]]
 uri = "file:main.db"
 sha256 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/002c0b4f.0"
+sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/02265526.0"
+sha256 = "646db48fa7794bcab4581f264ff3fad4cff7bbd24f5e8bb170d4f602b6caf828"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/062cdee6.0"
+sha256 = "6bdc59f897631af7811e3201cbc58e5999de2600ae8667454a34514eecfd8381"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/064e0aa9.0"
+sha256 = "825c67f5583131425c4e33275cc8e5c9dfd02cd190c6d71e1d335621e82965a8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/06dc52d5.0"
+sha256 = "a0681f1a11d5c02760bcb68b61b0d332f6c197e239c4b30dc47f91a79a73282b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/08063a00.0"
+sha256 = "40ec121c66bc70c48d5e512fa2d1d9f040c329467232f1964edd62fecb32af87"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/09789157.0"
+sha256 = "870f56d009d8aeb95b716b0e7b0020225d542c4b283b9ed896edf97428d6712e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0a775a30.0"
+sha256 = "39238e09bb7d30e39fbf87746ceac206f7ec206cff3d73c743e3f818ca2ec54f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0b1b94ef.0"
+sha256 = "94e4ab21333740d7ed0f2b5007744e5cf6792c0ddf4c6bdfb3ce8333010e7306"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0b9bc432.0"
+sha256 = "a13d881e11fe6df181b53841f9fa738a2d7ca9ae7be3d53c866f722b4242b013"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0bf05006.0"
+sha256 = "b68d02ce35bd02123cf5fcd329bdd33640214715dae0442a97782a4471e9b292"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0f5dc4f3.0"
+sha256 = "eaa3be600a842e5b603316ed14e9ae11a43003f68a8317f0f2c01a516da4e586"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0f6fa695.0"
+sha256 = "b0bf3a444f89d8be7db120bfecaa2f94d9e49ede21f680d674c1e8d839d8a9a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/1001acf7.0"
+sha256 = "4195ea007a7ef8d3e2d338e8d9ff0083198e36bfa025442ddf41bb5213904fc2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/106f3e4d.0"
+sha256 = "a0d7e56b32b767e076bd7d05ce1779dbe3656d0a02a9abe711fc79640b9f7fbe"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/14bc7599.0"
+sha256 = "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/18856ac4.0"
+sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/1d3472b9.0"
+sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/1e08bfd1.0"
+sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/1e09d511.0"
+sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/244b5494.0"
+sha256 = "d98f681c3a7dce812b90bf7c68046827f3bf5607357f1e4918c5dc813b359bf1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/2923b3f9.0"
+sha256 = "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/2ae6433e.0"
+sha256 = "8adefca890c92e6d0877fdcba07655296852217da657026aea69ee547642528c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/2b349938.0"
+sha256 = "7108110fdaf19e3e5a7ed8fa38557248e79fe78bb2e9eefe7a0bb801cbfd2db7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/32888f65.0"
+sha256 = "677160e6297b48b87ede98ab7b4f2be55894491776f6191937ea397d01a6fb4b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/3513523f.0"
+sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/3bde41ac.0"
+sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/3bde41ac.1"
+sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/3e45d192.0"
+sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/3fb36b73.0"
+sha256 = "9848c94859f83e48defe0b25a0f4347480b56ea2bb3336fe6d4dcf00d0d6031d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/40193066.0"
+sha256 = "9dd4cbb6d2c29cbb3ca98da02c042a690c0ef4c0521d98aae37e0a704c4bf210"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/4042bcee.0"
+sha256 = "22b557a27055b33606b6559f37703928d3e4ad79f110b407d04986e1843543d1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/40547a79.0"
+sha256 = "e273097c7c57cb7cbb908057991ae1774d4e1e8c6a062fb6be9e6645b32fb431"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/406c9bb1.0"
+sha256 = "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/48bec511.0"
+sha256 = "43f1bade6454349c258017cc99113f8b6a5712e3807e82ad9371348d52d60190"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/4b718d9b.0"
+sha256 = "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/4bfab552.0"
+sha256 = "ca3760ba63bf0a2c5dd0dc7fe897838cc58f12a386b4ee53d2065229848e96a3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/4f316efb.0"
+sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5273a94c.0"
+sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5443e9e3.0"
+sha256 = "1cb130a113f4e8502517a679808a98bf076d59bdb223bfc61cd224b8e1abda49"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/54657681.0"
+sha256 = "9c2a7510e01aec2c9b8cc2c9d03b16576858a93863a6d0a31a2ac05f47f5dbe1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/57bcb2da.0"
+sha256 = "9b3cbeb7d75271e0b62d40d60f8b18a35384ac6b171209231732fc778cfd2b5f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5860aaa6.0"
+sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5931b5bc.0"
+sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5a7722fb.0"
+sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5ad8a5d6.0"
+sha256 = "df68841998b7fd098a9517fe971e97890be0fc93bbe1b2a1ef63ebdea3111c80"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5cd81ad7.0"
+sha256 = "303c346ece82ca4f6713ac176164285d0469f326b6f12a787e11f5d702529277"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5e98733a.0"
+sha256 = "9e01d7bbaaf5ebd3e4ff9c02e3c3a12aaa421574ca86ddb0cb3a21880f2e283d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5f15c80c.0"
+sha256 = "5dadc31b57074a3168d1df23bb8b6b920acae1d426bf2288fc2de53cdd571089"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/5f618aec.0"
+sha256 = "80eee369aa5b29931209226fcb4b014ba31daa7f630d44a196817c1bb6b334f1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/607986c7.0"
+sha256 = "5d550643b6400d4341550a9b14aedd0b4fac33ae5deb7d8247b6b4f799c13306"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/626dceaf.0"
+sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/653b494a.0"
+sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/66445960.0"
+sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/68dd7389.0"
+sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/6b99d060.0"
+sha256 = "745bd29be45667514b4000e9cdb70cdecad0f02c78232ed722f64f7f80436e35"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/6d41d539.0"
+sha256 = "a3a7fe25439d9a9b50f60af43684444d798a4c869305bf615881e5c84a44c1a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/6fa5da56.0"
+sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/706f604c.0"
+sha256 = "fbe0f62dde93af96d1b8e27b19b2ee200a834880eca805585b66d18d2ea08192"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/749e9e03.0"
+sha256 = "4db45324410a01a7023b038e5da7d7274d3cfd392565c351cf3d297fd7664c73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/75d1b2ed.0"
+sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/76faf6c0.0"
+sha256 = "a2ae0b4ec9d2a4c4e150756a3defabd15bcaa75ee2b599e722b27c6a2998d00b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/7719f463.0"
+sha256 = "1cdd90d42b48cced8f5ecbff087c49da56b224f0272e4b5074e63b82fff5fb16"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/773e07ad.0"
+sha256 = "17b98c4d832e8349ecb55f1f90e41dfc7bcd9410d1e925ccd06612cd3b9b9a54"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/7a3adc42.0"
+sha256 = "8cc726cf62c554561e89e1237495bea3026b1709ba7153fed3401fcd489b5aaf"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/7a780d93.0"
+sha256 = "0c78902126532fde9eed4b2d8b6a2c9bbaa8b3abc59f233c45c6cb5514a9f808"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/7f3d5d1d.0"
+sha256 = "c4fa4cc30be6aee0a4c0dff81f28768eedd83e8d4934a42f82179cbfa61f13ad"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8160b96c.0"
+sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8508e720.0"
+sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8cb5ee0f.0"
+sha256 = "3eb7c3258f4af9222033dc1bb3dd2c7cfa0982b98e39fb8e9dc095cfeb38126c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8d86cdd1.0"
+sha256 = "cf339eae15268aff66148f3bcdf112a7700eafded3edcb3f86c60133b10e03f8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8d89cda1.0"
+sha256 = "b4ee8ed700b7abe4836d119c8113bc8b717f4f1568abd7edd81f2526c5836983"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8f103249.0"
+sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/90c5a3c8.0"
+sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/930ac5d2.0"
+sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/93bc0acc.0"
+sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9482e63a.0"
+sha256 = "c4a426fe57a7e4e6966e2103f2941eb7263e7c35727dd0f412bd593467304999"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9846683b.0"
+sha256 = "05161ad2ac04a0df956ef803e127aa877cc5131e0a727ed8e5de43f02e8868c4"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/988a38cb.0"
+sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9b5697b0.0"
+sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9c8dfbd4.0"
+sha256 = "42f0e946149ae0e0c6a1fb0e33150ce863479b2ef7b3c700161102ad1dcb34c1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9d04f354.0"
+sha256 = "660b5aa96668c5162f4af6b0a01241d8527aef8fa8a5307a7033b83c3de4a72d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9ef4a08a.0"
+sha256 = "ae927c01e73470cfc89943b5cd8f26e481d55c833517c1017f3fef404a38a317"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9f727ac7.0"
+sha256 = "05e0ebf9643197ccf8036cdd86a2ee14292c2a077dbe06435ed30369b8762564"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ACCVRAIZ1.pem"
+sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AC_RAIZ_FNMT-RCM.pem"
+sha256 = "aa18ea4c9a8441a461bb436a1c90beb994ac841980b8fd62c72de9a62ddf8ae3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AC_RAIZ_FNMT-RCM_SERVIDORES_SEGUROS.pem"
+sha256 = "8e3f237813d3f3e2f5767bc2a694a7557f84bb79fd60ef1adc25afd0c1fc5ef6"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ANF_Secure_Server_Root_CA.pem"
+sha256 = "efb2df6e0075fa74e448077e402d171851b2ffe4668a614adc00dcbc75633afd"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Actalis_Authentication_Root_CA.pem"
+sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AffirmTrust_Commercial.pem"
+sha256 = "7108110fdaf19e3e5a7ed8fa38557248e79fe78bb2e9eefe7a0bb801cbfd2db7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AffirmTrust_Networking.pem"
+sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AffirmTrust_Premium.pem"
+sha256 = "94c88202bf2c13c68b90d124f93f62374f36776b0bfbc110c6d06f829290b580"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/AffirmTrust_Premium_ECC.pem"
+sha256 = "42f0e946149ae0e0c6a1fb0e33150ce863479b2ef7b3c700161102ad1dcb34c1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Amazon_Root_CA_1.pem"
+sha256 = "2c43952ee9e000ff2acc4e2ed0897c0a72ad5fa72c3d934e81741cbd54f05bd1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Amazon_Root_CA_2.pem"
+sha256 = "a3a7fe25439d9a9b50f60af43684444d798a4c869305bf615881e5c84a44c1a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Amazon_Root_CA_3.pem"
+sha256 = "3eb7c3258f4af9222033dc1bb3dd2c7cfa0982b98e39fb8e9dc095cfeb38126c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Amazon_Root_CA_4.pem"
+sha256 = "b0b7961120481e33670315b2f843e643c42f693c7a1010eb9555e06ddc730214"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Atos_TrustedRoot_2011.pem"
+sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
+sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068_2.pem"
+sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Baltimore_CyberTrust_Root.pem"
+sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Buypass_Class_2_Root_CA.pem"
+sha256 = "9c2a7510e01aec2c9b8cc2c9d03b16576858a93863a6d0a31a2ac05f47f5dbe1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Buypass_Class_3_Root_CA.pem"
+sha256 = "8db5b7c8f058c56a8d033c2443d34fdfd3656150eaa73fe63c65161e7063ce99"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CA_Disig_Root_R2.pem"
+sha256 = "8adefca890c92e6d0877fdcba07655296852217da657026aea69ee547642528c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CFCA_EV_ROOT.pem"
+sha256 = "94e4ab21333740d7ed0f2b5007744e5cf6792c0ddf4c6bdfb3ce8333010e7306"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/COMODO_Certification_Authority.pem"
+sha256 = "e273097c7c57cb7cbb908057991ae1774d4e1e8c6a062fb6be9e6645b32fb431"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/COMODO_ECC_Certification_Authority.pem"
+sha256 = "d69f7b57250536f57ffba92cffe82a8bbcb16e03a9a2607ec967f362ce83f9ce"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/COMODO_RSA_Certification_Authority.pem"
+sha256 = "24b0d4292dacb02efc38542838e378bc35f040dcd21bebfddbc82dc7feb2876d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certainly_Root_E1.pem"
+sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certainly_Root_R1.pem"
+sha256 = "0c78902126532fde9eed4b2d8b6a2c9bbaa8b3abc59f233c45c6cb5514a9f808"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certigna.pem"
+sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certigna_Root_CA.pem"
+sha256 = "fe3b44c18182e167121a2c645cecc4817441d469dc00633e60fe8476f9e1ad96"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certum_EC-384_CA.pem"
+sha256 = "c4a426fe57a7e4e6966e2103f2941eb7263e7c35727dd0f412bd593467304999"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certum_Trusted_Network_CA.pem"
+sha256 = "43f1bade6454349c258017cc99113f8b6a5712e3807e82ad9371348d52d60190"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certum_Trusted_Network_CA_2.pem"
+sha256 = "9dd4cbb6d2c29cbb3ca98da02c042a690c0ef4c0521d98aae37e0a704c4bf210"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Certum_Trusted_Root_CA.pem"
+sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Comodo_AAA_Services_root.pem"
+sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/D-TRUST_BR_Root_CA_1_2020.pem"
+sha256 = "ae927c01e73470cfc89943b5cd8f26e481d55c833517c1017f3fef404a38a317"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/D-TRUST_EV_Root_CA_1_2020.pem"
+sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/D-TRUST_Root_Class_3_CA_2_2009.pem"
+sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/D-TRUST_Root_Class_3_CA_2_EV_2009.pem"
+sha256 = "f81ceeaf6341513ef391ab3ea3302e8b2fb2c1527752797bba9b20ca22048b3c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Assured_ID_Root_CA.pem"
+sha256 = "b52fae9cd8dcf49285f0337cd815deca13fedd31f653bf07f61579451517e18c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Assured_ID_Root_G2.pem"
+sha256 = "660b5aa96668c5162f4af6b0a01241d8527aef8fa8a5307a7033b83c3de4a72d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Assured_ID_Root_G3.pem"
+sha256 = "c4fa4cc30be6aee0a4c0dff81f28768eedd83e8d4934a42f82179cbfa61f13ad"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Global_Root_CA.pem"
+sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Global_Root_G2.pem"
+sha256 = "5d550643b6400d4341550a9b14aedd0b4fac33ae5deb7d8247b6b4f799c13306"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Global_Root_G3.pem"
+sha256 = "1914cd2d4cde263315f9e32c7683fc0e1b921919ad12b256d49bf782011c03cc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_High_Assurance_EV_Root_CA.pem"
+sha256 = "d98f681c3a7dce812b90bf7c68046827f3bf5607357f1e4918c5dc813b359bf1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_TLS_ECC_P384_Root_G5.pem"
+sha256 = "05161ad2ac04a0df956ef803e127aa877cc5131e0a727ed8e5de43f02e8868c4"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_TLS_RSA4096_Root_G5.pem"
+sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/DigiCert_Trusted_Root_G4.pem"
+sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/E-Tugra_Certification_Authority.pem"
+sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/E-Tugra_Global_Root_CA_ECC_v3.pem"
+sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/E-Tugra_Global_Root_CA_RSA_v3.pem"
+sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Entrust.net_Premium_2048_Secure_Server_CA.pem"
+sha256 = "24e0277c0c028497c6b0abbbf7163ec3ae7b341cadfb0b90bc00c4ad642172cc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Entrust_Root_Certification_Authority.pem"
+sha256 = "745bd29be45667514b4000e9cdb70cdecad0f02c78232ed722f64f7f80436e35"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Entrust_Root_Certification_Authority_-_EC1.pem"
+sha256 = "a0d7e56b32b767e076bd7d05ce1779dbe3656d0a02a9abe711fc79640b9f7fbe"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Entrust_Root_Certification_Authority_-_G2.pem"
+sha256 = "646db48fa7794bcab4581f264ff3fad4cff7bbd24f5e8bb170d4f602b6caf828"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Entrust_Root_Certification_Authority_-_G4.pem"
+sha256 = "9e01d7bbaaf5ebd3e4ff9c02e3c3a12aaa421574ca86ddb0cb3a21880f2e283d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GDCA_TrustAUTH_R5_ROOT.pem"
+sha256 = "b0bf3a444f89d8be7db120bfecaa2f94d9e49ede21f680d674c1e8d839d8a9a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GLOBALTRUST_2020.pem"
+sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GTS_Root_R1.pem"
+sha256 = "4195ea007a7ef8d3e2d338e8d9ff0083198e36bfa025442ddf41bb5213904fc2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GTS_Root_R2.pem"
+sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GTS_Root_R3.pem"
+sha256 = "39238e09bb7d30e39fbf87746ceac206f7ec206cff3d73c743e3f818ca2ec54f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GTS_Root_R4.pem"
+sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_ECC_Root_CA_-_R4.pem"
+sha256 = "d1b69887f73444c0fc0a6f22a2fe961c2423275f9c38ba7d50da2a4ba75394f1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_ECC_Root_CA_-_R5.pem"
+sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_Root_CA.pem"
+sha256 = "df68841998b7fd098a9517fe971e97890be0fc93bbe1b2a1ef63ebdea3111c80"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_Root_CA_-_R3.pem"
+sha256 = "6bdc59f897631af7811e3201cbc58e5999de2600ae8667454a34514eecfd8381"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_Root_CA_-_R6.pem"
+sha256 = "5ff8425be71c1805446bf10601ce3cb9619889866766fc9285583ca5a4a7de94"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_Root_E46.pem"
+sha256 = "5bd16128d0934629c2e1713140a6f97c9828dbb5429ab5797b2573efc71de1a1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/GlobalSign_Root_R46.pem"
+sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Go_Daddy_Class_2_CA.pem"
+sha256 = "47f15a52a984ab1f9cd92b6c1849c0465c1b3c9c6837d54e5d2c004fa01b69b7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Go_Daddy_Root_Certificate_Authority_-_G2.pem"
+sha256 = "500329abac100a953a7396b54b36be57d333022f17401bc948248ea179cf1784"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/HARICA_TLS_ECC_Root_CA_2021.pem"
+sha256 = "c6dc63e98b3a5e6a595c7d583a9c47c5efb6d316957466fd16c785b423eacf37"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/HARICA_TLS_RSA_Root_CA_2021.pem"
+sha256 = "05e0ebf9643197ccf8036cdd86a2ee14292c2a077dbe06435ed30369b8762564"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Hellenic_Academic_and_Research_Institutions_ECC_RootCA_2015.pem"
+sha256 = "1cdd90d42b48cced8f5ecbff087c49da56b224f0272e4b5074e63b82fff5fb16"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Hellenic_Academic_and_Research_Institutions_RootCA_2015.pem"
+sha256 = "677160e6297b48b87ede98ab7b4f2be55894491776f6191937ea397d01a6fb4b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/HiPKI_Root_CA_-_G1.pem"
+sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Hongkong_Post_Root_CA_1.pem"
+sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Hongkong_Post_Root_CA_3.pem"
+sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ISRG_Root_X1.pem"
+sha256 = "22b557a27055b33606b6559f37703928d3e4ad79f110b407d04986e1843543d1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ISRG_Root_X2.pem"
+sha256 = "a13d881e11fe6df181b53841f9fa738a2d7ca9ae7be3d53c866f722b4242b013"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/IdenTrust_Commercial_Root_CA_1.pem"
+sha256 = "1d03b965511ce50d0a0bae1b549ed7048c783cfcba9aa40ea11d355b1889657c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/IdenTrust_Public_Sector_Root_CA_1.pem"
+sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Izenpe.com.pem"
+sha256 = "1d37341b099afc610bf4feb387096577a0dc61bb8fd09444f1a199a1b1b117e3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Microsec_e-Szigno_Root_CA_2009.pem"
+sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Microsoft_ECC_Root_Certificate_Authority_2017.pem"
+sha256 = "b4ee8ed700b7abe4836d119c8113bc8b717f4f1568abd7edd81f2526c5836983"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Microsoft_RSA_Root_Certificate_Authority_2017.pem"
+sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/NAVER_Global_Root_Certification_Authority.pem"
+sha256 = "9848c94859f83e48defe0b25a0f4347480b56ea2bb3336fe6d4dcf00d0d6031d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/NetLock_Arany_=Class_Gold=_Főtanúsítvány.pem"
+sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/OISTE_WISeKey_Global_Root_GB_CA.pem"
+sha256 = "2dc52d373089ff5173ac392a464746dd066aaa3b7d1b3494a473c96686666fce"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/OISTE_WISeKey_Global_Root_GC_CA.pem"
+sha256 = "17b98c4d832e8349ecb55f1f90e41dfc7bcd9410d1e925ccd06612cd3b9b9a54"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/QuoVadis_Root_CA_1_G3.pem"
+sha256 = "4db45324410a01a7023b038e5da7d7274d3cfd392565c351cf3d297fd7664c73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/QuoVadis_Root_CA_2.pem"
+sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/QuoVadis_Root_CA_2_G3.pem"
+sha256 = "825c67f5583131425c4e33275cc8e5c9dfd02cd190c6d71e1d335621e82965a8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/QuoVadis_Root_CA_3.pem"
+sha256 = "a2ae0b4ec9d2a4c4e150756a3defabd15bcaa75ee2b599e722b27c6a2998d00b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/QuoVadis_Root_CA_3_G3.pem"
+sha256 = "198cfe560c191a800cbe923ceca0a4e4f3d5a0d7ff9316b47998765fdc0897be"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_EV_Root_Certification_Authority_ECC.pem"
+sha256 = "662d60a283f416d888ff18831009e2cba95c61377f648beeed91a3dea12ac286"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_EV_Root_Certification_Authority_RSA_R2.pem"
+sha256 = "a0681f1a11d5c02760bcb68b61b0d332f6c197e239c4b30dc47f91a79a73282b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_Root_Certification_Authority_ECC.pem"
+sha256 = "b68d02ce35bd02123cf5fcd329bdd33640214715dae0442a97782a4471e9b292"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_Root_Certification_Authority_RSA.pem"
+sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SZAFIR_ROOT_CA2.pem"
+sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SecureSign_RootCA11.pem"
+sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SecureTrust_CA.pem"
+sha256 = "a3e70af2c4b48562b61fe858d9d30f073f2cf2136f2af01ab5a966673e70af4b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Secure_Global_CA.pem"
+sha256 = "7ee52fb3a5afacd55a7a2e00f057f7f64776ea0d536036f54c57694961e25179"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Security_Communication_ECC_RootCA1.pem"
+sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Security_Communication_RootCA2.pem"
+sha256 = "39ad3110b8f84821ca22cfbd995914f2149521d27ce576e743de6a00dc39d9db"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Security_Communication_RootCA3.pem"
+sha256 = "40ec121c66bc70c48d5e512fa2d1d9f040c329467232f1964edd62fecb32af87"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Security_Communication_Root_CA.pem"
+sha256 = "684f2f6ce0a18fcb038d08a495846fbc35b96d99875fef1b24384cf0944a68c3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Starfield_Class_2_CA.pem"
+sha256 = "1ad8373ec50073168cb6862a0e119adf2c1065c896adf7eb9695779739b4bb2e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Starfield_Root_Certificate_Authority_-_G2.pem"
+sha256 = "ca3760ba63bf0a2c5dd0dc7fe897838cc58f12a386b4ee53d2065229848e96a3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Starfield_Services_Root_Certificate_Authority_-_G2.pem"
+sha256 = "870f56d009d8aeb95b716b0e7b0020225d542c4b283b9ed896edf97428d6712e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SwissSign_Gold_CA_-_G2.pem"
+sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SwissSign_Silver_CA_-_G2.pem"
+sha256 = "9b3cbeb7d75271e0b62d40d60f8b18a35384ac6b171209231732fc778cfd2b5f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/T-TeleSec_GlobalRoot_Class_2.pem"
+sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/T-TeleSec_GlobalRoot_Class_3.pem"
+sha256 = "1cb130a113f4e8502517a679808a98bf076d59bdb223bfc61cd224b8e1abda49"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem"
+sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TWCA_Global_Root_CA.pem"
+sha256 = "5dadc31b57074a3168d1df23bb8b6b920acae1d426bf2288fc2de53cdd571089"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TWCA_Root_Certification_Authority.pem"
+sha256 = "b69a59344e58615a691fa9567d55ad6337f09b57647a389242cbf43716575559"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TeliaSonera_Root_CA_v1.pem"
+sha256 = "303c346ece82ca4f6713ac176164285d0469f326b6f12a787e11f5d702529277"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Telia_Root_CA_v2.pem"
+sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Trustwave_Global_Certification_Authority.pem"
+sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Trustwave_Global_ECC_P256_Certification_Authority.pem"
+sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Trustwave_Global_ECC_P384_Certification_Authority.pem"
+sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TunTrust_Root_CA.pem"
+sha256 = "8a852f7182753cb0193299c6cb2b4a106b1c38a789217b5eb380d736c5cc0081"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/UCA_Extended_Validation_Root.pem"
+sha256 = "eaa3be600a842e5b603316ed14e9ae11a43003f68a8317f0f2c01a516da4e586"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/UCA_Global_G2_Root.pem"
+sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/USERTrust_ECC_Certification_Authority.pem"
+sha256 = "08fb40ba4144166f6ae80c7ab60be23e97e5083836d45fa85a33a5d0bfec10f8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/USERTrust_RSA_Certification_Authority.pem"
+sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/XRamp_Global_CA_Root.pem"
+sha256 = "fbe0f62dde93af96d1b8e27b19b2ee200a834880eca805585b66d18d2ea08192"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/a3418fda.0"
+sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/a94d09e5.0"
+sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/aee5f10d.0"
+sha256 = "24e0277c0c028497c6b0abbbf7163ec3ae7b341cadfb0b90bc00c4ad642172cc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b0e59380.0"
+sha256 = "d1b69887f73444c0fc0a6f22a2fe961c2423275f9c38ba7d50da2a4ba75394f1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b1159c4c.0"
+sha256 = "b52fae9cd8dcf49285f0337cd815deca13fedd31f653bf07f61579451517e18c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b433981b.0"
+sha256 = "efb2df6e0075fa74e448077e402d171851b2ffe4668a614adc00dcbc75633afd"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b66938e9.0"
+sha256 = "7ee52fb3a5afacd55a7a2e00f057f7f64776ea0d536036f54c57694961e25179"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b727005e.0"
+sha256 = "94c88202bf2c13c68b90d124f93f62374f36776b0bfbc110c6d06f829290b580"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b7a5b843.0"
+sha256 = "b69a59344e58615a691fa9567d55ad6337f09b57647a389242cbf43716575559"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/b81b93f0.0"
+sha256 = "8e3f237813d3f3e2f5767bc2a694a7557f84bb79fd60ef1adc25afd0c1fc5ef6"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/bf53fb88.0"
+sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/c01eb047.0"
+sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/c28a8a30.0"
+sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ca-certificates.crt"
+sha256 = "82f3a63130e0b47915659d619f177c8157c2bbb29dbf0f58ad2721ff84fb1190"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ca6e4ad9.0"
+sha256 = "d22b235421616835f68d15801d82b44e7c463433f8bbdcc92f9c023fafcb2bf2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/cbf06781.0"
+sha256 = "500329abac100a953a7396b54b36be57d333022f17401bc948248ea179cf1784"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/cc450945.0"
+sha256 = "1d37341b099afc610bf4feb387096577a0dc61bb8fd09444f1a199a1b1b117e3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/cd58d51e.0"
+sha256 = "39ad3110b8f84821ca22cfbd995914f2149521d27ce576e743de6a00dc39d9db"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/cd8c0d63.0"
+sha256 = "aa18ea4c9a8441a461bb436a1c90beb994ac841980b8fd62c72de9a62ddf8ae3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ce5e74ef.0"
+sha256 = "2c43952ee9e000ff2acc4e2ed0897c0a72ad5fa72c3d934e81741cbd54f05bd1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/certSIGN_ROOT_CA.pem"
+sha256 = "cf339eae15268aff66148f3bcdf112a7700eafded3edcb3f86c60133b10e03f8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/certSIGN_Root_CA_G2.pem"
+sha256 = "80eee369aa5b29931209226fcb4b014ba31daa7f630d44a196817c1bb6b334f1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/d4dae3dd.0"
+sha256 = "f81ceeaf6341513ef391ab3ea3302e8b2fb2c1527752797bba9b20ca22048b3c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/d52c538d.0"
+sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/d6325660.0"
+sha256 = "24b0d4292dacb02efc38542838e378bc35f040dcd21bebfddbc82dc7feb2876d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/d7e8dc79.0"
+sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/d887a5bb.0"
+sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/dc4d6a89.0"
+sha256 = "5ff8425be71c1805446bf10601ce3cb9619889866766fc9285583ca5a4a7de94"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/dd8e9d41.0"
+sha256 = "1914cd2d4cde263315f9e32c7683fc0e1b921919ad12b256d49bf782011c03cc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/de6d66f3.0"
+sha256 = "b0b7961120481e33670315b2f843e643c42f693c7a1010eb9555e06ddc730214"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e-Szigno_Root_CA_2017.pem"
+sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e113c810.0"
+sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e18bfb83.0"
+sha256 = "198cfe560c191a800cbe923ceca0a4e4f3d5a0d7ff9316b47998765fdc0897be"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e35234b1.0"
+sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e36a6752.0"
+sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e73d606e.0"
+sha256 = "2dc52d373089ff5173ac392a464746dd066aaa3b7d1b3494a473c96686666fce"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e868b802.0"
+sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/e8de2f56.0"
+sha256 = "8db5b7c8f058c56a8d033c2443d34fdfd3656150eaa73fe63c65161e7063ce99"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ePKI_Root_Certification_Authority.pem"
+sha256 = "d22b235421616835f68d15801d82b44e7c463433f8bbdcc92f9c023fafcb2bf2"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ecccd8db.0"
+sha256 = "c6dc63e98b3a5e6a595c7d583a9c47c5efb6d316957466fd16c785b423eacf37"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ed858448.0"
+sha256 = "2ce349e2da9df497cc62aca37b009a2c3261ccdbe06a4c4a063f8105da40eb5d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ee64a828.0"
+sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/eed8c118.0"
+sha256 = "d69f7b57250536f57ffba92cffe82a8bbcb16e03a9a2607ec967f362ce83f9ce"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ef954a4e.0"
+sha256 = "1d03b965511ce50d0a0bae1b549ed7048c783cfcba9aa40ea11d355b1889657c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/emSign_ECC_Root_CA_-_C3.pem"
+sha256 = "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/emSign_ECC_Root_CA_-_G3.pem"
+sha256 = "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/emSign_Root_CA_-_C1.pem"
+sha256 = "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/emSign_Root_CA_-_G1.pem"
+sha256 = "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f081611a.0"
+sha256 = "47f15a52a984ab1f9cd92b6c1849c0465c1b3c9c6837d54e5d2c004fa01b69b7"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f0c70a8d.0"
+sha256 = "662d60a283f416d888ff18831009e2cba95c61377f648beeed91a3dea12ac286"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f249de83.0"
+sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f30dd6ad.0"
+sha256 = "08fb40ba4144166f6ae80c7ab60be23e97e5083836d45fa85a33a5d0bfec10f8"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f3377b1b.0"
+sha256 = "684f2f6ce0a18fcb038d08a495846fbc35b96d99875fef1b24384cf0944a68c3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f387163d.0"
+sha256 = "1ad8373ec50073168cb6862a0e119adf2c1065c896adf7eb9695779739b4bb2e"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f39fc864.0"
+sha256 = "a3e70af2c4b48562b61fe858d9d30f073f2cf2136f2af01ab5a966673e70af4b"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/f51bb24c.0"
+sha256 = "fe3b44c18182e167121a2c645cecc4817441d469dc00633e60fe8476f9e1ad96"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/fa5da96b.0"
+sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/fc5a8f99.0"
+sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/fd64f3fc.0"
+sha256 = "8a852f7182753cb0193299c6cb2b4a106b1c38a789217b5eb380d736c5cc0081"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/fe8a2cd8.0"
+sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/feffd413.0"
+sha256 = "5bd16128d0934629c2e1713140a6f97c9828dbb5429ab5797b2573efc71de1a1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/ff34af3f.0"
+sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/vTrus_ECC_Root_CA.pem"
+sha256 = "2ce349e2da9df497cc62aca37b009a2c3261ccdbe06a4c4a063f8105da40eb5d"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/vTrus_Root_CA.pem"
+sha256 = "8cc726cf62c554561e89e1237495bea3026b1709ba7153fed3401fcd489b5aaf"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/002c0b4f.0"
+sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/02265526.0"
+sha256 = "646db48fa7794bcab4581f264ff3fad4cff7bbd24f5e8bb170d4f602b6caf828"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/062cdee6.0"
+sha256 = "6bdc59f897631af7811e3201cbc58e5999de2600ae8667454a34514eecfd8381"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/064e0aa9.0"
+sha256 = "825c67f5583131425c4e33275cc8e5c9dfd02cd190c6d71e1d335621e82965a8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/06dc52d5.0"
+sha256 = "a0681f1a11d5c02760bcb68b61b0d332f6c197e239c4b30dc47f91a79a73282b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/08063a00.0"
+sha256 = "40ec121c66bc70c48d5e512fa2d1d9f040c329467232f1964edd62fecb32af87"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/09789157.0"
+sha256 = "870f56d009d8aeb95b716b0e7b0020225d542c4b283b9ed896edf97428d6712e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0a775a30.0"
+sha256 = "39238e09bb7d30e39fbf87746ceac206f7ec206cff3d73c743e3f818ca2ec54f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0b1b94ef.0"
+sha256 = "94e4ab21333740d7ed0f2b5007744e5cf6792c0ddf4c6bdfb3ce8333010e7306"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0b9bc432.0"
+sha256 = "a13d881e11fe6df181b53841f9fa738a2d7ca9ae7be3d53c866f722b4242b013"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0bf05006.0"
+sha256 = "b68d02ce35bd02123cf5fcd329bdd33640214715dae0442a97782a4471e9b292"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0f5dc4f3.0"
+sha256 = "eaa3be600a842e5b603316ed14e9ae11a43003f68a8317f0f2c01a516da4e586"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0f6fa695.0"
+sha256 = "b0bf3a444f89d8be7db120bfecaa2f94d9e49ede21f680d674c1e8d839d8a9a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/1001acf7.0"
+sha256 = "4195ea007a7ef8d3e2d338e8d9ff0083198e36bfa025442ddf41bb5213904fc2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/106f3e4d.0"
+sha256 = "a0d7e56b32b767e076bd7d05ce1779dbe3656d0a02a9abe711fc79640b9f7fbe"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/14bc7599.0"
+sha256 = "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/18856ac4.0"
+sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/1d3472b9.0"
+sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/1e08bfd1.0"
+sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/1e09d511.0"
+sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/244b5494.0"
+sha256 = "d98f681c3a7dce812b90bf7c68046827f3bf5607357f1e4918c5dc813b359bf1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/2923b3f9.0"
+sha256 = "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/2ae6433e.0"
+sha256 = "8adefca890c92e6d0877fdcba07655296852217da657026aea69ee547642528c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/2b349938.0"
+sha256 = "7108110fdaf19e3e5a7ed8fa38557248e79fe78bb2e9eefe7a0bb801cbfd2db7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/32888f65.0"
+sha256 = "677160e6297b48b87ede98ab7b4f2be55894491776f6191937ea397d01a6fb4b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/3513523f.0"
+sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/3bde41ac.0"
+sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/3bde41ac.1"
+sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/3e45d192.0"
+sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/3fb36b73.0"
+sha256 = "9848c94859f83e48defe0b25a0f4347480b56ea2bb3336fe6d4dcf00d0d6031d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/40193066.0"
+sha256 = "9dd4cbb6d2c29cbb3ca98da02c042a690c0ef4c0521d98aae37e0a704c4bf210"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/4042bcee.0"
+sha256 = "22b557a27055b33606b6559f37703928d3e4ad79f110b407d04986e1843543d1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/40547a79.0"
+sha256 = "e273097c7c57cb7cbb908057991ae1774d4e1e8c6a062fb6be9e6645b32fb431"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/406c9bb1.0"
+sha256 = "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/48bec511.0"
+sha256 = "43f1bade6454349c258017cc99113f8b6a5712e3807e82ad9371348d52d60190"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/4b718d9b.0"
+sha256 = "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/4bfab552.0"
+sha256 = "ca3760ba63bf0a2c5dd0dc7fe897838cc58f12a386b4ee53d2065229848e96a3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/4f316efb.0"
+sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5273a94c.0"
+sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5443e9e3.0"
+sha256 = "1cb130a113f4e8502517a679808a98bf076d59bdb223bfc61cd224b8e1abda49"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/54657681.0"
+sha256 = "9c2a7510e01aec2c9b8cc2c9d03b16576858a93863a6d0a31a2ac05f47f5dbe1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/57bcb2da.0"
+sha256 = "9b3cbeb7d75271e0b62d40d60f8b18a35384ac6b171209231732fc778cfd2b5f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5860aaa6.0"
+sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5931b5bc.0"
+sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5a7722fb.0"
+sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5ad8a5d6.0"
+sha256 = "df68841998b7fd098a9517fe971e97890be0fc93bbe1b2a1ef63ebdea3111c80"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5cd81ad7.0"
+sha256 = "303c346ece82ca4f6713ac176164285d0469f326b6f12a787e11f5d702529277"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5e98733a.0"
+sha256 = "9e01d7bbaaf5ebd3e4ff9c02e3c3a12aaa421574ca86ddb0cb3a21880f2e283d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5f15c80c.0"
+sha256 = "5dadc31b57074a3168d1df23bb8b6b920acae1d426bf2288fc2de53cdd571089"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/5f618aec.0"
+sha256 = "80eee369aa5b29931209226fcb4b014ba31daa7f630d44a196817c1bb6b334f1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/607986c7.0"
+sha256 = "5d550643b6400d4341550a9b14aedd0b4fac33ae5deb7d8247b6b4f799c13306"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/626dceaf.0"
+sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/653b494a.0"
+sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/66445960.0"
+sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/68dd7389.0"
+sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/6b99d060.0"
+sha256 = "745bd29be45667514b4000e9cdb70cdecad0f02c78232ed722f64f7f80436e35"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/6d41d539.0"
+sha256 = "a3a7fe25439d9a9b50f60af43684444d798a4c869305bf615881e5c84a44c1a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/6fa5da56.0"
+sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/706f604c.0"
+sha256 = "fbe0f62dde93af96d1b8e27b19b2ee200a834880eca805585b66d18d2ea08192"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/749e9e03.0"
+sha256 = "4db45324410a01a7023b038e5da7d7274d3cfd392565c351cf3d297fd7664c73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/75d1b2ed.0"
+sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/76faf6c0.0"
+sha256 = "a2ae0b4ec9d2a4c4e150756a3defabd15bcaa75ee2b599e722b27c6a2998d00b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/7719f463.0"
+sha256 = "1cdd90d42b48cced8f5ecbff087c49da56b224f0272e4b5074e63b82fff5fb16"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/773e07ad.0"
+sha256 = "17b98c4d832e8349ecb55f1f90e41dfc7bcd9410d1e925ccd06612cd3b9b9a54"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/7a3adc42.0"
+sha256 = "8cc726cf62c554561e89e1237495bea3026b1709ba7153fed3401fcd489b5aaf"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/7a780d93.0"
+sha256 = "0c78902126532fde9eed4b2d8b6a2c9bbaa8b3abc59f233c45c6cb5514a9f808"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/7f3d5d1d.0"
+sha256 = "c4fa4cc30be6aee0a4c0dff81f28768eedd83e8d4934a42f82179cbfa61f13ad"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8160b96c.0"
+sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8508e720.0"
+sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8cb5ee0f.0"
+sha256 = "3eb7c3258f4af9222033dc1bb3dd2c7cfa0982b98e39fb8e9dc095cfeb38126c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8d86cdd1.0"
+sha256 = "cf339eae15268aff66148f3bcdf112a7700eafded3edcb3f86c60133b10e03f8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8d89cda1.0"
+sha256 = "b4ee8ed700b7abe4836d119c8113bc8b717f4f1568abd7edd81f2526c5836983"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8f103249.0"
+sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/90c5a3c8.0"
+sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/930ac5d2.0"
+sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/93bc0acc.0"
+sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9482e63a.0"
+sha256 = "c4a426fe57a7e4e6966e2103f2941eb7263e7c35727dd0f412bd593467304999"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9846683b.0"
+sha256 = "05161ad2ac04a0df956ef803e127aa877cc5131e0a727ed8e5de43f02e8868c4"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/988a38cb.0"
+sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9b5697b0.0"
+sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9c8dfbd4.0"
+sha256 = "42f0e946149ae0e0c6a1fb0e33150ce863479b2ef7b3c700161102ad1dcb34c1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9d04f354.0"
+sha256 = "660b5aa96668c5162f4af6b0a01241d8527aef8fa8a5307a7033b83c3de4a72d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9ef4a08a.0"
+sha256 = "ae927c01e73470cfc89943b5cd8f26e481d55c833517c1017f3fef404a38a317"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9f727ac7.0"
+sha256 = "05e0ebf9643197ccf8036cdd86a2ee14292c2a077dbe06435ed30369b8762564"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ACCVRAIZ1.pem"
+sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AC_RAIZ_FNMT-RCM.pem"
+sha256 = "aa18ea4c9a8441a461bb436a1c90beb994ac841980b8fd62c72de9a62ddf8ae3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AC_RAIZ_FNMT-RCM_SERVIDORES_SEGUROS.pem"
+sha256 = "8e3f237813d3f3e2f5767bc2a694a7557f84bb79fd60ef1adc25afd0c1fc5ef6"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ANF_Secure_Server_Root_CA.pem"
+sha256 = "efb2df6e0075fa74e448077e402d171851b2ffe4668a614adc00dcbc75633afd"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Actalis_Authentication_Root_CA.pem"
+sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AffirmTrust_Commercial.pem"
+sha256 = "7108110fdaf19e3e5a7ed8fa38557248e79fe78bb2e9eefe7a0bb801cbfd2db7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AffirmTrust_Networking.pem"
+sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AffirmTrust_Premium.pem"
+sha256 = "94c88202bf2c13c68b90d124f93f62374f36776b0bfbc110c6d06f829290b580"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/AffirmTrust_Premium_ECC.pem"
+sha256 = "42f0e946149ae0e0c6a1fb0e33150ce863479b2ef7b3c700161102ad1dcb34c1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Amazon_Root_CA_1.pem"
+sha256 = "2c43952ee9e000ff2acc4e2ed0897c0a72ad5fa72c3d934e81741cbd54f05bd1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Amazon_Root_CA_2.pem"
+sha256 = "a3a7fe25439d9a9b50f60af43684444d798a4c869305bf615881e5c84a44c1a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Amazon_Root_CA_3.pem"
+sha256 = "3eb7c3258f4af9222033dc1bb3dd2c7cfa0982b98e39fb8e9dc095cfeb38126c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Amazon_Root_CA_4.pem"
+sha256 = "b0b7961120481e33670315b2f843e643c42f693c7a1010eb9555e06ddc730214"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Atos_TrustedRoot_2011.pem"
+sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
+sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068_2.pem"
+sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Baltimore_CyberTrust_Root.pem"
+sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Buypass_Class_2_Root_CA.pem"
+sha256 = "9c2a7510e01aec2c9b8cc2c9d03b16576858a93863a6d0a31a2ac05f47f5dbe1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Buypass_Class_3_Root_CA.pem"
+sha256 = "8db5b7c8f058c56a8d033c2443d34fdfd3656150eaa73fe63c65161e7063ce99"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CA_Disig_Root_R2.pem"
+sha256 = "8adefca890c92e6d0877fdcba07655296852217da657026aea69ee547642528c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CFCA_EV_ROOT.pem"
+sha256 = "94e4ab21333740d7ed0f2b5007744e5cf6792c0ddf4c6bdfb3ce8333010e7306"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/COMODO_Certification_Authority.pem"
+sha256 = "e273097c7c57cb7cbb908057991ae1774d4e1e8c6a062fb6be9e6645b32fb431"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/COMODO_ECC_Certification_Authority.pem"
+sha256 = "d69f7b57250536f57ffba92cffe82a8bbcb16e03a9a2607ec967f362ce83f9ce"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/COMODO_RSA_Certification_Authority.pem"
+sha256 = "24b0d4292dacb02efc38542838e378bc35f040dcd21bebfddbc82dc7feb2876d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certainly_Root_E1.pem"
+sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certainly_Root_R1.pem"
+sha256 = "0c78902126532fde9eed4b2d8b6a2c9bbaa8b3abc59f233c45c6cb5514a9f808"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certigna.pem"
+sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certigna_Root_CA.pem"
+sha256 = "fe3b44c18182e167121a2c645cecc4817441d469dc00633e60fe8476f9e1ad96"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certum_EC-384_CA.pem"
+sha256 = "c4a426fe57a7e4e6966e2103f2941eb7263e7c35727dd0f412bd593467304999"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certum_Trusted_Network_CA.pem"
+sha256 = "43f1bade6454349c258017cc99113f8b6a5712e3807e82ad9371348d52d60190"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certum_Trusted_Network_CA_2.pem"
+sha256 = "9dd4cbb6d2c29cbb3ca98da02c042a690c0ef4c0521d98aae37e0a704c4bf210"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Certum_Trusted_Root_CA.pem"
+sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Comodo_AAA_Services_root.pem"
+sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/D-TRUST_BR_Root_CA_1_2020.pem"
+sha256 = "ae927c01e73470cfc89943b5cd8f26e481d55c833517c1017f3fef404a38a317"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/D-TRUST_EV_Root_CA_1_2020.pem"
+sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/D-TRUST_Root_Class_3_CA_2_2009.pem"
+sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/D-TRUST_Root_Class_3_CA_2_EV_2009.pem"
+sha256 = "f81ceeaf6341513ef391ab3ea3302e8b2fb2c1527752797bba9b20ca22048b3c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Assured_ID_Root_CA.pem"
+sha256 = "b52fae9cd8dcf49285f0337cd815deca13fedd31f653bf07f61579451517e18c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Assured_ID_Root_G2.pem"
+sha256 = "660b5aa96668c5162f4af6b0a01241d8527aef8fa8a5307a7033b83c3de4a72d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Assured_ID_Root_G3.pem"
+sha256 = "c4fa4cc30be6aee0a4c0dff81f28768eedd83e8d4934a42f82179cbfa61f13ad"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Global_Root_CA.pem"
+sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Global_Root_G2.pem"
+sha256 = "5d550643b6400d4341550a9b14aedd0b4fac33ae5deb7d8247b6b4f799c13306"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Global_Root_G3.pem"
+sha256 = "1914cd2d4cde263315f9e32c7683fc0e1b921919ad12b256d49bf782011c03cc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_High_Assurance_EV_Root_CA.pem"
+sha256 = "d98f681c3a7dce812b90bf7c68046827f3bf5607357f1e4918c5dc813b359bf1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_TLS_ECC_P384_Root_G5.pem"
+sha256 = "05161ad2ac04a0df956ef803e127aa877cc5131e0a727ed8e5de43f02e8868c4"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_TLS_RSA4096_Root_G5.pem"
+sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/DigiCert_Trusted_Root_G4.pem"
+sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/E-Tugra_Certification_Authority.pem"
+sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/E-Tugra_Global_Root_CA_ECC_v3.pem"
+sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/E-Tugra_Global_Root_CA_RSA_v3.pem"
+sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Entrust.net_Premium_2048_Secure_Server_CA.pem"
+sha256 = "24e0277c0c028497c6b0abbbf7163ec3ae7b341cadfb0b90bc00c4ad642172cc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Entrust_Root_Certification_Authority.pem"
+sha256 = "745bd29be45667514b4000e9cdb70cdecad0f02c78232ed722f64f7f80436e35"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Entrust_Root_Certification_Authority_-_EC1.pem"
+sha256 = "a0d7e56b32b767e076bd7d05ce1779dbe3656d0a02a9abe711fc79640b9f7fbe"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Entrust_Root_Certification_Authority_-_G2.pem"
+sha256 = "646db48fa7794bcab4581f264ff3fad4cff7bbd24f5e8bb170d4f602b6caf828"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Entrust_Root_Certification_Authority_-_G4.pem"
+sha256 = "9e01d7bbaaf5ebd3e4ff9c02e3c3a12aaa421574ca86ddb0cb3a21880f2e283d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GDCA_TrustAUTH_R5_ROOT.pem"
+sha256 = "b0bf3a444f89d8be7db120bfecaa2f94d9e49ede21f680d674c1e8d839d8a9a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GLOBALTRUST_2020.pem"
+sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GTS_Root_R1.pem"
+sha256 = "4195ea007a7ef8d3e2d338e8d9ff0083198e36bfa025442ddf41bb5213904fc2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GTS_Root_R2.pem"
+sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GTS_Root_R3.pem"
+sha256 = "39238e09bb7d30e39fbf87746ceac206f7ec206cff3d73c743e3f818ca2ec54f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GTS_Root_R4.pem"
+sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_ECC_Root_CA_-_R4.pem"
+sha256 = "d1b69887f73444c0fc0a6f22a2fe961c2423275f9c38ba7d50da2a4ba75394f1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_ECC_Root_CA_-_R5.pem"
+sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_Root_CA.pem"
+sha256 = "df68841998b7fd098a9517fe971e97890be0fc93bbe1b2a1ef63ebdea3111c80"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_Root_CA_-_R3.pem"
+sha256 = "6bdc59f897631af7811e3201cbc58e5999de2600ae8667454a34514eecfd8381"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_Root_CA_-_R6.pem"
+sha256 = "5ff8425be71c1805446bf10601ce3cb9619889866766fc9285583ca5a4a7de94"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_Root_E46.pem"
+sha256 = "5bd16128d0934629c2e1713140a6f97c9828dbb5429ab5797b2573efc71de1a1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/GlobalSign_Root_R46.pem"
+sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Go_Daddy_Class_2_CA.pem"
+sha256 = "47f15a52a984ab1f9cd92b6c1849c0465c1b3c9c6837d54e5d2c004fa01b69b7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Go_Daddy_Root_Certificate_Authority_-_G2.pem"
+sha256 = "500329abac100a953a7396b54b36be57d333022f17401bc948248ea179cf1784"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/HARICA_TLS_ECC_Root_CA_2021.pem"
+sha256 = "c6dc63e98b3a5e6a595c7d583a9c47c5efb6d316957466fd16c785b423eacf37"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/HARICA_TLS_RSA_Root_CA_2021.pem"
+sha256 = "05e0ebf9643197ccf8036cdd86a2ee14292c2a077dbe06435ed30369b8762564"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Hellenic_Academic_and_Research_Institutions_ECC_RootCA_2015.pem"
+sha256 = "1cdd90d42b48cced8f5ecbff087c49da56b224f0272e4b5074e63b82fff5fb16"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Hellenic_Academic_and_Research_Institutions_RootCA_2015.pem"
+sha256 = "677160e6297b48b87ede98ab7b4f2be55894491776f6191937ea397d01a6fb4b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/HiPKI_Root_CA_-_G1.pem"
+sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Hongkong_Post_Root_CA_1.pem"
+sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Hongkong_Post_Root_CA_3.pem"
+sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ISRG_Root_X1.pem"
+sha256 = "22b557a27055b33606b6559f37703928d3e4ad79f110b407d04986e1843543d1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ISRG_Root_X2.pem"
+sha256 = "a13d881e11fe6df181b53841f9fa738a2d7ca9ae7be3d53c866f722b4242b013"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/IdenTrust_Commercial_Root_CA_1.pem"
+sha256 = "1d03b965511ce50d0a0bae1b549ed7048c783cfcba9aa40ea11d355b1889657c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/IdenTrust_Public_Sector_Root_CA_1.pem"
+sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Izenpe.com.pem"
+sha256 = "1d37341b099afc610bf4feb387096577a0dc61bb8fd09444f1a199a1b1b117e3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Microsec_e-Szigno_Root_CA_2009.pem"
+sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Microsoft_ECC_Root_Certificate_Authority_2017.pem"
+sha256 = "b4ee8ed700b7abe4836d119c8113bc8b717f4f1568abd7edd81f2526c5836983"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Microsoft_RSA_Root_Certificate_Authority_2017.pem"
+sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/NAVER_Global_Root_Certification_Authority.pem"
+sha256 = "9848c94859f83e48defe0b25a0f4347480b56ea2bb3336fe6d4dcf00d0d6031d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/NetLock_Arany_=Class_Gold=_Főtanúsítvány.pem"
+sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/OISTE_WISeKey_Global_Root_GB_CA.pem"
+sha256 = "2dc52d373089ff5173ac392a464746dd066aaa3b7d1b3494a473c96686666fce"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/OISTE_WISeKey_Global_Root_GC_CA.pem"
+sha256 = "17b98c4d832e8349ecb55f1f90e41dfc7bcd9410d1e925ccd06612cd3b9b9a54"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/QuoVadis_Root_CA_1_G3.pem"
+sha256 = "4db45324410a01a7023b038e5da7d7274d3cfd392565c351cf3d297fd7664c73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/QuoVadis_Root_CA_2.pem"
+sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/QuoVadis_Root_CA_2_G3.pem"
+sha256 = "825c67f5583131425c4e33275cc8e5c9dfd02cd190c6d71e1d335621e82965a8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/QuoVadis_Root_CA_3.pem"
+sha256 = "a2ae0b4ec9d2a4c4e150756a3defabd15bcaa75ee2b599e722b27c6a2998d00b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/QuoVadis_Root_CA_3_G3.pem"
+sha256 = "198cfe560c191a800cbe923ceca0a4e4f3d5a0d7ff9316b47998765fdc0897be"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_EV_Root_Certification_Authority_ECC.pem"
+sha256 = "662d60a283f416d888ff18831009e2cba95c61377f648beeed91a3dea12ac286"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_EV_Root_Certification_Authority_RSA_R2.pem"
+sha256 = "a0681f1a11d5c02760bcb68b61b0d332f6c197e239c4b30dc47f91a79a73282b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_Root_Certification_Authority_ECC.pem"
+sha256 = "b68d02ce35bd02123cf5fcd329bdd33640214715dae0442a97782a4471e9b292"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_Root_Certification_Authority_RSA.pem"
+sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SZAFIR_ROOT_CA2.pem"
+sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SecureSign_RootCA11.pem"
+sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SecureTrust_CA.pem"
+sha256 = "a3e70af2c4b48562b61fe858d9d30f073f2cf2136f2af01ab5a966673e70af4b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Secure_Global_CA.pem"
+sha256 = "7ee52fb3a5afacd55a7a2e00f057f7f64776ea0d536036f54c57694961e25179"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Security_Communication_ECC_RootCA1.pem"
+sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Security_Communication_RootCA2.pem"
+sha256 = "39ad3110b8f84821ca22cfbd995914f2149521d27ce576e743de6a00dc39d9db"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Security_Communication_RootCA3.pem"
+sha256 = "40ec121c66bc70c48d5e512fa2d1d9f040c329467232f1964edd62fecb32af87"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Security_Communication_Root_CA.pem"
+sha256 = "684f2f6ce0a18fcb038d08a495846fbc35b96d99875fef1b24384cf0944a68c3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Starfield_Class_2_CA.pem"
+sha256 = "1ad8373ec50073168cb6862a0e119adf2c1065c896adf7eb9695779739b4bb2e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Starfield_Root_Certificate_Authority_-_G2.pem"
+sha256 = "ca3760ba63bf0a2c5dd0dc7fe897838cc58f12a386b4ee53d2065229848e96a3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Starfield_Services_Root_Certificate_Authority_-_G2.pem"
+sha256 = "870f56d009d8aeb95b716b0e7b0020225d542c4b283b9ed896edf97428d6712e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SwissSign_Gold_CA_-_G2.pem"
+sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SwissSign_Silver_CA_-_G2.pem"
+sha256 = "9b3cbeb7d75271e0b62d40d60f8b18a35384ac6b171209231732fc778cfd2b5f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/T-TeleSec_GlobalRoot_Class_2.pem"
+sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/T-TeleSec_GlobalRoot_Class_3.pem"
+sha256 = "1cb130a113f4e8502517a679808a98bf076d59bdb223bfc61cd224b8e1abda49"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TUBITAK_Kamu_SM_SSL_Kok_Sertifikasi_-_Surum_1.pem"
+sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TWCA_Global_Root_CA.pem"
+sha256 = "5dadc31b57074a3168d1df23bb8b6b920acae1d426bf2288fc2de53cdd571089"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TWCA_Root_Certification_Authority.pem"
+sha256 = "b69a59344e58615a691fa9567d55ad6337f09b57647a389242cbf43716575559"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TeliaSonera_Root_CA_v1.pem"
+sha256 = "303c346ece82ca4f6713ac176164285d0469f326b6f12a787e11f5d702529277"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Telia_Root_CA_v2.pem"
+sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Trustwave_Global_Certification_Authority.pem"
+sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Trustwave_Global_ECC_P256_Certification_Authority.pem"
+sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Trustwave_Global_ECC_P384_Certification_Authority.pem"
+sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TunTrust_Root_CA.pem"
+sha256 = "8a852f7182753cb0193299c6cb2b4a106b1c38a789217b5eb380d736c5cc0081"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/UCA_Extended_Validation_Root.pem"
+sha256 = "eaa3be600a842e5b603316ed14e9ae11a43003f68a8317f0f2c01a516da4e586"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/UCA_Global_G2_Root.pem"
+sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/USERTrust_ECC_Certification_Authority.pem"
+sha256 = "08fb40ba4144166f6ae80c7ab60be23e97e5083836d45fa85a33a5d0bfec10f8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/USERTrust_RSA_Certification_Authority.pem"
+sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/XRamp_Global_CA_Root.pem"
+sha256 = "fbe0f62dde93af96d1b8e27b19b2ee200a834880eca805585b66d18d2ea08192"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/a3418fda.0"
+sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/a94d09e5.0"
+sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/aee5f10d.0"
+sha256 = "24e0277c0c028497c6b0abbbf7163ec3ae7b341cadfb0b90bc00c4ad642172cc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b0e59380.0"
+sha256 = "d1b69887f73444c0fc0a6f22a2fe961c2423275f9c38ba7d50da2a4ba75394f1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b1159c4c.0"
+sha256 = "b52fae9cd8dcf49285f0337cd815deca13fedd31f653bf07f61579451517e18c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b433981b.0"
+sha256 = "efb2df6e0075fa74e448077e402d171851b2ffe4668a614adc00dcbc75633afd"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b66938e9.0"
+sha256 = "7ee52fb3a5afacd55a7a2e00f057f7f64776ea0d536036f54c57694961e25179"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b727005e.0"
+sha256 = "94c88202bf2c13c68b90d124f93f62374f36776b0bfbc110c6d06f829290b580"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b7a5b843.0"
+sha256 = "b69a59344e58615a691fa9567d55ad6337f09b57647a389242cbf43716575559"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/b81b93f0.0"
+sha256 = "8e3f237813d3f3e2f5767bc2a694a7557f84bb79fd60ef1adc25afd0c1fc5ef6"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/bf53fb88.0"
+sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/c01eb047.0"
+sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/c28a8a30.0"
+sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ca-certificates.crt"
+sha256 = "82f3a63130e0b47915659d619f177c8157c2bbb29dbf0f58ad2721ff84fb1190"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ca6e4ad9.0"
+sha256 = "d22b235421616835f68d15801d82b44e7c463433f8bbdcc92f9c023fafcb2bf2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/cbf06781.0"
+sha256 = "500329abac100a953a7396b54b36be57d333022f17401bc948248ea179cf1784"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/cc450945.0"
+sha256 = "1d37341b099afc610bf4feb387096577a0dc61bb8fd09444f1a199a1b1b117e3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/cd58d51e.0"
+sha256 = "39ad3110b8f84821ca22cfbd995914f2149521d27ce576e743de6a00dc39d9db"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/cd8c0d63.0"
+sha256 = "aa18ea4c9a8441a461bb436a1c90beb994ac841980b8fd62c72de9a62ddf8ae3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ce5e74ef.0"
+sha256 = "2c43952ee9e000ff2acc4e2ed0897c0a72ad5fa72c3d934e81741cbd54f05bd1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/certSIGN_ROOT_CA.pem"
+sha256 = "cf339eae15268aff66148f3bcdf112a7700eafded3edcb3f86c60133b10e03f8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/certSIGN_Root_CA_G2.pem"
+sha256 = "80eee369aa5b29931209226fcb4b014ba31daa7f630d44a196817c1bb6b334f1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/d4dae3dd.0"
+sha256 = "f81ceeaf6341513ef391ab3ea3302e8b2fb2c1527752797bba9b20ca22048b3c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/d52c538d.0"
+sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/d6325660.0"
+sha256 = "24b0d4292dacb02efc38542838e378bc35f040dcd21bebfddbc82dc7feb2876d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/d7e8dc79.0"
+sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/d887a5bb.0"
+sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/dc4d6a89.0"
+sha256 = "5ff8425be71c1805446bf10601ce3cb9619889866766fc9285583ca5a4a7de94"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/dd8e9d41.0"
+sha256 = "1914cd2d4cde263315f9e32c7683fc0e1b921919ad12b256d49bf782011c03cc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/de6d66f3.0"
+sha256 = "b0b7961120481e33670315b2f843e643c42f693c7a1010eb9555e06ddc730214"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e-Szigno_Root_CA_2017.pem"
+sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e113c810.0"
+sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e18bfb83.0"
+sha256 = "198cfe560c191a800cbe923ceca0a4e4f3d5a0d7ff9316b47998765fdc0897be"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e35234b1.0"
+sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e36a6752.0"
+sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e73d606e.0"
+sha256 = "2dc52d373089ff5173ac392a464746dd066aaa3b7d1b3494a473c96686666fce"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e868b802.0"
+sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/e8de2f56.0"
+sha256 = "8db5b7c8f058c56a8d033c2443d34fdfd3656150eaa73fe63c65161e7063ce99"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ePKI_Root_Certification_Authority.pem"
+sha256 = "d22b235421616835f68d15801d82b44e7c463433f8bbdcc92f9c023fafcb2bf2"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ecccd8db.0"
+sha256 = "c6dc63e98b3a5e6a595c7d583a9c47c5efb6d316957466fd16c785b423eacf37"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ed858448.0"
+sha256 = "2ce349e2da9df497cc62aca37b009a2c3261ccdbe06a4c4a063f8105da40eb5d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ee64a828.0"
+sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/eed8c118.0"
+sha256 = "d69f7b57250536f57ffba92cffe82a8bbcb16e03a9a2607ec967f362ce83f9ce"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ef954a4e.0"
+sha256 = "1d03b965511ce50d0a0bae1b549ed7048c783cfcba9aa40ea11d355b1889657c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/emSign_ECC_Root_CA_-_C3.pem"
+sha256 = "b1d0ac5a261e857409cc921acb515796538b48847722f0a00ddccbf60bccec81"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/emSign_ECC_Root_CA_-_G3.pem"
+sha256 = "36e68e205b53c67c7a013894e0d5c8583063468118d1ce78ecbc2200d1dd185c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/emSign_Root_CA_-_C1.pem"
+sha256 = "fb98230f8746d60429c20f8ce04254384337b479a77698939f7041d0c0eb4289"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/emSign_Root_CA_-_G1.pem"
+sha256 = "8d390d4c54f6a4a040b04413f1f002192027c66a2a835741f78a152074584a27"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f081611a.0"
+sha256 = "47f15a52a984ab1f9cd92b6c1849c0465c1b3c9c6837d54e5d2c004fa01b69b7"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f0c70a8d.0"
+sha256 = "662d60a283f416d888ff18831009e2cba95c61377f648beeed91a3dea12ac286"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f249de83.0"
+sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f30dd6ad.0"
+sha256 = "08fb40ba4144166f6ae80c7ab60be23e97e5083836d45fa85a33a5d0bfec10f8"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f3377b1b.0"
+sha256 = "684f2f6ce0a18fcb038d08a495846fbc35b96d99875fef1b24384cf0944a68c3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f387163d.0"
+sha256 = "1ad8373ec50073168cb6862a0e119adf2c1065c896adf7eb9695779739b4bb2e"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f39fc864.0"
+sha256 = "a3e70af2c4b48562b61fe858d9d30f073f2cf2136f2af01ab5a966673e70af4b"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/f51bb24c.0"
+sha256 = "fe3b44c18182e167121a2c645cecc4817441d469dc00633e60fe8476f9e1ad96"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/fa5da96b.0"
+sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/fc5a8f99.0"
+sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/fd64f3fc.0"
+sha256 = "8a852f7182753cb0193299c6cb2b4a106b1c38a789217b5eb380d736c5cc0081"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/fe8a2cd8.0"
+sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/feffd413.0"
+sha256 = "5bd16128d0934629c2e1713140a6f97c9828dbb5429ab5797b2573efc71de1a1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/ff34af3f.0"
+sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/vTrus_ECC_Root_CA.pem"
+sha256 = "2ce349e2da9df497cc62aca37b009a2c3261ccdbe06a4c4a063f8105da40eb5d"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/vTrus_Root_CA.pem"
+sha256 = "8cc726cf62c554561e89e1237495bea3026b1709ba7153fed3401fcd489b5aaf"
 
 [sgx.cpu_features]
 avx = "unspecified"

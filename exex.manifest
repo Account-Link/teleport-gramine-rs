@@ -53,6 +53,8 @@ mounts = [
     { path = "/lib", uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
     { path = "/lib/x86_64-linux-gnu", uri = "file:/lib/x86_64-linux-gnu" },
     { path = "/tmp", type = "tmpfs" },
+    { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },
+    { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },
 ]
 
 [fs.insecure__keys]
@@ -74,6 +76,8 @@ trusted_files = [
     { uri = "file:/lib/x86_64-linux-gnu/" },
     { uri = "file:teleport.env" },
     { uri = "file:main.db" },
+    { uri = "file:/usr/lib/ssl/certs/" },
+    { uri = "file:/etc/ssl/certs/" },
 ]
 max_threads = 32
 isvprodid = 0

@@ -36,6 +36,8 @@ fs.mounts = [
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
   { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
     { path = "/tmp", type = "tmpfs" },
+  { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },  # add this line
+  { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
 
 ]
 
@@ -56,6 +58,8 @@ sgx.trusted_files = [
   "file:{{ arch_libdir }}/",
     "file:teleport.env",
     "file:main.db",
+  "file:/usr/lib/ssl/certs/",
+  "file:/etc/ssl/certs/",
 
 ]
 

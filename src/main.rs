@@ -12,6 +12,7 @@ mod twitter;
 async fn main() {
     env_logger::init();
     dotenv::dotenv().ok();
+    dotenv::from_filename("/teleport.env").ok();
 
     let db_url = std::env::var("DB_URL").expect("DB_URL not set");
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");

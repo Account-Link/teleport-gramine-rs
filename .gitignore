@@ -2,3 +2,5 @@ Cargo.lock
 target
 .env
 *.db
+teleport.env
+

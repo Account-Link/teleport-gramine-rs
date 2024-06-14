@@ -2,8 +2,9 @@ use alloy::providers::network::EthereumWallet;
 use axum::{
     extract::{Query, State},
     response::Redirect,
+    Json,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
     db::{
@@ -31,6 +32,11 @@ pub struct CallbackQuery {
 pub struct MintQuery {
     teleport_id: String,
     policy: String,
+}
+
+#[derive(Serialize)]
+pub struct MintResponse {
+    pub hash: String,
 }
 
 #[derive(Clone)]
@@ -112,14 +118,14 @@ pub async fn callback(
 pub async fn mint(
     State(shared_state): State<SharedState>,
     Query(query): Query<MintQuery>,
-) -> String {
+) -> Json<MintResponse> {
     let mut connection =
         open_connection(shared_state.db_url.clone()).expect("Failed to open database");
     let user = get_user_by_teleport_id(&mut connection, query.teleport_id)
         .await
         .expect("Failed to get user by teleport_id");
 
-    mint_nft(
+    let tx_hash = mint_nft(
         shared_state.wallet,
         shared_state.rpc_url,
         user.address,
@@ -127,5 +133,6 @@ pub async fn mint(
         query.policy,
     )
     .await
-    .expect("Failed to mint NFT")
+    .expect("Failed to mint NFT");
+    Json(MintResponse { hash: tx_hash })
 }

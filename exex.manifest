@@ -1,12 +1,19 @@
 [libos]
-entrypoint = "target/release/exex"
+entrypoint = "/gramine-ratls"
 
 [loader]
-entrypoint = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-log_level = "error"
+entrypoint = "file:/usr/local/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+log_level = "debug"
+argv = [
+    "gramine-ratls",
+    "/tmp/crt.pem",
+    "/tmp/key.pem",
+    "--",
+    "target/release/exex",
+]
 
 [loader.env]
-LD_LIBRARY_PATH = "/lib:/lib/x86_64-linux-gnu"
+LD_LIBRARY_PATH = "/usr/local/lib:/usr/lib/x86_64-linux-gnu:/lib/x86_64-linux-gnu"
 MALLOC_ARENA_MAX = "1"
 RUST_BACKTRACE = "full"
 RUST_LOG = "info"
@@ -40,9 +47,16 @@ passthrough = true
 
 [fs]
 mounts = [
-    { path = "/lib", uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
+    { type = "encrypted", path = "/main.db", uri = "file:main.db", key_name = "teleportexex" },
+    { path = "/gramine-ratls", uri = "file:/usr/local/bin/gramine-ratls" },
+    { path = "/teleport.env", uri = "file:teleport.env" },
+    { path = "/lib", uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/runtime/glibc" },
     { path = "/lib/x86_64-linux-gnu", uri = "file:/lib/x86_64-linux-gnu" },
+    { path = "/tmp", type = "tmpfs" },
 ]
+
+[fs.insecure__keys]
+teleportexex = "38EBF5306BC11707AD66F60FC12F212D"
 
 [sys]
 enable_extra_runtime_domain_names_conf = true
@@ -50,16 +64,20 @@ enable_extra_runtime_domain_names_conf = true
 [sgx]
 debug = true
 edmm_enable = false
+remote_attestation = "dcap"
 trusted_files = [
-    { uri = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so" },
+    { uri = "file:/usr/local/bin/gramine-ratls" },
+    { uri = "file:/usr/lib/x86_64-linux-gnu/" },
+    { uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/libsysdb.so" },
     { uri = "file:target/release/exex" },
-    { uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/" },
+    { uri = "file:/usr/local/lib/x86_64-linux-gnu/gramine/runtime/glibc/" },
     { uri = "file:/lib/x86_64-linux-gnu/" },
+    { uri = "file:teleport.env" },
+    { uri = "file:main.db" },
 ]
-max_threads = 8
+max_threads = 32
 isvprodid = 0
 isvsvn = 0
-remote_attestation = "none"
 enable_stats = false
 enclave_size = "256M"
 use_exinfo = false

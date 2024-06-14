@@ -3,12 +3,13 @@
 
 # Rust manifest example
 
-libos.entrypoint = "{{ self_exe }}"
+libos.entrypoint = "/gramine-ratls"
+
 loader.entrypoint = "file:{{ gramine.libos }}"
 loader.log_level = "{{ log_level }}"
 
+loader.env.LD_LIBRARY_PATH = "/usr/local/lib:/usr{{ arch_libdir }}:{{ arch_libdir }}"
 
-loader.env.LD_LIBRARY_PATH = "/lib:/lib/x86_64-linux-gnu"
 loader.env.MALLOC_ARENA_MAX = "1"
 loader.env.TWITTER_CONSUMER_KEY = { passthrough = true }
 loader.env.TWITTER_CONSUMER_SECRET = { passthrough = true }
@@ -22,21 +23,40 @@ loader.env.WS_RPC_URL = { passthrough = true }
 loader.env.RUST_BACKTRACE = "full"
 loader.env.RUST_LOG = "info"
 
+loader.argv = [
+    "gramine-ratls", "/tmp/crt.pem", "/tmp/key.pem", "--",
+    "target/release/exex",
+	]
+
+
 fs.mounts = [
+  { type = "encrypted", path = "/main.db", uri = "file:main.db", key_name = "teleportexex" },
+    { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
+    { path = "/teleport.env", uri = "file:teleport.env" },
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
   { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+    { path = "/tmp", type = "tmpfs" },
+
 ]
+
+fs.insecure__keys.teleportexex = "38EBF5306BC11707AD66F60FC12F212D"
 
 sys.enable_extra_runtime_domain_names_conf = true
 
 sgx.debug = true
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
+sgx.remote_attestation = "dcap"
 
 sgx.trusted_files = [
+    "file:/usr/local/bin/gramine-ratls",
+    "file:/usr{{ arch_libdir }}/",
   "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
   "file:{{ gramine.runtimedir() }}/",
   "file:{{ arch_libdir }}/",
+    "file:teleport.env",
+    "file:main.db",
+
 ]
 
 # The maximum number of threads in a single process needs to be declared in advance.
@@ -46,4 +66,4 @@ sgx.trusted_files = [
 # - any threads and threadpools you might be starting
 # - helper threads internal to Gramine — see:
 #   https://gramine.readthedocs.io/en/stable/manifest-syntax.html#number-of-threads
-sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '8' }}
+sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}

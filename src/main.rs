@@ -2,6 +2,7 @@ use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
 use db::{create_tables, open_connection};
 use endpoints::{callback, mint, new_user, SharedState};
 use listener::subscribe_to_events;
+use tower_http::cors::{Any, CorsLayer};
 mod db;
 mod endpoints;
 mod listener;
@@ -34,7 +35,11 @@ async fn main() {
         wallet: signer.into(),
         rpc_url,
     };
+    let cors = CorsLayer::new()
+        .allow_methods([http::Method::GET])
+        .allow_origin(Any);
     let app = axum::Router::new()
+        .layer(cors)
         .route("/new", axum::routing::get(new_user))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))

@@ -1,3 +1,4 @@
+use alloy::providers::network::EthereumWallet;
 use axum::{
     extract::{Query, State},
     response::Redirect,
@@ -5,13 +6,18 @@ use axum::{
 use serde::Deserialize;
 
 use crate::{
-    db::{add_access_tokens, add_oauth_tokens, get_oauth_tokens_by_teleport_id, open_connection},
-    twitter::{authorize_token, get_user_id, request_oauth_token},
+    db::{
+        add_oauth_user, add_user, get_oauth_user_by_teleport_id, get_user_by_teleport_id,
+        open_connection, OAuthUser, User,
+    },
+    listener::mint_nft,
+    twitter::{authorize_token, get_user_x_id, request_oauth_token},
 };
 
 #[derive(Deserialize)]
 pub struct NewUserQuery {
     teleport_id: String,
+    address: String,
 }
 
 #[derive(Deserialize)]
@@ -21,9 +27,17 @@ pub struct CallbackQuery {
     teleport_id: String,
 }
 
+#[derive(Deserialize)]
+pub struct MintQuery {
+    teleport_id: String,
+    policy: String,
+}
+
 #[derive(Clone)]
 pub struct SharedState {
     pub db_url: String,
+    pub ws_rpc_url: String,
+    pub wallet: EthereumWallet,
 }
 
 pub async fn new_user(
@@ -36,15 +50,15 @@ pub async fn new_user(
     let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
         .await
         .expect("Failed to request oauth token");
-
-    add_oauth_tokens(
-        &mut connection,
-        teleport_id.clone(),
-        oauth_token.clone(),
+    let user = OAuthUser {
+        teleport_id: teleport_id.clone(),
+        oauth_token: oauth_token.clone(),
         oauth_token_secret,
-    )
-    .await
-    .expect("Failed to add oauth tokens to database");
+        address: query.address,
+    };
+    add_oauth_user(&mut connection, user)
+        .await
+        .expect("Failed to add oauth tokens to database");
 
     let url = format!(
         "https://api.twitter.com/oauth/authenticate?oauth_token={}",
@@ -64,27 +78,47 @@ pub async fn callback(
     let mut connection =
         open_connection(shared_state.db_url.clone()).expect("Failed to open database");
 
-    let (oauth_token_from_db, oauth_token_secret) =
-        get_oauth_tokens_by_teleport_id(&mut connection, teleport_id.clone())
-            .await
-            .expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_token_from_db);
+    let oauth_user = get_oauth_user_by_teleport_id(&mut connection, teleport_id.clone())
+        .await
+        .expect("Failed to get oauth tokens");
+    assert_eq!(oauth_token, oauth_user.oauth_token);
 
     let (access_token, access_secret) =
-        authorize_token(oauth_token, oauth_token_secret, oauth_verifier)
+        authorize_token(oauth_token, oauth_user.oauth_token_secret, oauth_verifier)
             .await
             .unwrap();
-    let user_id = get_user_id(access_token.clone(), access_secret.clone()).await;
+    let x_id = get_user_x_id(access_token.clone(), access_secret.clone()).await;
 
-    add_access_tokens(
-        &mut connection,
-        user_id,
+    let user = User {
+        x_id,
         teleport_id,
         access_token,
         access_secret,
-    )
-    .await
-    .unwrap();
+        address: oauth_user.address,
+    };
+
+    add_user(&mut connection, user).await.unwrap();
 
     Redirect::temporary("http://localhost:4000/mint?success=true")
+}
+
+pub async fn mint(
+    State(shared_state): State<SharedState>,
+    Query(query): Query<MintQuery>,
+) -> String {
+    let mut connection =
+        open_connection(shared_state.db_url.clone()).expect("Failed to open database");
+    let user = get_user_by_teleport_id(&mut connection, query.teleport_id)
+        .await
+        .expect("Failed to get user by teleport_id");
+
+    mint_nft(
+        shared_state.wallet,
+        shared_state.ws_rpc_url,
+        user.address,
+        user.x_id,
+        query.policy,
+    )
+    .await
+    .expect("Failed to mint NFT")
 }

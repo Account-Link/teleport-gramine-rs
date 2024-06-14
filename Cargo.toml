@@ -14,7 +14,6 @@ edition = "2021"
 
 eyre = "0.6.12"
 futures = "0.3.30"
-alloy-sol-types = {version = "0.7.2", features = ["json"]}
 rusqlite = { version = "0.31.0", features = ["bundled"] }
 
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread"] }
@@ -37,10 +36,14 @@ alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features
     "rpc-client-ws",
     "rpc-types-eth",
     "rpc-types",
-
+    "contract",
+    "sol-types",
+    "signer-local",
+    "signer-mnemonic"
 ] }
 
 futures-util = "0.3"
+rusqlite-from-row = "0.2.4"
 
 [dev-dependencies]
 # reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }

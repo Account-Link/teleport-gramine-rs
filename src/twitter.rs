@@ -33,7 +33,6 @@ struct AccessTokenRequestQuery {
     oauth_verifier: String,
 }
 
-//
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct AccessTokenResponseBody {
     oauth_token: String,
@@ -48,7 +47,7 @@ struct CallbackUrlQuery {
     oauth_verifier: String,
 }
 
-pub async fn get_user_id(access_token: String, access_secret: String) -> String {
+pub async fn get_user_x_id(access_token: String, access_secret: String) -> String {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
@@ -125,9 +124,6 @@ pub async fn authorize_token(
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-    // let callback_url_query = callback_url.query().unwrap_or_default();
-    // let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query)?;
-    // assert_eq!(callback_url_query.oauth_token, oauth_token);
 
     let query = AccessTokenRequestQuery { oauth_verifier };
 
@@ -171,8 +167,6 @@ mod tests {
             "https://api.twitter.com/oauth/authenticate?oauth_token={}",
             tokens.0.clone()
         );
-        // teleport-exex.com/new?teleport_id=123
-        // 302 redirect -> teleport-tdx.com/ret?teleport_id=123
         log::info!("Please visit: {}", url);
         let mut callback_url = String::new();
         std::io::stdin().read_line(&mut callback_url).unwrap();
@@ -209,6 +203,6 @@ mod tests {
         let access_secret = std::env::var("TEST_ACCESS_SECRET")
             .expect("TEST_ACCESS_SECRET not set")
             .to_string();
-        get_user_id(access_token, access_secret).await;
+        get_user_x_id(access_token, access_secret).await;
     }
 }

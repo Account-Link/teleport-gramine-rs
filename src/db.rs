@@ -1,4 +1,22 @@
 use rusqlite::Connection;
+use rusqlite_from_row::FromRow;
+
+#[derive(Debug, FromRow)]
+pub struct User {
+    pub x_id: String,
+    pub teleport_id: String,
+    pub access_token: String,
+    pub access_secret: String,
+    pub address: String,
+}
+
+#[derive(Debug, FromRow)]
+pub struct OAuthUser {
+    pub teleport_id: String,
+    pub oauth_token: String,
+    pub oauth_token_secret: String,
+    pub address: String,
+}
 
 pub fn open_connection(db_url: String) -> rusqlite::Result<Connection> {
     if db_url == "memory" {
@@ -9,14 +27,16 @@ pub fn open_connection(db_url: String) -> rusqlite::Result<Connection> {
     Connection::open(db_url)
 }
 
-pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
+pub fn create_tables(connection: &mut Connection) -> eyre::Result<()> {
     connection.execute(
         r#"
             CREATE TABLE IF NOT EXISTS twitter_access_tokens (
-                x_id             INTEGER PRIMARY KEY,
+                id               INTEGER PRIMARY KEY AUTOINCREMENT,
+                x_id             TEXT NOT NULL UNIQUE,
                 teleport_id      TEXT NOT NULL UNIQUE,
                 access_token     TEXT NOT NULL,
-                access_secret    TEXT NOT NULL
+                access_secret    TEXT NOT NULL,
+                address          TEXT NOT NULL
             );
             "#,
         (),
@@ -27,7 +47,8 @@ pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
                 id                    INTEGER PRIMARY KEY AUTOINCREMENT,
                 teleport_id           TEXT NOT NULL UNIQUE,
                 oauth_token           TEXT NOT NULL,
-                oauth_token_secret    TEXT NOT NULL
+                oauth_token_secret    TEXT NOT NULL,
+                address               TEXT NOT NULL
             );
             "#,
         (),
@@ -36,54 +57,52 @@ pub fn create_tables(connection: &mut Connection) -> rusqlite::Result<()> {
     Ok(())
 }
 
-pub async fn add_access_tokens(
-    connection: &mut Connection,
-    x_id: String,
-    teleport_id: String,
-    access_token: String,
-    access_secret: String,
-) -> rusqlite::Result<()> {
+pub async fn add_user(connection: &mut Connection, user: User) -> eyre::Result<()> {
     connection.execute(
         r#"
-            REPLACE INTO twitter_access_tokens (x_id, teleport_id, access_token, access_secret)
+            REPLACE INTO twitter_access_tokens (x_id, teleport_id, access_token, access_secret, address)
             VALUES (?1, ?2, ?3, ?4)
             "#,
-        rusqlite::params![x_id, teleport_id, access_token, access_secret],
+        rusqlite::params![
+            user.x_id,
+            user.teleport_id,
+            user.access_token,
+            user.access_secret,
+            user.address
+        ],
     )?;
     log::info!(
         "Added user tokens to database for teleport_id: {}",
-        teleport_id
+        user.teleport_id
     );
     Ok(())
 }
 
-pub async fn add_oauth_tokens(
+pub async fn add_oauth_user(
     connection: &mut Connection,
-    teleport_id: String,
-    oauth_token: String,
-    oauth_token_secret: String,
-) -> rusqlite::Result<()> {
+    oauth_user: OAuthUser,
+) -> eyre::Result<()> {
     connection.execute(
         r#"
-            REPLACE INTO twitter_oauth_tokens (teleport_id, oauth_token, oauth_token_secret)
+            REPLACE INTO twitter_oauth_tokens (teleport_id, oauth_token, oauth_token_secret, address)
             VALUES (?1, ?2, ?3)
             "#,
-        rusqlite::params![teleport_id, oauth_token, oauth_token_secret],
+        rusqlite::params![oauth_user.teleport_id, oauth_user.oauth_token, oauth_user.oauth_token_secret, oauth_user.address],
     )?;
     log::info!(
         "Added oauth tokens in database for teleport_id: {}",
-        teleport_id
+        oauth_user.teleport_id
     );
     Ok(())
 }
 
-pub async fn get_oauth_tokens_by_teleport_id(
+pub async fn get_oauth_user_by_teleport_id(
     connection: &mut Connection,
     teleport_id: String,
-) -> rusqlite::Result<(String, String)> {
+) -> eyre::Result<OAuthUser> {
     let mut stmt = connection.prepare(
         r#"
-            SELECT oauth_token, oauth_token_secret
+            SELECT teleport_id, oauth_token, oauth_token_secret, address
             FROM twitter_oauth_tokens
             WHERE teleport_id = ?1
             "#,
@@ -93,38 +112,54 @@ pub async fn get_oauth_tokens_by_teleport_id(
         .next()
         .expect("Failed to get row")
         .expect("No rows returned");
-    let oauth_token: String = row.get(0)?;
-    let oauth_token_secret: String = row.get(1)?;
+    let user = OAuthUser::try_from_row(row)?;
     log::info!(
         "Retrieved oauth tokens from database for teleport_id: {}",
         teleport_id
     );
-    Ok((oauth_token, oauth_token_secret))
+    Ok(user)
 }
 
-pub async fn get_access_tokens(
+pub async fn get_user_by_teleport_id(
     connection: &mut Connection,
-    user_id: u64,
-) -> rusqlite::Result<(String, String)> {
+    teleport_id: String,
+) -> eyre::Result<User> {
     let mut stmt = connection.prepare(
         r#"
-            SELECT access_token, access_secret
+            SELECT x_id, teleport_id, access_token, access_secret, address
             FROM twitter_access_tokens
-            WHERE x_id = ?1
+            WHERE teleport_id = ?1
             "#,
     )?;
-    let mut rows = stmt.query(rusqlite::params![user_id])?;
+    let mut rows = stmt.query(rusqlite::params![teleport_id])?;
     let row = rows
         .next()
         .expect("Failed to get row")
         .expect("No rows returned");
-    let access_token: String = row.get(0)?;
-    let access_secret: String = row.get(1)?;
+    let user = User::try_from_row(row)?;
     log::info!(
-        "Retrieved user tokens from database for user_id: {}",
-        user_id
+        "Retrieved user tokens from database for teleport_id: {}",
+        teleport_id
     );
-    Ok((access_token, access_secret))
+    Ok(user)
+}
+
+pub async fn get_user_by_x_id(connection: &mut Connection, x_id: String) -> eyre::Result<User> {
+    let mut stmt = connection.prepare(
+        r#"
+            SELECT x_id, teleport_id, access_token, access_secret, address
+            FROM twitter_access_tokens
+            WHERE x_id = ?1
+            "#,
+    )?;
+    let mut rows = stmt.query(rusqlite::params![x_id])?;
+    let row = rows
+        .next()
+        .expect("Failed to get row")
+        .expect("No rows returned");
+    let user = User::try_from_row(row)?;
+    log::info!("Retrieved user tokens from database for x_id: {}", x_id);
+    Ok(user)
 }
 
 #[cfg(test)]
@@ -137,20 +172,22 @@ mod tests {
         dotenv::dotenv().ok();
         let mut connection = Connection::open_in_memory()?;
         create_tables(&mut connection).expect("Failed to create tables");
-        add_access_tokens(
-            &mut connection,
-            "1".to_string(),
-            "2".to_string(),
-            "access_token".to_string(),
-            "access_secret".to_string(),
-        )
-        .await
-        .expect("Failed to add user tokens");
-        let (access_token, access_secret) = get_access_tokens(&mut connection, 1)
+        let user = User {
+            x_id: "1".to_string(),
+            teleport_id: "2".to_string(),
+            access_token: "access token".to_string(),
+            access_secret: "access secret".to_string(),
+            address: "address".to_string(),
+        };
+        add_user(&mut connection, user)
+            .await
+            .expect("Failed to add user tokens");
+        let user = get_user_by_teleport_id(&mut connection, "2".to_string())
             .await
             .expect("Failed to get user tokens");
-        assert_eq!(access_token, "access_token");
-        assert_eq!(access_secret, "access_secret");
+        assert_eq!(user.access_token, "access_token");
+        assert_eq!(user.access_secret, "access_secret");
+        assert_eq!(user.address, "address");
         Ok(())
     }
 }

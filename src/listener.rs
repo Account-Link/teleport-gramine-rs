@@ -1,33 +1,38 @@
-use alloy::primitives::address;
-use alloy::providers::Provider;
-use alloy::providers::ProviderBuilder;
-use alloy::providers::WsConnect;
-use alloy::rpc::types::BlockNumberOrTag;
-use alloy::rpc::types::Filter;
-use alloy_sol_types::sol;
-use alloy_sol_types::SolEventInterface;
+use std::str::FromStr;
+
+use alloy::{
+    hex::ToHexExt,
+    primitives::{address, Address, Uint},
+    providers::{network::EthereumWallet, Provider, ProviderBuilder, WsConnect},
+    rpc::types::{BlockNumberOrTag, Filter},
+    sol,
+    sol_types::SolEventInterface,
+};
 use futures_util::stream::StreamExt;
 use rusqlite::Connection;
 use NFT::NFTEvents;
 
-use crate::db;
-use crate::oai;
-use crate::twitter::send_tweet;
+use crate::{db, oai, twitter::send_tweet};
 
-sol!(NFT, "src/abi.json");
+sol!(
+    #[sol(rpc)]
+    NFT,
+    "src/abi.json"
+);
+
+pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
 
 pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
 
-    let nft_address = address!("3154Cf16ccdb4C6d922629664174b904d80F2C35");
     let filter = Filter::new()
-        .address(nft_address)
+        .address(NFT_ADDRESS)
         .from_block(BlockNumberOrTag::Latest);
 
     log::info!(
         "Subscribed to events for contract at: {}",
-        nft_address.to_string()
+        NFT_ADDRESS.to_string()
     );
 
     let sub = provider.subscribe_logs(&filter).await?;
@@ -39,11 +44,14 @@ pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyr
                 NFTEvents::Redeem(redeem) => {
                     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                     if safe {
-                        let x_id = redeem.x_id.into_limbs()[0];
-                        let tokens = db::get_access_tokens(db, x_id).await.ok();
-                        if let Some((access_token, access_secret)) = tokens {
-                            send_tweet(access_token, access_secret, redeem.content.to_string())
-                                .await;
+                        let user = db::get_user_by_x_id(db, redeem.x_id.to_string()).await.ok();
+                        if let Some(user) = user {
+                            send_tweet(
+                                user.access_token,
+                                user.access_secret,
+                                redeem.content.to_string(),
+                            )
+                            .await;
                         }
                     }
                 }
@@ -53,4 +61,63 @@ pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyr
     }
 
     Ok(())
+}
+
+pub async fn mint_nft(
+    wallet: EthereumWallet,
+    ws_rpc_url: String,
+    recipient: String,
+    x_id: String,
+    policy: String,
+) -> eyre::Result<String> {
+    let ws = WsConnect::new(ws_rpc_url);
+    let provider = ProviderBuilder::new()
+        .with_recommended_fillers()
+        .wallet(wallet)
+        .on_ws(ws)
+        .await?;
+
+    let nft = NFT::new(NFT_ADDRESS, provider);
+    let recipient = Address::from_str(&recipient)?;
+    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, 2);
+    let tx = mint.send().await.unwrap();
+
+    let tx_hash = tx.tx_hash();
+
+    log::info!("Minted NFT with tx hash: {}", tx_hash);
+
+    Ok(tx_hash.encode_hex_with_prefix())
+}
+
+#[cfg(test)]
+mod tests {
+    use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
+
+    use super::*;
+    #[tokio::test]
+    async fn test_mint_nft() {
+        env_logger::init();
+        dotenv::dotenv().ok();
+        let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL must be set");
+        let recipient_address = address!("36e7Fda8CC503D5Ec7729A42eb86EF02Af315Bf9");
+        let mnemonic =
+            std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC must be set");
+
+        let signer = MnemonicBuilder::<English>::default()
+            .phrase(mnemonic)
+            .index(0)
+            .unwrap()
+            .build()
+            .unwrap();
+        let wallet = EthereumWallet::from(signer);
+        mint_nft(
+            wallet,
+            ws_rpc_url,
+            recipient_address.to_string(),
+            1.to_string(),
+            "policy".to_string(),
+        )
+        .await
+        .unwrap();
+    }
 }

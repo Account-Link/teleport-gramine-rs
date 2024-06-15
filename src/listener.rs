@@ -21,6 +21,7 @@ sol!(
 );
 
 pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
+// pub const NFT_ADDRESS: Address = address!("0x4422F3413c83F01e94cCd9a2D5E169ED290D27bd");
 
 pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);

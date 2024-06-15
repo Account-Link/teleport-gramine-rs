@@ -1,13 +1,16 @@
+use std::{net::SocketAddr, path::PathBuf};
+
 use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
 use db::{create_tables, open_connection};
-use endpoints::{callback, mint, new_user, SharedState};
+use endpoints::{callback, hello_world, mint, new_user, SharedState};
 use listener::subscribe_to_events;
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 mod db;
 mod endpoints;
 mod listener;
 mod oai;
 mod twitter;
+use axum_server::tls_rustls::RustlsConfig;
 
 #[tokio::main]
 async fn main() {
@@ -39,11 +42,26 @@ async fn main() {
         .route("/new", axum::routing::get(new_user))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))
+        .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let config = RustlsConfig::from_pem_file(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("cert.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("key.pem"),
+    )
+    .await
+    .unwrap();
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+
     tokio::spawn(async move {
-        axum::serve(listener, app).await.unwrap();
+        axum_server::bind_rustls(addr, config)
+            .serve(app.into_make_service())
+            .await
+            .unwrap();
     });
     subscribe_to_events(&mut connection, ws_rpc_url)
         .await

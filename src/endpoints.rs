@@ -136,3 +136,8 @@ pub async fn mint(
     .expect("Failed to mint NFT");
     Json(MintResponse { hash: tx_hash })
 }
+
+pub async fn hello_world() -> &'static str {
+    log::info!("Hello, World!");
+    "Hello, World!"
+}

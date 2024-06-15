@@ -48,6 +48,7 @@ futures-util = "0.3"
 rusqlite-from-row = "0.2.4"
 tower-http = {version = "0.5.2", features =["cors"]}
 http = "1.1.0"
+axum-server = {version = "0.6.0", features = ["tls-rustls"]}
 
 [dev-dependencies]
 # reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
@@ -55,7 +56,7 @@ http = "1.1.0"
 tempfile = "3.8"
 
 [patch.crates-io]
-revm = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+# revm = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+# revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+# revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+# revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }

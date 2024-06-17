@@ -32,7 +32,7 @@ async fn main() {
         .build()
         .unwrap();
 
-    let db = db::in_memory::InMemoryUserDB::new();
+    let db = db::in_memory::InMemoryDB::new();
     let db = Arc::new(Mutex::new(db));
     let shared_state = SharedState {
         db: db.clone(),

@@ -3,13 +3,13 @@ use std::ops::Deref;
 use rusqlite::{Connection, DatabaseName, OpenFlags};
 use rusqlite_from_row::FromRow;
 
-use super::{User, UserDB};
+use super::{TeleportDB, User, NFT};
 
-pub struct SqliteUserDB {
+pub struct SqliteDB {
     pub connection: Connection,
 }
 
-impl SqliteUserDB {
+impl SqliteDB {
     pub fn new(path: String) -> eyre::Result<Self> {
         let flags = if path == "memdb" {
             OpenFlags::SQLITE_OPEN_MEMORY
@@ -42,7 +42,7 @@ impl SqliteUserDB {
     }
 }
 
-impl UserDB for SqliteUserDB {
+impl TeleportDB for SqliteDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()> {
         self.connection.execute(
             r#"
@@ -109,6 +109,14 @@ impl UserDB for SqliteUserDB {
         let vec = serialized.deref().to_vec();
         Ok(vec)
     }
+
+    async fn add_nft(&mut self, nft_id: String, nft: NFT) -> eyre::Result<()> {
+        todo!()
+    }
+
+    async fn remove_nft(&mut self, nft_id: String) -> eyre::Result<super::NFT> {
+        todo!()
+    }
 }
 
 #[cfg(test)]
@@ -117,7 +125,7 @@ mod tests {
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {
-        let mut db = SqliteUserDB::new("memdb".to_string())?;
+        let mut db = SqliteDB::new("memdb".to_string())?;
         let user = User {
             x_id: None,
             access_token: "access token".to_string(),
@@ -137,7 +145,7 @@ mod tests {
 
     #[tokio::test]
     async fn db_test_overwrite() -> eyre::Result<()> {
-        let mut db = SqliteUserDB::new("memdb".to_string())?;
+        let mut db = SqliteDB::new("memdb".to_string())?;
         let mut user = User {
             x_id: None,
             access_token: "access token".to_string(),

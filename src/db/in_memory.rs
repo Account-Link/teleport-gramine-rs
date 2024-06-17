@@ -2,15 +2,17 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{User, UserDB};
+use super::{PendingNFT, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
-pub struct InMemoryUserDB {
+pub struct InMemoryDB {
     pub x_id_to_teleport_id: BTreeMap<String, String>,
     pub users: BTreeMap<String, User>,
+    pub pending_nfts: BTreeMap<String, PendingNFT>,
+    pub nfts: BTreeMap<String, NFT>,
 }
 
-impl InMemoryUserDB {
+impl InMemoryDB {
     pub fn new() -> Self {
         Self::default()
     }
@@ -19,7 +21,7 @@ impl InMemoryUserDB {
     }
 }
 
-impl UserDB for InMemoryUserDB {
+impl TeleportDB for InMemoryDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()> {
         self.users.insert(teleport_id.clone(), user.clone());
         if let Some(x_id) = user.x_id {
@@ -53,6 +55,36 @@ impl UserDB for InMemoryUserDB {
         let serialized = bincode::serialize(&self)?;
         Ok(serialized)
     }
+
+    async fn add_pending_nft(
+        &mut self,
+        tx_hash: String,
+        pending_nft: PendingNFT,
+    ) -> eyre::Result<()> {
+        self.pending_nfts.insert(tx_hash, pending_nft);
+        Ok(())
+    }
+
+    async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<()> {
+        let pending_nft = self
+            .pending_nfts
+            .remove(&tx_hash)
+            .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
+        let nft = NFT {
+            teleport_id: pending_nft.teleport_id,
+            token_id,
+        };
+        self.nfts.insert(pending_nft.nft_id, nft);
+        Ok(())
+    }
+
+    async fn get_nft(&self, nft_id: String) -> eyre::Result<NFT> {
+        let nft = self
+            .nfts
+            .get(&nft_id)
+            .ok_or_else(|| eyre::eyre!("NFT not found"))?;
+        Ok(nft.clone())
+    }
 }
 
 #[cfg(test)]
@@ -61,7 +93,7 @@ mod tests {
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {
-        let mut db = InMemoryUserDB::new();
+        let mut db = InMemoryDB::new();
         let user = User {
             x_id: None,
             access_token: "access token".to_string(),
@@ -81,7 +113,7 @@ mod tests {
 
     #[tokio::test]
     async fn db_test_overwrite() -> eyre::Result<()> {
-        let mut db = InMemoryUserDB::new();
+        let mut db = InMemoryDB::new();
         let mut user = User {
             x_id: None,
             access_token: "access token".to_string(),

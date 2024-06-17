@@ -13,7 +13,7 @@ use futures_util::stream::StreamExt;
 use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
-use crate::{db::UserDB, oai, twitter::send_tweet};
+use crate::{db::TeleportDB, oai, twitter::send_tweet};
 
 sol!(
     #[sol(rpc)]
@@ -24,7 +24,7 @@ sol!(
 pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
 // pub const NFT_ADDRESS: Address = address!("0x4422F3413c83F01e94cCd9a2D5E169ED290D27bd");
 
-pub async fn subscribe_to_nft_events<A: UserDB>(
+pub async fn subscribe_to_nft_events<A: TeleportDB>(
     db: Arc<Mutex<A>>,
     ws_rpc_url: String,
 ) -> eyre::Result<()> {
@@ -61,6 +61,24 @@ pub async fn subscribe_to_nft_events<A: UserDB>(
                             )
                             .await;
                         }
+                    }
+                }
+                NFTEvents::Transfer(transfer) => {
+                    let from = transfer.from;
+                    let id = transfer.id;
+                    if from == Address::repeat_byte(0) {
+                        let mut db = db.lock().await;
+                        db.promote_pending_nft(
+                            log.transaction_hash.unwrap().encode_hex_with_prefix(),
+                            id.to_string(),
+                        )
+                        .await?;
+                        drop(db);
+                        log::info!(
+                            "NFT minted with id {} to address {}",
+                            id.to_string(),
+                            transfer.to.to_string()
+                        );
                     }
                 }
                 _ => continue,

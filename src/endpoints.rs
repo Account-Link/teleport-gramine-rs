@@ -14,7 +14,7 @@ use crate::{
         nft::{mint_nft, redeem_nft, send_eth},
         wallet::gen_sk,
     },
-    db::{User, UserDB},
+    db::{PendingNFT, TeleportDB, User},
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
 
@@ -35,12 +35,12 @@ pub struct CallbackQuery {
 pub struct MintQuery {
     teleport_id: String,
     policy: String,
+    nft_id: String,
 }
 
 #[derive(Deserialize)]
 pub struct RedeemQuery {
-    teleport_id: String,
-    token_id: String,
+    nft_id: String,
     content: String,
 }
 
@@ -50,13 +50,13 @@ pub struct TxHashResponse {
 }
 
 #[derive(Clone)]
-pub struct SharedState<A: UserDB> {
+pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub rpc_url: String,
     pub wallet: EthereumWallet,
 }
 
-pub async fn new_user<A: UserDB>(
+pub async fn new_user<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
@@ -85,7 +85,7 @@ pub async fn new_user<A: UserDB>(
     Redirect::temporary(&url)
 }
 
-pub async fn callback<A: UserDB>(
+pub async fn callback<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<CallbackQuery>,
 ) -> Redirect {
@@ -138,7 +138,7 @@ pub async fn callback<A: UserDB>(
     Redirect::temporary(&url_with_params)
 }
 
-pub async fn mint<A: UserDB>(
+pub async fn mint<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<MintQuery>,
 ) -> Json<TxHashResponse> {
@@ -159,16 +159,32 @@ pub async fn mint<A: UserDB>(
     .await
     .expect("Failed to mint NFT");
 
+    let mut db = shared_state.db.lock().await;
+    db.add_pending_nft(
+        tx_hash.clone(),
+        PendingNFT {
+            teleport_id: query.teleport_id.clone(),
+            nft_id: query.nft_id.clone(),
+        },
+    )
+    .await
+    .expect("Failed to add pending NFT");
+    drop(db);
+
     Json(TxHashResponse { hash: tx_hash })
 }
 
-pub async fn redeem<A: UserDB>(
+pub async fn redeem<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
+    let nft = db
+        .get_nft(query.nft_id.clone())
+        .await
+        .expect("Failed to get NFT by id");
     let user = db
-        .get_user_by_teleport_id(query.teleport_id.clone())
+        .get_user_by_teleport_id(nft.teleport_id.clone())
         .await
         .expect("Failed to get user by teleport_id");
     drop(db);
@@ -176,7 +192,7 @@ pub async fn redeem<A: UserDB>(
     let tx_hash = redeem_nft(
         user.signer().unwrap().into(),
         shared_state.rpc_url,
-        query.token_id,
+        nft.token_id,
         query.content,
     )
     .await

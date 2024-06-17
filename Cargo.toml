@@ -4,14 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-# reth = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-exex = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-node-api = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-node-ethereum = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-primitives = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-provider = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-tracing = { git = "https://github.com/paradigmxyz/reth.git" }
-
 eyre = "0.6.12"
 futures = "0.3.30"
 rusqlite = { version = "0.31.0", features = ["bundled", "serialize"] }
@@ -50,14 +42,4 @@ tower-http = {version = "0.5.2", features =["cors"]}
 http = "1.1.0"
 axum-server = {version = "0.6.0", features = ["tls-rustls"]}
 bincode = "1.3.3"
-
-[dev-dependencies]
-# reth-exex-test-utils = { git = "https://github.com/paradigmxyz/reth.git" }
-# reth-testing-utils = { git = "https://github.com/paradigmxyz/reth.git" }
-tempfile = "3.8"
-
-[patch.crates-io]
-# revm = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-# revm-interpreter = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-# revm-precompile = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
-# revm-primitives = { git = "https://github.com/bluealloy/revm", rev = "a28a543" }
+getrandom = "0.2.15"

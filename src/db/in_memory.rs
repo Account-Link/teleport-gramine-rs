@@ -67,6 +67,7 @@ mod tests {
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
             address: "address".to_string(),
+            sk: "sk".to_string(),
         };
         db.add_user("2".to_string(), user.clone())
             .await
@@ -86,6 +87,7 @@ mod tests {
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
             address: "address".to_string(),
+            sk: "sk".to_string(),
         };
         db.add_user("2".to_string(), user.clone())
             .await

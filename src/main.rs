@@ -1,16 +1,18 @@
 use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 
 use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
+use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{callback, hello_world, mint, new_user, SharedState};
-use listener::subscribe_to_events;
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
+
+use crate::actions::nft::subscribe_to_nft_events;
+
+mod actions;
 mod db;
 mod endpoints;
-mod listener;
 mod oai;
 mod twitter;
-use axum_server::tls_rustls::RustlsConfig;
 
 #[tokio::main]
 async fn main() {
@@ -62,5 +64,5 @@ async fn main() {
             .await
             .unwrap();
     });
-    subscribe_to_events(db, ws_rpc_url).await.unwrap();
+    subscribe_to_nft_events(db, ws_rpc_url).await.unwrap();
 }

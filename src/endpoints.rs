@@ -10,8 +10,8 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 
 use crate::{
+    actions::{nft::mint_nft, wallet::gen_sk},
     db::{User, UserDB},
-    listener::mint_nft,
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
 
@@ -51,16 +51,16 @@ pub async fn new_user<A: UserDB>(
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
     let teleport_id = query.teleport_id;
-    // let mut connection =
-    //     open_connection(shared_state.db_url.clone()).expect("Failed to open database");
     let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
         .await
         .expect("Failed to request oauth token");
+    let sk = gen_sk().expect("Failed to generate sk");
     let user = User {
         x_id: None,
         access_token: oauth_token.clone(),
         access_secret: oauth_token_secret,
         address: query.address,
+        sk,
     };
     let mut db = shared_state.db.lock().await;
     db.add_user(teleport_id.clone(), user)
@@ -89,12 +89,6 @@ pub async fn callback<A: UserDB>(
         .get_user_by_teleport_id(teleport_id.clone())
         .await
         .expect("Failed to get oauth tokens");
-    // let mut connection =
-    //     open_connection(shared_state.db_url.clone()).expect("Failed to open database");
-
-    // let oauth_user = get_oauth_user_by_teleport_id(&mut connection, teleport_id.clone())
-    //     .await
-    //     .expect("Failed to get oauth tokens");
     assert_eq!(oauth_token, oauth_user.access_token);
 
     let (access_token, access_secret) =
@@ -108,9 +102,8 @@ pub async fn callback<A: UserDB>(
         access_token,
         access_secret,
         address: oauth_user.address,
+        sk: oauth_user.sk,
     };
-
-    // add_user(&mut connection, user).await.unwrap();
     db.add_user(teleport_id.clone(), user)
         .await
         .expect("Failed to add user to database");
@@ -130,11 +123,6 @@ pub async fn mint<A: UserDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<MintQuery>,
 ) -> Json<MintResponse> {
-    // let mut connection =
-    //     open_connection(shared_state.db_url.clone()).expect("Failed to open database");
-    // let user = get_user_by_teleport_id(&mut connection, query.teleport_id)
-    //     .await
-    //     .expect("Failed to get user by teleport_id");
     let db = shared_state.db.lock().await;
     let user = db
         .get_user_by_teleport_id(query.teleport_id.clone())

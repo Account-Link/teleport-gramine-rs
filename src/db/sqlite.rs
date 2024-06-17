@@ -31,7 +31,8 @@ impl SqliteUserDB {
                 teleport_id      TEXT NOT NULL UNIQUE,
                 access_token     TEXT NOT NULL,
                 access_secret    TEXT NOT NULL,
-                address          TEXT NOT NULL
+                address          TEXT NOT NULL,
+                sk               TEXT NOT NULL
             );
             "#,
             (),
@@ -45,15 +46,16 @@ impl UserDB for SqliteUserDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()> {
         self.connection.execute(
             r#"
-            REPLACE INTO users (x_id, teleport_id, access_token, access_secret, address)
-            VALUES (?1, ?2, ?3, ?4, ?5)
+            REPLACE INTO users (x_id, teleport_id, access_token, access_secret, address, sk)
+            VALUES (?1, ?2, ?3, ?4, ?5, ?6)
             "#,
             rusqlite::params![
                 user.x_id,
                 teleport_id,
                 user.access_token,
                 user.access_secret,
-                user.address
+                user.address,
+                user.sk
             ],
         )?;
         log::info!(
@@ -66,7 +68,7 @@ impl UserDB for SqliteUserDB {
     async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User> {
         let mut stmt = self.connection.prepare(
             r#"
-            SELECT x_id, teleport_id, access_token, access_secret, address
+            SELECT x_id, teleport_id, access_token, access_secret, address, sk
             FROM users
             WHERE teleport_id = ?1
             "#,
@@ -87,7 +89,7 @@ impl UserDB for SqliteUserDB {
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
         let mut stmt = self.connection.prepare(
             r#"
-            SELECT x_id, teleport_id, access_token, access_secret, address
+            SELECT x_id, teleport_id, access_token, access_secret, address, sk
             FROM users
             WHERE x_id = ?1
             "#,
@@ -121,6 +123,7 @@ mod tests {
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
             address: "address".to_string(),
+            sk: "sk".to_string(),
         };
         db.add_user("2".to_string(), user.clone())
             .await
@@ -140,6 +143,7 @@ mod tests {
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
             address: "address".to_string(),
+            sk: "sk".to_string(),
         };
         db.add_user("2".to_string(), user.clone())
             .await

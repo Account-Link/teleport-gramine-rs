@@ -9,6 +9,7 @@ pub struct User {
     pub access_token: String,
     pub access_secret: String,
     pub address: String,
+    pub sk: String,
 }
 
 pub trait UserDB {

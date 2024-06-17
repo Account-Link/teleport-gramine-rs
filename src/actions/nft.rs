@@ -22,7 +22,7 @@ sol!(
 
 pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
 
-pub async fn subscribe_to_events<A: UserDB>(
+pub async fn subscribe_to_nft_events<A: UserDB>(
     db: Arc<Mutex<A>>,
     ws_rpc_url: String,
 ) -> eyre::Result<()> {

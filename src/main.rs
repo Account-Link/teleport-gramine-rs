@@ -47,9 +47,19 @@ async fn main() {
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);
+    // let config = RustlsConfig::from_pem_file(
+    //     PathBuf::from("/tmp/cert.pem"),
+    //     PathBuf::from("/tmp/key.pem"),
+    // )
+    // .await
+    // .unwrap();
     let config = RustlsConfig::from_pem_file(
-        PathBuf::from("/tmp/cert.pem"),
-        PathBuf::from("/tmp/key.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("cert.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("key.pem"),
     )
     .await
     .unwrap();

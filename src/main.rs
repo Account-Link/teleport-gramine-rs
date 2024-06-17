@@ -1,9 +1,9 @@
-use std::{net::SocketAddr, path::PathBuf};
+use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 
 use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
-use db::{create_tables, open_connection};
 use endpoints::{callback, hello_world, mint, new_user, SharedState};
 use listener::subscribe_to_events;
+use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
 mod db;
 mod endpoints;
@@ -18,7 +18,7 @@ async fn main() {
     dotenv::dotenv().ok();
     dotenv::from_filename("/teleport.env").ok();
 
-    let db_url = std::env::var("DB_URL").expect("DB_URL not set");
+    // let db_url = std::env::var("DB_URL").expect("DB_URL not set");
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
     let rpc_url = std::env::var("RPC_URL").expect("RPC_URL not set");
     let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
@@ -30,11 +30,10 @@ async fn main() {
         .build()
         .unwrap();
 
-    let mut connection = open_connection(db_url.clone()).expect("Failed to open database");
-    create_tables(&mut connection).expect("Failed to create tables");
-
+    let db = db::in_memory::InMemoryUserDB::new();
+    let db = Arc::new(Mutex::new(db));
     let shared_state = SharedState {
-        db_url: db_url.clone(),
+        db: db.clone(),
         wallet: signer.into(),
         rpc_url,
     };
@@ -63,7 +62,5 @@ async fn main() {
             .await
             .unwrap();
     });
-    subscribe_to_events(&mut connection, ws_rpc_url)
-        .await
-        .unwrap();
+    subscribe_to_events(db, ws_rpc_url).await.unwrap();
 }

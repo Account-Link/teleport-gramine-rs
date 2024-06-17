@@ -65,7 +65,7 @@ pub async fn get_user_x_info(access_token: String, access_secret: String) -> Use
     let user_info: UserInfoResponse = resp.json().await.expect("Failed to parse user info");
     let user_info = user_info.data;
     // let id = user_info.data.id.clone();
-    log::info!("{:?}", user_info);
+    log::info!("Fetched x_info: {:?}", user_info);
     user_info
 }
 

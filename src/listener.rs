@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
@@ -9,10 +9,10 @@ use alloy::{
     sol_types::SolEventInterface,
 };
 use futures_util::stream::StreamExt;
-use rusqlite::Connection;
+use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
-use crate::{db, oai, twitter::send_tweet};
+use crate::{db::UserDB, oai, twitter::send_tweet};
 
 sol!(
     #[sol(rpc)]
@@ -22,7 +22,10 @@ sol!(
 
 pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
 
-pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyre::Result<()> {
+pub async fn subscribe_to_events<A: UserDB>(
+    db: Arc<Mutex<A>>,
+    ws_rpc_url: String,
+) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
 
@@ -44,7 +47,10 @@ pub async fn subscribe_to_events(db: &mut Connection, ws_rpc_url: String) -> eyr
                 NFTEvents::Redeem(redeem) => {
                     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                     if safe {
-                        let user = db::get_user_by_x_id(db, redeem.x_id.to_string()).await.ok();
+                        // let user = db::get_user_by_x_id(db, redeem.x_id.to_string()).await.ok();
+                        let db = db.lock().await;
+                        let user = db.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
+                        drop(db);
                         if let Some(user) = user {
                             send_tweet(
                                 user.access_token,

@@ -17,7 +17,7 @@ use crate::{db::UserDB, oai, twitter::send_tweet};
 sol!(
     #[sol(rpc)]
     NFT,
-    "src/abi.json"
+    "abi/nft.json"
 );
 
 pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");

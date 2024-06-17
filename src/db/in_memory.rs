@@ -14,11 +14,6 @@ impl InMemoryUserDB {
     pub fn new() -> Self {
         Self::default()
     }
-
-    pub fn serialize(&self) -> Vec<u8> {
-        bincode::serialize(self).expect("Failed to serialize InMemoryUserDB")
-    }
-
     pub fn deserialize(data: &[u8]) -> Self {
         bincode::deserialize(data).expect("Failed to deserialize InMemoryUserDB")
     }
@@ -52,6 +47,11 @@ impl UserDB for InMemoryUserDB {
             .get(teleport_id)
             .ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
+    }
+
+    async fn serialize(&self) -> eyre::Result<Vec<u8>> {
+        let serialized = bincode::serialize(&self)?;
+        Ok(serialized)
     }
 }
 

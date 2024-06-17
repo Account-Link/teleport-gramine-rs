@@ -1,4 +1,6 @@
-use rusqlite::{Connection, OpenFlags};
+use std::ops::Deref;
+
+use rusqlite::{Connection, DatabaseName, OpenFlags};
 use rusqlite_from_row::FromRow;
 
 use super::{User, UserDB};
@@ -98,6 +100,12 @@ impl UserDB for SqliteUserDB {
         let user = User::try_from_row(row)?;
         log::info!("Retrieved user tokens from database for x_id: {}", x_id);
         Ok(user)
+    }
+
+    async fn serialize(&self) -> eyre::Result<Vec<u8>> {
+        let serialized = self.connection.serialize(DatabaseName::Main)?;
+        let vec = serialized.deref().to_vec();
+        Ok(vec)
     }
 }
 

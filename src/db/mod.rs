@@ -17,4 +17,5 @@ pub trait UserDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()>;
     async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User>;
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User>;
+    async fn serialize(&self) -> eyre::Result<Vec<u8>>;
 }

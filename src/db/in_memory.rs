@@ -66,8 +66,8 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            address: "address".to_string(),
-            sk: "sk".to_string(),
+            embedded_address: "address".to_string(),
+            sk: None,
         };
         db.add_user("2".to_string(), user.clone())
             .await
@@ -75,7 +75,7 @@ mod tests {
         let user = db.get_user_by_teleport_id("2".to_string()).await?;
         assert_eq!(user.access_token, "access token");
         assert_eq!(user.access_secret, "access secret");
-        assert_eq!(user.address, "address");
+        assert_eq!(user.embedded_address, "address");
         Ok(())
     }
 
@@ -86,13 +86,14 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            address: "address".to_string(),
-            sk: "sk".to_string(),
+            embedded_address: "address".to_string(),
+            sk: None,
         };
         db.add_user("2".to_string(), user.clone())
             .await
             .expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());
+        user.sk = Some("sk".to_string());
         db.add_user("2".to_string(), user.clone())
             .await
             .expect("Failed to add user tokens");

@@ -10,7 +10,10 @@ use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
 
 use crate::{
-    actions::{nft::mint_nft, wallet::gen_sk},
+    actions::{
+        nft::{mint_nft, redeem_nft, send_eth},
+        wallet::gen_sk,
+    },
     db::{User, UserDB},
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
@@ -34,8 +37,15 @@ pub struct MintQuery {
     policy: String,
 }
 
+#[derive(Deserialize)]
+pub struct RedeemQuery {
+    teleport_id: String,
+    token_id: String,
+    content: String,
+}
+
 #[derive(Serialize)]
-pub struct MintResponse {
+pub struct TxHashResponse {
     pub hash: String,
 }
 
@@ -54,13 +64,12 @@ pub async fn new_user<A: UserDB>(
     let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
         .await
         .expect("Failed to request oauth token");
-    let sk = gen_sk().expect("Failed to generate sk");
     let user = User {
         x_id: None,
         access_token: oauth_token.clone(),
         access_secret: oauth_token_secret,
-        address: query.address,
-        sk,
+        embedded_address: query.address,
+        sk: None,
     };
     let mut db = shared_state.db.lock().await;
     db.add_user(teleport_id.clone(), user)
@@ -96,18 +105,28 @@ pub async fn callback<A: UserDB>(
             .await
             .unwrap();
     let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
-
+    let sk = gen_sk().expect("Failed to generate sk");
     let user = User {
         x_id: Some(x_info.id.clone()),
         access_token,
         access_secret,
-        address: oauth_user.address,
-        sk: oauth_user.sk,
+        embedded_address: oauth_user.embedded_address,
+        sk: Some(sk),
     };
-    db.add_user(teleport_id.clone(), user)
+    db.add_user(teleport_id.clone(), user.clone())
         .await
         .expect("Failed to add user to database");
     drop(db);
+
+    //temp: give eoa some eth for gas
+    send_eth(
+        shared_state.wallet,
+        shared_state.rpc_url.clone(),
+        user.address().unwrap(),
+        "0.03",
+    )
+    .await
+    .expect("Failed to send eth to eoa");
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
@@ -122,7 +141,7 @@ pub async fn callback<A: UserDB>(
 pub async fn mint<A: UserDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<MintQuery>,
-) -> Json<MintResponse> {
+) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
     let user = db
         .get_user_by_teleport_id(query.teleport_id.clone())
@@ -133,13 +152,36 @@ pub async fn mint<A: UserDB>(
     let tx_hash = mint_nft(
         shared_state.wallet,
         shared_state.rpc_url,
-        user.address,
+        user.address().expect("User address not set"),
         user.x_id.expect("User x_id not set"),
         query.policy,
     )
     .await
     .expect("Failed to mint NFT");
-    Json(MintResponse { hash: tx_hash })
+
+    Json(TxHashResponse { hash: tx_hash })
+}
+
+pub async fn redeem<A: UserDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<RedeemQuery>,
+) -> Json<TxHashResponse> {
+    let db = shared_state.db.lock().await;
+    let user = db
+        .get_user_by_teleport_id(query.teleport_id.clone())
+        .await
+        .expect("Failed to get user by teleport_id");
+    drop(db);
+
+    let tx_hash = redeem_nft(
+        user.signer().unwrap().into(),
+        shared_state.rpc_url,
+        query.token_id,
+        query.content,
+    )
+    .await
+    .expect("Failed to mint NFT");
+    Json(TxHashResponse { hash: tx_hash })
 }
 
 pub async fn hello_world() -> &'static str {

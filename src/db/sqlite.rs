@@ -31,8 +31,8 @@ impl SqliteUserDB {
                 teleport_id      TEXT NOT NULL UNIQUE,
                 access_token     TEXT NOT NULL,
                 access_secret    TEXT NOT NULL,
-                address          TEXT NOT NULL,
-                sk               TEXT NOT NULL
+                embedded_address          TEXT NOT NULL,
+                sk               TEXT
             );
             "#,
             (),
@@ -46,7 +46,7 @@ impl UserDB for SqliteUserDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()> {
         self.connection.execute(
             r#"
-            REPLACE INTO users (x_id, teleport_id, access_token, access_secret, address, sk)
+            REPLACE INTO users (x_id, teleport_id, access_token, access_secret, embedded_address, sk)
             VALUES (?1, ?2, ?3, ?4, ?5, ?6)
             "#,
             rusqlite::params![
@@ -54,7 +54,7 @@ impl UserDB for SqliteUserDB {
                 teleport_id,
                 user.access_token,
                 user.access_secret,
-                user.address,
+                user.embedded_address,
                 user.sk
             ],
         )?;
@@ -68,7 +68,7 @@ impl UserDB for SqliteUserDB {
     async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User> {
         let mut stmt = self.connection.prepare(
             r#"
-            SELECT x_id, teleport_id, access_token, access_secret, address, sk
+            SELECT x_id, teleport_id, access_token, access_secret, embedded_address, sk
             FROM users
             WHERE teleport_id = ?1
             "#,
@@ -89,7 +89,7 @@ impl UserDB for SqliteUserDB {
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
         let mut stmt = self.connection.prepare(
             r#"
-            SELECT x_id, teleport_id, access_token, access_secret, address, sk
+            SELECT x_id, teleport_id, access_token, access_secret, embedded_address, sk
             FROM users
             WHERE x_id = ?1
             "#,
@@ -122,8 +122,8 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            address: "address".to_string(),
-            sk: "sk".to_string(),
+            embedded_address: "address".to_string(),
+            sk: None,
         };
         db.add_user("2".to_string(), user.clone())
             .await
@@ -131,7 +131,7 @@ mod tests {
         let user = db.get_user_by_teleport_id("2".to_string()).await?;
         assert_eq!(user.access_token, "access token");
         assert_eq!(user.access_secret, "access secret");
-        assert_eq!(user.address, "address");
+        assert_eq!(user.embedded_address, "address");
         Ok(())
     }
 
@@ -142,13 +142,14 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            address: "address".to_string(),
-            sk: "sk".to_string(),
+            embedded_address: "address".to_string(),
+            sk: None,
         };
         db.add_user("2".to_string(), user.clone())
             .await
             .expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());
+        user.sk = Some("sk".to_string());
         db.add_user("2".to_string(), user.clone())
             .await
             .expect("Failed to add user tokens");

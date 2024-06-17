@@ -1,3 +1,6 @@
+use std::str::FromStr;
+
+use alloy::{primitives::Address, signers::local::PrivateKeySigner};
 use rusqlite_from_row::FromRow;
 use serde::{Deserialize, Serialize};
 pub mod in_memory;
@@ -8,8 +11,24 @@ pub struct User {
     pub x_id: Option<String>,
     pub access_token: String,
     pub access_secret: String,
-    pub address: String,
-    pub sk: String,
+    pub embedded_address: String,
+    pub sk: Option<String>,
+}
+
+impl User {
+    pub fn signer(&self) -> eyre::Result<PrivateKeySigner> {
+        let sk = self.sk.clone();
+        if let Some(sk) = sk {
+            Ok(PrivateKeySigner::from_str(&sk)?)
+        } else {
+            eyre::bail!("User does not have a private key")
+        }
+    }
+
+    pub fn address(&self) -> eyre::Result<Address> {
+        let signer = self.signer()?;
+        Ok(signer.address())
+    }
 }
 
 pub trait UserDB {

@@ -2,7 +2,7 @@ use std::{net::SocketAddr, path::PathBuf, sync::Arc};
 
 use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
 use axum_server::tls_rustls::RustlsConfig;
-use endpoints::{callback, hello_world, mint, new_user, SharedState};
+use endpoints::{callback, hello_world, mint, new_user, redeem, SharedState};
 use tokio::sync::Mutex;
 use tower_http::cors::CorsLayer;
 
@@ -43,6 +43,7 @@ async fn main() {
         .route("/new", axum::routing::get(new_user))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))
+        .route("/redeem", axum::routing::get(redeem))
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);

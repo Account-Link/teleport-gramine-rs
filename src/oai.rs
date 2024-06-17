@@ -30,7 +30,6 @@ mod tests {
     use crate::oai::is_tweet_safe;
 
     async fn test_is_tweet_safe(tweet: &str, policy: &str, expected: bool) {
-        env_logger::init();
         dotenv::dotenv().ok();
         let is_safe = is_tweet_safe(&tweet.to_string(), &policy.to_string()).await;
         assert_eq!(is_safe, expected);

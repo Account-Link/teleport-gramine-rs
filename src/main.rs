@@ -32,7 +32,7 @@ async fn main() {
         .build()
         .unwrap();
 
-    let db = db::in_memory::InMemoryUserDB::new();
+    let db = db::in_memory::InMemoryDB::new();
     let db = Arc::new(Mutex::new(db));
     let shared_state = SharedState {
         db: db.clone(),
@@ -48,8 +48,12 @@ async fn main() {
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);
     let config = RustlsConfig::from_pem_file(
-        PathBuf::from("/tmp/cert.pem"),
-        PathBuf::from("/tmp/key.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("cert.pem"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("self_signed_certs")
+            .join("key.pem"),
     )
     .await
     .unwrap();

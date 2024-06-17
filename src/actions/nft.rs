@@ -2,9 +2,10 @@ use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
-    primitives::{address, Address, Uint},
+    network::TransactionBuilder,
+    primitives::{address, utils::parse_units, Address, Uint},
     providers::{network::EthereumWallet, Provider, ProviderBuilder, WsConnect},
-    rpc::types::{BlockNumberOrTag, Filter},
+    rpc::types::{BlockNumberOrTag, Filter, TransactionRequest},
     sol,
     sol_types::SolEventInterface,
 };
@@ -72,7 +73,7 @@ pub async fn subscribe_to_nft_events<A: UserDB>(
 pub async fn mint_nft(
     wallet: EthereumWallet,
     rpc_url: String,
-    recipient: String,
+    recipient: Address,
     x_id: String,
     policy: String,
 ) -> eyre::Result<String> {
@@ -83,15 +84,55 @@ pub async fn mint_nft(
         .on_http(rpc_url);
 
     let nft = NFT::new(NFT_ADDRESS, provider);
-    let recipient = Address::from_str(&recipient)?;
     let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, 2);
-    let tx = mint.send().await.unwrap();
+    let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
 
     log::info!("Minted NFT with tx hash: {}", tx_hash);
 
     Ok(tx_hash.encode_hex_with_prefix())
+}
+
+pub async fn redeem_nft(
+    wallet: EthereumWallet,
+    rpc_url: String,
+    token_id: String,
+    content: String,
+) -> eyre::Result<String> {
+    let rpc_url = rpc_url.parse()?;
+    let provider = ProviderBuilder::new()
+        .with_recommended_fillers()
+        .wallet(wallet)
+        .on_http(rpc_url);
+
+    let nft = NFT::new(NFT_ADDRESS, provider);
+    let token_id = Uint::from_str(&token_id)?;
+    let redeem = nft.redeem(token_id, content);
+    let tx = redeem.send().await?;
+
+    let tx_hash = tx.tx_hash();
+
+    log::info!("Redeemed NFT with tx hash: {}", tx_hash);
+    Ok(tx_hash.encode_hex_with_prefix())
+}
+
+pub async fn send_eth(
+    wallet: EthereumWallet,
+    rpc_url: String,
+    recipient: Address,
+    amount: &str,
+) -> eyre::Result<()> {
+    let rpc_url = rpc_url.parse()?;
+    let provider = ProviderBuilder::new()
+        .with_recommended_fillers()
+        .wallet(wallet)
+        .on_http(rpc_url);
+    let tx = TransactionRequest::default()
+        .with_to(recipient)
+        .with_value(parse_units(amount, "ether").unwrap().into());
+    let _ = provider.send_transaction(tx).await?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -118,7 +159,7 @@ mod tests {
         mint_nft(
             wallet,
             rpc_url,
-            recipient_address.to_string(),
+            recipient_address,
             1.to_string(),
             "policy".to_string(),
         )

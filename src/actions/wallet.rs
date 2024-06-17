@@ -1,7 +1,7 @@
 pub fn gen_sk() -> eyre::Result<String> {
     let mut buf = [0u8; 32];
     getrandom::getrandom(&mut buf)?;
-    let sk = alloy::hex::encode(&buf);
+    let sk = alloy::hex::encode(buf);
     Ok(sk)
 }
 
@@ -16,7 +16,7 @@ mod tests {
         let mut buf = [0u8; 32];
         getrandom::getrandom(&mut buf)?;
         let signer = PrivateKeySigner::from_bytes(&buf.into())?;
-        let hex_key = alloy::hex::encode(&buf);
+        let hex_key = alloy::hex::encode(buf);
         let signer_1 = PrivateKeySigner::from_str(&hex_key)?;
         assert_eq!(signer.address().to_string(), signer_1.address().to_string());
         Ok(())

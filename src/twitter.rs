@@ -106,7 +106,7 @@ pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, S
         .await?;
     let status = response.status();
     if !status.is_success() {
-        return Err(eyre::eyre!(response.text().await?));
+        eyre::bail!(response.text().await?);
     }
     let response_bytes = response.bytes().await?;
     let request_token_body =
@@ -142,7 +142,7 @@ pub async fn authorize_token(
 
     let status = response.status();
     if !status.is_success() {
-        return Err(eyre::eyre!(response.text().await?));
+        eyre::bail!(response.text().await?);
     }
     let response_bytes = response.bytes().await?;
 
@@ -160,6 +160,7 @@ mod tests {
     use super::*;
 
     #[tokio::test]
+    #[ignore]
     async fn e2e_oauth_test() {
         env_logger::init();
         dotenv::dotenv().ok();
@@ -182,6 +183,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn send_tweet_test() {
         env_logger::init();
         dotenv::dotenv().ok();
@@ -197,7 +199,6 @@ mod tests {
 
     #[tokio::test]
     async fn get_user_info_test() {
-        env_logger::init();
         dotenv::dotenv().ok();
         let access_token = std::env::var("TEST_ACCESS_TOKEN")
             .expect("TEST_ACCESS_TOKEN not set")

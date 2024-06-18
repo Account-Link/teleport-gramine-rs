@@ -21,8 +21,7 @@ sol!(
     "abi/nft.json"
 );
 
-pub const NFT_ADDRESS: Address = address!("614e72B7d713feB6c682c372E330366af713c577");
-// pub const NFT_ADDRESS: Address = address!("0x4422F3413c83F01e94cCd9a2D5E169ED290D27bd");
+pub const NFT_ADDRESS: Address = address!("Fab6a41b917f5e591B4A49736568Ac7845cb0245");
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
     db: Arc<Mutex<A>>,

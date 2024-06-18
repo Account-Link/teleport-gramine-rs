@@ -9,13 +9,14 @@ pub async fn is_tweet_safe(tweet: &String, policy: &String) -> bool {
         "{}\n<BEGIN POLICY>\n{}\n<END POLICY>\n<BEGIN TWEET>\n{}\n<END TWEET>\n{}\n",
         TASK, policy, tweet, OUTPUT
     );
-    let args = openai_rust::chat::ChatArguments::new(
+    let mut args = openai_rust::chat::ChatArguments::new(
         "gpt-4o",
         vec![openai_rust::chat::Message {
             role: "user".to_owned(),
             content: inputs,
         }],
     );
+    args.temperature = Some(0.0);
     let res = client
         .create_chat(args)
         .await

@@ -48,37 +48,36 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                 NFTEvents::Redeem(redeem) => {
                     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                     if safe {
-                        // let user = db::get_user_by_x_id(db, redeem.x_id.to_string()).await.ok();
-                        let db = db.lock().await;
-                        let user = db.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
-                        drop(db);
+                        let db_lock = db.lock().await;
+                        let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
+                        drop(db_lock);
                         if let Some(user) = user {
-                            send_tweet(
+                            let tweet_id = send_tweet(
                                 user.access_token,
                                 user.access_secret,
                                 redeem.content.to_string(),
                             )
-                            .await;
+                            .await?;
+
+                            let mut db = db.lock().await;
+                            db.add_tweet(redeem.tokenId.to_string(), tweet_id).await?;
+                            drop(db);
                         }
                     }
                 }
-                NFTEvents::Transfer(transfer) => {
-                    let from = transfer.from;
-                    let id = transfer.id;
-                    if from == Address::repeat_byte(0) {
-                        let mut db = db.lock().await;
-                        db.promote_pending_nft(
-                            log.transaction_hash.unwrap().encode_hex_with_prefix(),
-                            id.to_string(),
-                        )
-                        .await?;
-                        drop(db);
-                        log::info!(
-                            "NFT minted with id {} to address {}",
-                            id.to_string(),
-                            transfer.to.to_string()
-                        );
-                    }
+                NFTEvents::NewTokenData(new_token_data) => {
+                    let mut db = db.lock().await;
+                    db.promote_pending_nft(
+                        log.transaction_hash.unwrap().encode_hex_with_prefix(),
+                        new_token_data.tokenId.to_string(),
+                    )
+                    .await?;
+                    drop(db);
+                    log::info!(
+                        "NFT minted with id {} to address {}",
+                        new_token_data.tokenId.to_string(),
+                        new_token_data.to.to_string()
+                    );
                 }
                 _ => continue,
             }
@@ -102,7 +101,7 @@ pub async fn mint_nft(
         .on_http(rpc_url);
 
     let nft = NFT::new(NFT_ADDRESS, provider);
-    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, 2);
+    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();

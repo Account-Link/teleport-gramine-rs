@@ -39,6 +39,16 @@ pub struct MintQuery {
 }
 
 #[derive(Deserialize)]
+pub struct TweetIdQuery {
+    token_id: String,
+}
+
+#[derive(Serialize)]
+pub struct TweetIdResponse {
+    tweet_id: String,
+}
+
+#[derive(Deserialize)]
 pub struct RedeemQuery {
     nft_id: String,
     content: String,
@@ -198,6 +208,20 @@ pub async fn redeem<A: TeleportDB>(
     .await
     .expect("Failed to mint NFT");
     Json(TxHashResponse { hash: tx_hash })
+}
+
+pub async fn get_tweet_id<A: TeleportDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<TweetIdQuery>,
+) -> Json<TweetIdResponse> {
+    let db = shared_state.db.lock().await;
+    let tweet_id = db
+        .get_tweet(query.token_id.clone())
+        .await
+        .expect("Failed to get tweet id");
+    drop(db);
+
+    Json(TweetIdResponse { tweet_id })
 }
 
 pub async fn hello_world() -> &'static str {

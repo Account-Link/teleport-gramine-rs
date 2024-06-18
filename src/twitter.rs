@@ -1,6 +1,18 @@
 use reqwest_oauth1::OAuthClientProvider;
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Deserialize)]
+struct SendTweetData {
+    // edit_history_tweet_ids: Vec<String>,
+    // text: String,
+    id: String,
+}
+
+#[derive(Debug, Deserialize)]
+struct SendTweetResponse {
+    data: SendTweetData,
+}
+
 #[derive(Debug, Serialize)]
 struct Tweet {
     text: String,
@@ -16,6 +28,8 @@ pub struct UserInfo {
     pub id: String,
     pub name: String,
     pub username: String,
+    pub profile_image_url: String,
+    // pub most_recent_tweet_id: Option<String>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -58,24 +72,29 @@ pub async fn get_user_x_info(access_token: String, access_secret: String) -> Use
         reqwest_oauth1::Secrets::new(app_key, app_secret).token(access_token, access_secret);
     let resp = client
         .oauth1(secrets)
-        .get("https://api.twitter.com/2/users/me".to_string())
+        .get(
+            "https://api.twitter.com/2/users/me?user.fields=profile_image_url,most_recent_tweet_id"
+                .to_string(),
+        )
         .send()
         .await
         .expect("Failed to get user info");
     let user_info: UserInfoResponse = resp.json().await.expect("Failed to parse user info");
     let user_info = user_info.data;
-    // let id = user_info.data.id.clone();
     log::info!("Fetched x_info: {:?}", user_info);
     user_info
 }
 
-pub async fn send_tweet(access_token: String, access_secret: String, tweet: String) {
-    let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
-    let app_secret =
-        std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
+pub async fn send_tweet(
+    access_token: String,
+    access_secret: String,
+    tweet: String,
+) -> eyre::Result<String> {
+    let app_key = std::env::var("TWITTER_CONSUMER_KEY")?;
+    let app_secret = std::env::var("TWITTER_CONSUMER_SECRET")?;
     let secrets =
         reqwest_oauth1::Secrets::new(app_key, app_secret).token(access_token, access_secret);
-    let body = serde_json::to_string(&Tweet { text: tweet }).unwrap();
+    let body = serde_json::to_string(&Tweet { text: tweet })?;
     let client = reqwest::Client::new();
     let resp = client
         .oauth1(secrets)
@@ -83,9 +102,11 @@ pub async fn send_tweet(access_token: String, access_secret: String, tweet: Stri
         .header(reqwest::header::CONTENT_TYPE, "application/json")
         .body(body)
         .send()
-        .await
-        .expect("Failed to send tweet");
-    log::info!("{:?}", resp.text().await);
+        .await?;
+
+    let tweet_response: SendTweetResponse = resp.json().await?;
+    log::info!("Tweet response: {:?}", tweet_response);
+    Ok(tweet_response.data.id)
 }
 
 pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, String)> {
@@ -194,11 +215,12 @@ mod tests {
         let access_secret = std::env::var("TEST_ACCESS_SECRET")
             .expect("TEST_ACCESS_SECRET not set")
             .to_string();
-        send_tweet(access_token, access_secret, tweet_text).await;
+        let _ = send_tweet(access_token, access_secret, tweet_text).await;
     }
 
     #[tokio::test]
     async fn get_user_info_test() {
+        env_logger::init();
         dotenv::dotenv().ok();
         let access_token = std::env::var("TEST_ACCESS_TOKEN")
             .expect("TEST_ACCESS_TOKEN not set")

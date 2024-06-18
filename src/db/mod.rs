@@ -56,5 +56,7 @@ pub trait TeleportDB {
     ) -> eyre::Result<()>;
     async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<()>;
     async fn get_nft(&self, nft_id: String) -> eyre::Result<NFT>;
+    async fn add_tweet(&mut self, token_id: String, tweet_id: String) -> eyre::Result<()>;
+    async fn get_tweet(&self, token_id: String) -> eyre::Result<String>;
     async fn serialize(&self) -> eyre::Result<Vec<u8>>;
 }

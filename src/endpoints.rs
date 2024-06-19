@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use alloy::providers::network::EthereumWallet;
 use axum::{
     extract::{Query, State},
     response::Redirect,
@@ -12,7 +11,7 @@ use tokio::sync::Mutex;
 use crate::{
     actions::{
         nft::{mint_nft, redeem_nft, send_eth},
-        wallet::gen_sk,
+        wallet::{gen_sk, WalletProvider},
     },
     db::{PendingNFT, TeleportDB, User},
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
@@ -63,7 +62,7 @@ pub struct TxHashResponse {
 pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub rpc_url: String,
-    pub wallet: EthereumWallet,
+    pub provider: WalletProvider,
 }
 
 pub async fn new_user<A: TeleportDB>(
@@ -71,6 +70,26 @@ pub async fn new_user<A: TeleportDB>(
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
     let teleport_id = query.teleport_id;
+
+    let db_lock = shared_state.db.lock().await;
+    let existing_user = db_lock
+        .get_user_by_teleport_id(teleport_id.clone())
+        .await
+        .ok();
+    if let Some(user) = existing_user {
+        if user.x_id.is_some() {
+            let x_info = get_user_x_info(user.access_token, user.access_secret).await;
+            let encoded_x_info = serde_urlencoded::to_string(&x_info)
+                .expect("Failed to encode x_info as query params");
+            let url_with_params = format!(
+                "http://localhost:4000/create?already_created=true&success=true&{}",
+                encoded_x_info
+            );
+            return Redirect::temporary(&url_with_params);
+        }
+    }
+    drop(db_lock);
+
     let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
         .await
         .expect("Failed to request oauth token");
@@ -129,14 +148,9 @@ pub async fn callback<A: TeleportDB>(
     drop(db);
 
     //temp: give eoa some eth for gas
-    send_eth(
-        shared_state.wallet,
-        shared_state.rpc_url.clone(),
-        user.address().unwrap(),
-        "0.03",
-    )
-    .await
-    .expect("Failed to send eth to eoa");
+    send_eth(shared_state.provider, user.address().unwrap(), "0.03")
+        .await
+        .expect("Failed to send eth to eoa");
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
@@ -160,8 +174,7 @@ pub async fn mint<A: TeleportDB>(
     drop(db);
 
     let tx_hash = mint_nft(
-        shared_state.wallet,
-        shared_state.rpc_url,
+        shared_state.provider,
         user.address().expect("User address not set"),
         user.x_id.expect("User x_id not set"),
         query.policy,

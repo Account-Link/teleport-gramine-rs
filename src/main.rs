@@ -1,6 +1,9 @@
 use std::{net::SocketAddr, sync::Arc};
 
-use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
+use alloy::{
+    providers::ProviderBuilder,
+    signers::local::{coins_bip39::English, MnemonicBuilder},
+};
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{callback, get_tweet_id, hello_world, mint, new_user, redeem, SharedState};
 use tokio::{fs, sync::Mutex};
@@ -34,12 +37,17 @@ async fn main() {
         .build()
         .unwrap();
 
+    let provider = ProviderBuilder::new()
+        .with_recommended_fillers()
+        .wallet(signer.into())
+        .on_http(rpc_url.parse().unwrap());
+
     let db = db::in_memory::InMemoryDB::new();
     let db = Arc::new(Mutex::new(db));
     let shared_state = SharedState {
         db: db.clone(),
-        wallet: signer.into(),
         rpc_url,
+        provider,
     };
 
     let eph = fs::read(tls_key_path)
@@ -58,14 +66,6 @@ async fn main() {
         gram_crt_print.replace_range(start..end, "C");
         remove_offset = end;
     }
-    // let mut remove_offset = gram_crt_print
-    //     .find(remove_str)
-    //     .unwrap_or(gram_crt_print.len());
-    // gram_crt_print.replace_range(remove_offset..remove_offset + remove_str.len(), "C");
-    // remove_offset = gram_crt_print
-    //     .find(remove_str)
-    //     .unwrap_or(gram_crt_print.len());
-    // gram_crt_print.replace_range(remove_offset..remove_offset + remove_str.len(), "C");
 
     let app = axum::Router::new()
         .route("/new", axum::routing::get(new_user))

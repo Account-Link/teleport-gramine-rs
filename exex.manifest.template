@@ -3,8 +3,7 @@
 
 # Rust manifest example
 
-libos.entrypoint = "/gramine-ratls"
-
+libos.entrypoint = "target/release/exex"
 loader.entrypoint = "file:{{ gramine.libos }}"
 loader.log_level = "{{ log_level }}"
 
@@ -14,15 +13,9 @@ loader.env.MALLOC_ARENA_MAX = "1"
 loader.env.RUST_BACKTRACE = "full"
 loader.env.RUST_LOG = "info"
 
-loader.argv = [
-    "gramine-ratls", "/tmp/crt.pem", "/tmp/key.pem", "--",
-    "target/release/exex",
-	]
-
 
 fs.mounts = [
   { type = "encrypted", path = "/main.db", uri = "file:main.db", key_name = "teleportexex" },
-    { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
     { path = "/teleport.env", uri = "file:teleport.env" },
   { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
   { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },

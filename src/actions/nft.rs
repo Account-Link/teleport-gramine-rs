@@ -13,6 +13,7 @@ use futures_util::stream::StreamExt;
 use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
+use super::wallet::WalletProvider;
 use crate::{db::TeleportDB, oai, twitter::send_tweet};
 
 sol!(
@@ -88,18 +89,11 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
 }
 
 pub async fn mint_nft(
-    wallet: EthereumWallet,
-    rpc_url: String,
+    provider: WalletProvider,
     recipient: Address,
     x_id: String,
     policy: String,
 ) -> eyre::Result<String> {
-    let rpc_url = rpc_url.parse()?;
-    let provider = ProviderBuilder::new()
-        .with_recommended_fillers()
-        .wallet(wallet)
-        .on_http(rpc_url);
-
     let nft = NFT::new(NFT_ADDRESS, provider);
     let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
     let tx = mint.send().await?;
@@ -135,16 +129,10 @@ pub async fn redeem_nft(
 }
 
 pub async fn send_eth(
-    wallet: EthereumWallet,
-    rpc_url: String,
+    provider: WalletProvider,
     recipient: Address,
     amount: &str,
 ) -> eyre::Result<()> {
-    let rpc_url = rpc_url.parse()?;
-    let provider = ProviderBuilder::new()
-        .with_recommended_fillers()
-        .wallet(wallet)
-        .on_http(rpc_url);
     let tx = TransactionRequest::default()
         .with_to(recipient)
         .with_value(parse_units(amount, "ether").unwrap().into());
@@ -173,9 +161,12 @@ mod tests {
             .build()
             .unwrap();
         let wallet = EthereumWallet::from(signer);
+        let provider = ProviderBuilder::new()
+            .with_recommended_fillers()
+            .wallet(wallet)
+            .on_http(rpc_url.parse().unwrap());
         mint_nft(
-            wallet,
-            rpc_url,
+            provider,
             recipient_address,
             1.to_string(),
             "policy".to_string(),

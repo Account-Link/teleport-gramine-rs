@@ -1,3 +1,22 @@
+use alloy::{
+    network::{Ethereum, EthereumWallet},
+    providers::{
+        fillers::{ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller, WalletFiller},
+        Identity, RootProvider,
+    },
+    transports::http::{Client, Http},
+};
+
+pub type WalletProvider = FillProvider<
+    JoinFill<
+        JoinFill<JoinFill<JoinFill<Identity, GasFiller>, NonceFiller>, ChainIdFiller>,
+        WalletFiller<EthereumWallet>,
+    >,
+    RootProvider<Http<Client>>,
+    Http<Client>,
+    Ethereum,
+>;
+
 pub fn gen_sk() -> eyre::Result<String> {
     let mut buf = [0u8; 32];
     getrandom::getrandom(&mut buf)?;

@@ -1,6 +1,6 @@
 <h1> teleport: gramine (libOS) enclave</h1>
 <h2>a trusted execution environment for storing authentication and authorization material</h2>
-<h3> built on intel SGX trust assumptions</h3>
+<h3> built on intel SGX trust assumptions 🦀</h3>
 
 #current measurment:
 ```

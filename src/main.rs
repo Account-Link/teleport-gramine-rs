@@ -4,6 +4,7 @@ use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
+
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{callback, get_tweet_id, hello_world, mint, new_user, redeem, SharedState};
 use tokio::{fs, sync::Mutex};
@@ -79,13 +80,15 @@ async fn main() {
     let config = RustlsConfig::from_pem(gram_crt_print.as_bytes().to_vec(), eph)
         .await
         .unwrap();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+//    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     tokio::spawn(async move {
-        axum_server::bind_rustls(addr, config)
-            .serve(app.into_make_service())
-            .await
-            .unwrap();
+        axum::serve(listener, app).await.unwrap();
+//        axum_server::bind_rustls(addr, config)
+//            .serve(app.into_make_service())
+//            .await
+//            .unwrap();
     });
     subscribe_to_nft_events(db, ws_rpc_url).await.unwrap();
 }

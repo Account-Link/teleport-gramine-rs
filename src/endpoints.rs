@@ -218,7 +218,6 @@ pub async fn get_tweet_id<A: TeleportDB>(
 
 pub async fn get_ratls_cert<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
-    Query(query): Query<TweetIdQuery>,
 ) -> Json<AttestationResponse> {
     let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
         .await

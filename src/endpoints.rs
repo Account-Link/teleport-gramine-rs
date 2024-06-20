@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use tokio::fs;
 
 use axum::{
     extract::{Query, State},
@@ -47,6 +48,11 @@ pub struct TweetIdResponse {
     tweet_id: String,
 }
 
+#[derive(Serialize)]
+pub struct AttestationResponse {
+    cert: String,
+}
+
 #[derive(Deserialize)]
 pub struct RedeemQuery {
     nft_id: String,
@@ -72,10 +78,7 @@ pub async fn new_user<A: TeleportDB>(
     let teleport_id = query.teleport_id;
 
     let db_lock = shared_state.db.lock().await;
-    let existing_user = db_lock
-        .get_user_by_teleport_id(teleport_id.clone())
-        .await
-        .ok();
+    let existing_user = db_lock.get_user_by_teleport_id(teleport_id.clone()).await.ok();
     if let Some(user) = existing_user {
         if user.x_id.is_some() {
             let x_info = get_user_x_info(user.access_token, user.access_secret).await;
@@ -90,9 +93,8 @@ pub async fn new_user<A: TeleportDB>(
     }
     drop(db_lock);
 
-    let (oauth_token, oauth_token_secret) = request_oauth_token(teleport_id.clone())
-        .await
-        .expect("Failed to request oauth token");
+    let (oauth_token, oauth_token_secret) =
+        request_oauth_token(teleport_id.clone()).await.expect("Failed to request oauth token");
     let user = User {
         x_id: None,
         access_token: oauth_token.clone(),
@@ -101,15 +103,10 @@ pub async fn new_user<A: TeleportDB>(
         sk: None,
     };
     let mut db = shared_state.db.lock().await;
-    db.add_user(teleport_id.clone(), user)
-        .await
-        .expect("Failed to add oauth tokens to database");
+    db.add_user(teleport_id.clone(), user).await.expect("Failed to add oauth tokens to database");
     drop(db);
 
-    let url = format!(
-        "https://api.twitter.com/oauth/authenticate?oauth_token={}",
-        oauth_token
-    );
+    let url = format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_token);
 
     Redirect::temporary(&url)
 }
@@ -123,16 +120,12 @@ pub async fn callback<A: TeleportDB>(
     let teleport_id = query.teleport_id;
 
     let mut db = shared_state.db.lock().await;
-    let oauth_user = db
-        .get_user_by_teleport_id(teleport_id.clone())
-        .await
-        .expect("Failed to get oauth tokens");
+    let oauth_user =
+        db.get_user_by_teleport_id(teleport_id.clone()).await.expect("Failed to get oauth tokens");
     assert_eq!(oauth_token, oauth_user.access_token);
 
     let (access_token, access_secret) =
-        authorize_token(oauth_token, oauth_user.access_secret, oauth_verifier)
-            .await
-            .unwrap();
+        authorize_token(oauth_token, oauth_user.access_secret, oauth_verifier).await.unwrap();
     let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
     let sk = gen_sk().expect("Failed to generate sk");
     let user = User {
@@ -142,9 +135,7 @@ pub async fn callback<A: TeleportDB>(
         embedded_address: oauth_user.embedded_address,
         sk: Some(sk),
     };
-    db.add_user(teleport_id.clone(), user.clone())
-        .await
-        .expect("Failed to add user to database");
+    db.add_user(teleport_id.clone(), user.clone()).await.expect("Failed to add user to database");
     drop(db);
 
     //temp: give eoa some eth for gas
@@ -154,10 +145,7 @@ pub async fn callback<A: TeleportDB>(
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-    let url_with_params = format!(
-        "https://teleport.best/create?success=true&{}",
-        encoded_x_info
-    );
+    let url_with_params = format!("https://teleport.best/create?success=true&{}", encoded_x_info);
 
     Redirect::temporary(&url_with_params)
 }
@@ -185,10 +173,7 @@ pub async fn mint<A: TeleportDB>(
     let mut db = shared_state.db.lock().await;
     db.add_pending_nft(
         tx_hash.clone(),
-        PendingNFT {
-            teleport_id: query.teleport_id.clone(),
-            nft_id: query.nft_id.clone(),
-        },
+        PendingNFT { teleport_id: query.teleport_id.clone(), nft_id: query.nft_id.clone() },
     )
     .await
     .expect("Failed to add pending NFT");
@@ -202,10 +187,7 @@ pub async fn redeem<A: TeleportDB>(
     Query(query): Query<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
-    let nft = db
-        .get_nft(query.nft_id.clone())
-        .await
-        .expect("Failed to get NFT by id");
+    let nft = db.get_nft(query.nft_id.clone()).await.expect("Failed to get NFT by id");
     let user = db
         .get_user_by_teleport_id(nft.teleport_id.clone())
         .await
@@ -228,13 +210,20 @@ pub async fn get_tweet_id<A: TeleportDB>(
     Query(query): Query<TweetIdQuery>,
 ) -> Json<TweetIdResponse> {
     let db = shared_state.db.lock().await;
-    let tweet_id = db
-        .get_tweet(query.token_id.clone())
-        .await
-        .expect("Failed to get tweet id");
+    let tweet_id = db.get_tweet(query.token_id.clone()).await.expect("Failed to get tweet id");
     drop(db);
 
     Json(TweetIdResponse { tweet_id })
+}
+
+pub async fn get_ratls_cert<A: TeleportDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<TweetIdQuery>,
+) -> Json<AttestationResponse> {
+    let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
+        .await
+        .expect("gramine ratls rootCA.crt not found");
+    Json(AttestationResponse { cert })
 }
 
 pub async fn hello_world() -> &'static str {

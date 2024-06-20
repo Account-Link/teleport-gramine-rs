@@ -11,16 +11,10 @@ pub async fn is_tweet_safe(tweet: &String, policy: &String) -> bool {
     );
     let mut args = openai_rust::chat::ChatArguments::new(
         "gpt-4o",
-        vec![openai_rust::chat::Message {
-            role: "user".to_owned(),
-            content: inputs,
-        }],
+        vec![openai_rust::chat::Message { role: "user".to_owned(), content: inputs }],
     );
     args.temperature = Some(0.0);
-    let res = client
-        .create_chat(args)
-        .await
-        .expect("Failed to create chat");
+    let res = client.create_chat(args).await.expect("Failed to create chat");
     let is_unsafe = res.choices[0].message.content.contains("unsafe");
     log::info!("gpt-4o response: {:?}", res.choices[0].message.content);
     !is_unsafe

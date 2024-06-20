@@ -82,7 +82,7 @@ pub async fn new_user<A: TeleportDB>(
             let encoded_x_info = serde_urlencoded::to_string(&x_info)
                 .expect("Failed to encode x_info as query params");
             let url_with_params = format!(
-                "http://localhost:4000/create?already_created=true&success=true&{}",
+                "https://teleport.best/create?already_created=true&success=true&{}",
                 encoded_x_info
             );
             return Redirect::temporary(&url_with_params);
@@ -155,7 +155,7 @@ pub async fn callback<A: TeleportDB>(
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
     let url_with_params = format!(
-        "http://localhost:4000/create?success=true&{}",
+        "https://teleport.best/create?success=true&{}",
         encoded_x_info
     );
 

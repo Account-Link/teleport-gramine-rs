@@ -28,6 +28,7 @@ $(SELF_EXE): Cargo.toml
 
 exex.manifest: exex.manifest.template
 	gramine-manifest \
+	-Dentrypoint=$$(command -v gramine-ratls) \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dself_exe=$(SELF_EXE) \

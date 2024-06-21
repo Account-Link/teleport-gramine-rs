@@ -18,6 +18,11 @@ struct Tweet {
     text: String,
 }
 
+#[derive(Debug, Serialize)]
+struct LikeTweet {
+    tweet_id: String,
+}
+
 #[derive(Debug, Deserialize)]
 struct UserInfoResponse {
     data: UserInfo,
@@ -107,6 +112,28 @@ pub async fn send_tweet(
     let tweet_response: SendTweetResponse = resp.json().await?;
     log::info!("Tweet response: {:?}", tweet_response);
     Ok(tweet_response.data.id)
+}
+
+pub async fn like_tweet(
+    access_token: String,
+    access_secret: String,
+    x_id: String,
+    tweet_id: String,
+) -> eyre::Result<()> {
+    let app_key = std::env::var("TWITTER_CONSUMER_KEY")?;
+    let app_secret = std::env::var("TWITTER_CONSUMER_SECRET")?;
+    let secrets =
+        reqwest_oauth1::Secrets::new(app_key, app_secret).token(access_token, access_secret);
+    let client = reqwest::Client::new();
+    let resp = client
+        .oauth1(secrets)
+        .post(format!("https://api.twitter.com/2/users/{}/likes", x_id))
+        .header(reqwest::header::CONTENT_TYPE, "application/json")
+        .body(serde_json::to_string(&&LikeTweet { tweet_id })?)
+        .send()
+        .await?;
+    log::info!("Like response: {:?}", resp);
+    Ok(())
 }
 
 pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, String)> {
@@ -216,6 +243,28 @@ mod tests {
             .expect("TEST_ACCESS_SECRET not set")
             .to_string();
         let _ = send_tweet(access_token, access_secret, tweet_text).await;
+    }
+
+    #[tokio::test]
+    // #[ignore]
+    async fn like_tweet_test() {
+        env_logger::init();
+        dotenv::dotenv().ok();
+        let access_token = std::env::var("TEST_ACCESS_TOKEN")
+            .expect("TEST_ACCESS_TOKEN not set")
+            .to_string();
+        let access_secret = std::env::var("TEST_ACCESS_SECRET")
+            .expect("TEST_ACCESS_SECRET not set")
+            .to_string();
+        let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
+        let x_id = x_info.id;
+        let _ = like_tweet(
+            access_token,
+            access_secret,
+            x_id,
+            "1803455775911694374".to_string(),
+        )
+        .await;
     }
 
     #[tokio::test]

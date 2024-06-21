@@ -21,11 +21,11 @@ pub struct NFT {
     pub token_id: String,
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
-pub struct PendingNFT {
-    pub teleport_id: String,
-    pub nft_id: String,
-}
+// #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
+// pub struct PendingNFT {
+//     pub teleport_id: String,
+//     pub nft_id: String,
+// }
 
 impl User {
     pub fn signer(&self) -> eyre::Result<PrivateKeySigner> {
@@ -49,12 +49,13 @@ pub trait TeleportDB {
     async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()>;
     async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User>;
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User>;
-    async fn add_pending_nft(
-        &mut self,
-        tx_hash: String,
-        pending_nft: PendingNFT,
-    ) -> eyre::Result<()>;
-    async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<()>;
+    // async fn add_pending_nft(
+    //     &mut self,
+    //     tx_hash: String,
+    //     pending_nft: PendingNFT,
+    // ) -> eyre::Result<()>;
+    // async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<()>;
+    async fn add_nft(&mut self, nft_id: String, nft: NFT) -> eyre::Result<()>;
     async fn get_nft(&self, nft_id: String) -> eyre::Result<NFT>;
     async fn add_tweet(&mut self, token_id: String, tweet_id: String) -> eyre::Result<()>;
     async fn get_tweet(&self, token_id: String) -> eyre::Result<String>;

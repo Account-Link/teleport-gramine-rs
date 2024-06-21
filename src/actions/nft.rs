@@ -61,20 +61,20 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                         }
                     }
                 }
-                NFTEvents::NewTokenData(new_token_data) => {
-                    let mut db = db.lock().await;
-                    db.promote_pending_nft(
-                        log.transaction_hash.unwrap().encode_hex_with_prefix(),
-                        new_token_data.tokenId.to_string(),
-                    )
-                    .await?;
-                    drop(db);
-                    log::info!(
-                        "NFT minted with id {} to address {}",
-                        new_token_data.tokenId.to_string(),
-                        new_token_data.to.to_string()
-                    );
-                }
+                // NFTEvents::NewTokenData(new_token_data) => {
+                //     let mut db = db.lock().await;
+                //     db.promote_pending_nft(
+                //         log.transaction_hash.unwrap().encode_hex_with_prefix(),
+                //         new_token_data.tokenId.to_string(),
+                //     )
+                //     .await?;
+                //     drop(db);
+                //     log::info!(
+                //         "NFT minted with id {} to address {}",
+                //         new_token_data.tokenId.to_string(),
+                //         new_token_data.to.to_string()
+                //     );
+                // }
                 _ => continue,
             }
         }
@@ -131,6 +131,16 @@ pub async fn send_eth(
         .with_value(parse_units(amount, "ether").unwrap().into());
     let _ = provider.send_transaction(tx).await?;
     Ok(())
+}
+
+pub async fn get_curr_token_id(rpc_url: String) -> eyre::Result<u64> {
+    let rpc_url = rpc_url.parse()?;
+    let provider = ProviderBuilder::new().on_http(rpc_url);
+    let nft = NFT::new(NFT_ADDRESS, provider);
+    let curr_token_id = nft.currentTokenId().call().await?._0;
+    let curr_token_id: u64 = curr_token_id.to::<u64>();
+    Ok(curr_token_id)
+    // Ok(curr_token_id.to_string())
 }
 
 #[cfg(test)]

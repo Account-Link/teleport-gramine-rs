@@ -1,5 +1,7 @@
-use std::sync::Arc;
-use tokio::fs;
+use std::sync::{
+    atomic::{AtomicU64, Ordering},
+    Arc,
+};
 
 use axum::{
     extract::{Query, State},
@@ -14,7 +16,7 @@ use crate::{
         nft::{mint_nft, redeem_nft, send_eth},
         wallet::{gen_sk, WalletProvider},
     },
-    db::{PendingNFT, TeleportDB, User},
+    db::{TeleportDB, User, NFT},
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
 
@@ -69,6 +71,7 @@ pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub rpc_url: String,
     pub provider: WalletProvider,
+    pub curr_nft_id: Arc<AtomicU64>,
 }
 
 pub async fn new_user<A: TeleportDB>(
@@ -81,6 +84,7 @@ pub async fn new_user<A: TeleportDB>(
     let existing_user = db_lock.get_user_by_teleport_id(teleport_id.clone()).await.ok();
     if let Some(user) = existing_user {
         if user.x_id.is_some() {
+            log::info!("User already created");
             let x_info = get_user_x_info(user.access_token, user.access_secret).await;
             let encoded_x_info = serde_urlencoded::to_string(&x_info)
                 .expect("Failed to encode x_info as query params");
@@ -170,10 +174,13 @@ pub async fn mint<A: TeleportDB>(
     .await
     .expect("Failed to mint NFT");
 
+    let curr_nft_id = shared_state.curr_nft_id.clone();
+    let new_value = curr_nft_id.fetch_add(1, Ordering::SeqCst) + 1;
+
     let mut db = shared_state.db.lock().await;
-    db.add_pending_nft(
-        tx_hash.clone(),
-        PendingNFT { teleport_id: query.teleport_id.clone(), nft_id: query.nft_id.clone() },
+    db.add_nft(
+        query.nft_id.clone(),
+        NFT { teleport_id: query.teleport_id.clone(), token_id: new_value.to_string() },
     )
     .await
     .expect("Failed to add pending NFT");
@@ -219,9 +226,10 @@ pub async fn get_tweet_id<A: TeleportDB>(
 pub async fn get_ratls_cert<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
 ) -> Json<AttestationResponse> {
-    let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
-        .await
-        .expect("gramine ratls rootCA.crt not found");
+    let cert =
+        tokio::fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
+            .await
+            .expect("gramine ratls rootCA.crt not found");
     Json(AttestationResponse { cert })
 }
 

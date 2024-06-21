@@ -1,5 +1,9 @@
-use std::{net::SocketAddr, sync::Arc};
+use std::{
+    net::SocketAddr,
+    sync::{atomic::AtomicU64, Arc},
+};
 
+use actions::nft::get_curr_token_id;
 use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
@@ -43,7 +47,10 @@ async fn main() {
 
     let db = db::in_memory::InMemoryDB::new();
     let db = Arc::new(Mutex::new(db));
-    let shared_state = SharedState { db: db.clone(), rpc_url, provider };
+
+    let curr_nft_id = get_curr_token_id(rpc_url.clone()).await.unwrap();
+    let curr_nft_id = Arc::new(AtomicU64::new(curr_nft_id));
+    let shared_state = SharedState { db: db.clone(), rpc_url, provider, curr_nft_id };
 
     let eph = fs::read(tls_key_path).await.expect("gramine ratls rootCA.key not found");
 

@@ -2,13 +2,13 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{PendingNFT, TeleportDB, User, NFT};
+use super::{TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
     pub x_id_to_teleport_id: BTreeMap<String, String>,
     pub users: BTreeMap<String, User>,
-    pub pending_nfts: BTreeMap<String, PendingNFT>,
+    // pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
 }
@@ -51,22 +51,27 @@ impl TeleportDB for InMemoryDB {
         Ok(serialized)
     }
 
-    async fn add_pending_nft(
-        &mut self,
-        tx_hash: String,
-        pending_nft: PendingNFT,
-    ) -> eyre::Result<()> {
-        self.pending_nfts.insert(tx_hash, pending_nft);
-        Ok(())
-    }
+    // async fn add_pending_nft(
+    //     &mut self,
+    //     tx_hash: String,
+    //     pending_nft: PendingNFT,
+    // ) -> eyre::Result<()> {
+    //     self.pending_nfts.insert(tx_hash, pending_nft);
+    //     Ok(())
+    // }
 
-    async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<()> {
-        let pending_nft = self
-            .pending_nfts
-            .remove(&tx_hash)
-            .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT { teleport_id: pending_nft.teleport_id, token_id };
-        self.nfts.insert(pending_nft.nft_id, nft);
+    // async fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) ->
+    // eyre::Result<()> {     let pending_nft = self
+    //         .pending_nfts
+    //         .remove(&tx_hash)
+    //         .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
+    //     let nft = NFT { teleport_id: pending_nft.teleport_id, token_id };
+    //     self.nfts.insert(pending_nft.nft_id, nft);
+    //     Ok(())
+    // }
+
+    async fn add_nft(&mut self, nft_id: String, nft: NFT) -> eyre::Result<()> {
+        self.nfts.insert(nft_id, nft);
         Ok(())
     }
 

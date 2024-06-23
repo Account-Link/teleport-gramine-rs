@@ -237,21 +237,14 @@ mod tests {
     async fn like_tweet_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let access_token = std::env::var("TEST_ACCESS_TOKEN")
-            .expect("TEST_ACCESS_TOKEN not set")
-            .to_string();
-        let access_secret = std::env::var("TEST_ACCESS_SECRET")
-            .expect("TEST_ACCESS_SECRET not set")
-            .to_string();
+        let access_token =
+            std::env::var("TEST_ACCESS_TOKEN").expect("TEST_ACCESS_TOKEN not set").to_string();
+        let access_secret =
+            std::env::var("TEST_ACCESS_SECRET").expect("TEST_ACCESS_SECRET not set").to_string();
         let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
         let x_id = x_info.id;
-        let _ = like_tweet(
-            access_token,
-            access_secret,
-            x_id,
-            "1803455775911694374".to_string(),
-        )
-        .await;
+        let _ =
+            like_tweet(access_token, access_secret, x_id, "1803455775911694374".to_string()).await;
     }
 
     #[tokio::test]

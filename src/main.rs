@@ -70,15 +70,12 @@ async fn main() {
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);
     let config = RustlsConfig::from_pem(gram_crt_print.as_bytes().to_vec(), eph).await.unwrap();
-    //    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    //let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     tokio::spawn(async move {
-        axum::serve(listener, app).await.unwrap();
-        //        axum_server::bind_rustls(addr, config)
-        //            .serve(app.into_make_service())
-        //            .await
-        //            .unwrap();
+        //axum::serve(listener, app).await.unwrap();
+        axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
     });
     subscribe_to_nft_events(db, ws_rpc_url).await.unwrap();
 }

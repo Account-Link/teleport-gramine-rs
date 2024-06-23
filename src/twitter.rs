@@ -140,11 +140,9 @@ pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, S
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-    let callback_url = format!("https://0.0.0.0:3000/callback?teleport_id={}", teleport_id);
+    let callback_url = format!("https://tee.teleport.best/callback?teleport_id={}", teleport_id);
     let secrets = reqwest_oauth1::Secrets::new(app_key, app_secret);
-    let query = RequestTokenRequestQuery {
-        oauth_callback: callback_url.to_string(),
-    };
+    let query = RequestTokenRequestQuery { oauth_callback: callback_url.to_string() };
     let response = reqwest_oauth1::Client::new()
         .post("https://api.twitter.com/oauth/request_token")
         .sign(secrets)
@@ -160,10 +158,7 @@ pub async fn request_oauth_token(teleport_id: String) -> eyre::Result<(String, S
     let request_token_body =
         serde_urlencoded::from_bytes::<RequestTokenResponseBody>(&response_bytes)?;
     assert!(request_token_body.oauth_callback_confirmed);
-    Ok((
-        request_token_body.oauth_token,
-        request_token_body.oauth_token_secret,
-    ))
+    Ok((request_token_body.oauth_token, request_token_body.oauth_token_secret))
 }
 
 pub async fn authorize_token(
@@ -197,10 +192,7 @@ pub async fn authorize_token(
     let access_token_body =
         serde_urlencoded::from_bytes::<AccessTokenResponseBody>(&response_bytes)?;
 
-    Ok((
-        access_token_body.oauth_token,
-        access_token_body.oauth_token_secret,
-    ))
+    Ok((access_token_body.oauth_token, access_token_body.oauth_token_secret))
 }
 
 #[cfg(test)]
@@ -214,19 +206,16 @@ mod tests {
         dotenv::dotenv().ok();
         let tokens = request_oauth_token(1.to_string()).await.unwrap();
         log::info!("{:?}", tokens);
-        let url = format!(
-            "https://api.twitter.com/oauth/authenticate?oauth_token={}",
-            tokens.0.clone()
-        );
+        let url =
+            format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", tokens.0.clone());
         log::info!("Please visit: {}", url);
         let mut callback_url = String::new();
         std::io::stdin().read_line(&mut callback_url).unwrap();
         let url = url::Url::parse(&callback_url).unwrap();
         let callback_url_query = url.query().unwrap_or_default();
         let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query).unwrap();
-        let tokens = authorize_token(tokens.0, tokens.1, callback_url_query.oauth_verifier)
-            .await
-            .unwrap();
+        let tokens =
+            authorize_token(tokens.0, tokens.1, callback_url_query.oauth_verifier).await.unwrap();
         log::info!("{:?}", tokens);
     }
 
@@ -236,12 +225,10 @@ mod tests {
         env_logger::init();
         dotenv::dotenv().ok();
         let tweet_text = "Wow!".to_string();
-        let access_token = std::env::var("TEST_ACCESS_TOKEN")
-            .expect("TEST_ACCESS_TOKEN not set")
-            .to_string();
-        let access_secret = std::env::var("TEST_ACCESS_SECRET")
-            .expect("TEST_ACCESS_SECRET not set")
-            .to_string();
+        let access_token =
+            std::env::var("TEST_ACCESS_TOKEN").expect("TEST_ACCESS_TOKEN not set").to_string();
+        let access_secret =
+            std::env::var("TEST_ACCESS_SECRET").expect("TEST_ACCESS_SECRET not set").to_string();
         let _ = send_tweet(access_token, access_secret, tweet_text).await;
     }
 
@@ -250,33 +237,24 @@ mod tests {
     async fn like_tweet_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let access_token = std::env::var("TEST_ACCESS_TOKEN")
-            .expect("TEST_ACCESS_TOKEN not set")
-            .to_string();
-        let access_secret = std::env::var("TEST_ACCESS_SECRET")
-            .expect("TEST_ACCESS_SECRET not set")
-            .to_string();
+        let access_token =
+            std::env::var("TEST_ACCESS_TOKEN").expect("TEST_ACCESS_TOKEN not set").to_string();
+        let access_secret =
+            std::env::var("TEST_ACCESS_SECRET").expect("TEST_ACCESS_SECRET not set").to_string();
         let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
         let x_id = x_info.id;
-        let _ = like_tweet(
-            access_token,
-            access_secret,
-            x_id,
-            "1803455775911694374".to_string(),
-        )
-        .await;
+        let _ =
+            like_tweet(access_token, access_secret, x_id, "1803455775911694374".to_string()).await;
     }
 
     #[tokio::test]
     async fn get_user_info_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let access_token = std::env::var("TEST_ACCESS_TOKEN")
-            .expect("TEST_ACCESS_TOKEN not set")
-            .to_string();
-        let access_secret = std::env::var("TEST_ACCESS_SECRET")
-            .expect("TEST_ACCESS_SECRET not set")
-            .to_string();
+        let access_token =
+            std::env::var("TEST_ACCESS_TOKEN").expect("TEST_ACCESS_TOKEN not set").to_string();
+        let access_secret =
+            std::env::var("TEST_ACCESS_SECRET").expect("TEST_ACCESS_SECRET not set").to_string();
         get_user_x_info(access_token, access_secret).await;
     }
 }

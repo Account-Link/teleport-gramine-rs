@@ -5,3 +5,4 @@ target
 teleport.env
 exex.manifest.sgx
 exex.manifest
+exex.sig

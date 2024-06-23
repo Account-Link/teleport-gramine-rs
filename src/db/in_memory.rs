@@ -33,10 +33,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User> {
-        let user = self
-            .users
-            .get(&teleport_id)
-            .ok_or_else(|| eyre::eyre!("User not found"))?;
+        let user = self.users.get(&teleport_id).ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
     }
 
@@ -45,10 +42,7 @@ impl TeleportDB for InMemoryDB {
             .x_id_to_teleport_id
             .get(&x_id)
             .ok_or_else(|| eyre::eyre!("User teleport_id not found for x_id"))?;
-        let user = self
-            .users
-            .get(teleport_id)
-            .ok_or_else(|| eyre::eyre!("User not found"))?;
+        let user = self.users.get(teleport_id).ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
     }
 
@@ -71,19 +65,13 @@ impl TeleportDB for InMemoryDB {
             .pending_nfts
             .remove(&tx_hash)
             .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT {
-            teleport_id: pending_nft.teleport_id,
-            token_id,
-        };
+        let nft = NFT { teleport_id: pending_nft.teleport_id, token_id };
         self.nfts.insert(pending_nft.nft_id, nft);
         Ok(())
     }
 
     async fn get_nft(&self, nft_id: String) -> eyre::Result<NFT> {
-        let nft = self
-            .nfts
-            .get(&nft_id)
-            .ok_or_else(|| eyre::eyre!("NFT not found"))?;
+        let nft = self.nfts.get(&nft_id).ok_or_else(|| eyre::eyre!("NFT not found"))?;
         Ok(nft.clone())
     }
 
@@ -93,10 +81,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     async fn get_tweet(&self, token_id: String) -> eyre::Result<String> {
-        let tweet_id = self
-            .tweets
-            .get(&token_id)
-            .ok_or_else(|| eyre::eyre!("Tweet not found"))?;
+        let tweet_id = self.tweets.get(&token_id).ok_or_else(|| eyre::eyre!("Tweet not found"))?;
         Ok(tweet_id.clone())
     }
 }
@@ -115,9 +100,7 @@ mod tests {
             embedded_address: "address".to_string(),
             sk: None,
         };
-        db.add_user("2".to_string(), user.clone())
-            .await
-            .expect("Failed to add user tokens");
+        db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         let user = db.get_user_by_teleport_id("2".to_string()).await?;
         assert_eq!(user.access_token, "access token");
         assert_eq!(user.access_secret, "access secret");
@@ -135,14 +118,10 @@ mod tests {
             embedded_address: "address".to_string(),
             sk: None,
         };
-        db.add_user("2".to_string(), user.clone())
-            .await
-            .expect("Failed to add user tokens");
+        db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());
         user.sk = Some("sk".to_string());
-        db.add_user("2".to_string(), user.clone())
-            .await
-            .expect("Failed to add user tokens");
+        db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         let fetched_user = db.get_user_by_x_id("1".to_string()).await?;
         assert_eq!(user, fetched_user);
         Ok(())

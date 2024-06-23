@@ -22,10 +22,11 @@ loader.uid = 65534
 loader.gid = 65534
 
 fs.mounts = [
+    { type = "encrypted", path = "/root/save", uri = "file:save_dir", key_name = "sgx_mrenclave" },
     { path = "/teleport.env", uri = "file:teleport.env" },
-  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
-      { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
-  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+    { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+    { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
+    { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
     { path = "/tmp", type = "tmpfs" },
   { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },  # add this line
   { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
@@ -40,6 +41,10 @@ sgx.debug = true
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 sgx.remote_attestation = "dcap"
 
+sgx.allowed_files = [
+  "file:save_dir"
+
+]
 sgx.trusted_files = [
     "file:/usr/local/bin/gramine-ratls",
     "file:/usr{{ arch_libdir }}/",

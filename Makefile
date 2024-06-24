@@ -28,11 +28,11 @@ $(SELF_EXE): Cargo.toml
 
 exex.manifest: exex.manifest.template
 	gramine-manifest \
-		-Dentrypoint=$$(command -v gramine-ratls) \
+	-Dentrypoint=$$(command -v gramine-ratls) \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dself_exe=$(SELF_EXE) \
-		$< $@
+			$< > $@
 
 # Make on Ubuntu <= 20.04 doesn't support "Rules with Grouped Targets" (`&:`),
 # see the helloworld example for details on this workaround.

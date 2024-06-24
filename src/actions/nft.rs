@@ -31,14 +31,9 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
 
-    let filter = Filter::new()
-        .address(NFT_ADDRESS)
-        .from_block(BlockNumberOrTag::Latest);
+    let filter = Filter::new().address(NFT_ADDRESS).from_block(BlockNumberOrTag::Latest);
 
-    log::info!(
-        "Subscribed to events for contract at: {}",
-        NFT_ADDRESS.to_string()
-    );
+    log::info!("Subscribed to events for contract at: {}", NFT_ADDRESS.to_string());
 
     let sub = provider.subscribe_logs(&filter).await?;
     let mut stream = sub.into_stream();
@@ -112,10 +107,8 @@ pub async fn redeem_nft(
     content: String,
 ) -> eyre::Result<String> {
     let rpc_url = rpc_url.parse()?;
-    let provider = ProviderBuilder::new()
-        .with_recommended_fillers()
-        .wallet(wallet)
-        .on_http(rpc_url);
+    let provider =
+        ProviderBuilder::new().with_recommended_fillers().wallet(wallet).on_http(rpc_url);
 
     let nft = NFT::new(NFT_ADDRESS, provider);
     let token_id = Uint::from_str(&token_id)?;
@@ -165,13 +158,6 @@ mod tests {
             .with_recommended_fillers()
             .wallet(wallet)
             .on_http(rpc_url.parse().unwrap());
-        mint_nft(
-            provider,
-            recipient_address,
-            1.to_string(),
-            "policy".to_string(),
-        )
-        .await
-        .unwrap();
+        mint_nft(provider, recipient_address, 1.to_string(), "policy".to_string()).await.unwrap();
     }
 }

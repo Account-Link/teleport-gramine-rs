@@ -139,7 +139,7 @@ pub async fn callback<A: TeleportDB>(
     drop(db);
 
     //temp: give eoa some eth for gas
-    send_eth(shared_state.provider, user.address().unwrap(), "0.03")
+    send_eth(shared_state.provider, user.address().unwrap(), "0.002")
         .await
         .expect("Failed to send eth to eoa");
 
@@ -216,9 +216,7 @@ pub async fn get_tweet_id<A: TeleportDB>(
     Json(TweetIdResponse { tweet_id })
 }
 
-pub async fn get_ratls_cert<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
-) -> Json<AttestationResponse> {
+pub async fn get_ratls_cert() -> Json<AttestationResponse> {
     let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
         .await
         .expect("gramine ratls rootCA.crt not found");

@@ -136,11 +136,14 @@ pub async fn like_tweet(
     Ok(())
 }
 
-pub async fn request_oauth_token(address: String) -> eyre::Result<(String, String)> {
+pub async fn request_oauth_token(
+    address: String,
+    callback_base_url: String,
+) -> eyre::Result<(String, String)> {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-    let callback_url = format!("https://0.0.0.0:3000/callback?address={}", address);
+    let callback_url = format!("{}/callback?address={}", callback_base_url, address);
     let secrets = reqwest_oauth1::Secrets::new(app_key, app_secret);
     let query = RequestTokenRequestQuery { oauth_callback: callback_url.to_string() };
     let response = reqwest_oauth1::Client::new()
@@ -204,7 +207,8 @@ mod tests {
     async fn e2e_oauth_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let tokens = request_oauth_token(1.to_string()).await.unwrap();
+        let tokens =
+            request_oauth_token(1.to_string(), "http://localhost:3000".to_string()).await.unwrap();
         log::info!("{:?}", tokens);
         let url =
             format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", tokens.0.clone());

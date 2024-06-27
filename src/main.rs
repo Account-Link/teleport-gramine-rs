@@ -33,6 +33,7 @@ async fn main() {
     let tls_cert_path = std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
+    let tee_url = std::env::var("TEE_URL").expect("TEE_URL not set");
 
     let signer =
         MnemonicBuilder::<English>::default().phrase(mnemonic).index(0).unwrap().build().unwrap();
@@ -51,7 +52,7 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
-    let shared_state = SharedState { db: db.clone(), provider, app_url };
+    let shared_state = SharedState { db: db.clone(), provider, app_url, tee_url };
 
     let eph = fs::read(tls_key_path).await.expect("gramine ratls rootCA.key not found");
 

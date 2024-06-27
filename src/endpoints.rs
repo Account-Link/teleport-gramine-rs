@@ -69,6 +69,7 @@ pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
     pub app_url: String,
+    pub tee_url: String,
 }
 
 pub async fn new_user<A: TeleportDB>(
@@ -94,7 +95,9 @@ pub async fn new_user<A: TeleportDB>(
     drop(db_lock);
 
     let (oauth_token, oauth_token_secret) =
-        request_oauth_token(address.clone()).await.expect("Failed to request oauth token");
+        request_oauth_token(address.clone(), shared_state.tee_url)
+            .await
+            .expect("Failed to request oauth token");
     let user =
         User { x_id: None, access_token: oauth_token.clone(), access_secret: oauth_token_secret };
     let mut db = shared_state.db.lock().await;

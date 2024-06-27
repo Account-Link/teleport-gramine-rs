@@ -32,6 +32,7 @@ async fn main() {
     let tls_key_path = std::env::var("TLS_KEY_PATH").expect("TLS_KEY_PATH not set");
     let tls_cert_path = std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
+    let app_url = std::env::var("APP_URL").expect("APP_URL not set");
 
     let signer =
         MnemonicBuilder::<English>::default().phrase(mnemonic).index(0).unwrap().build().unwrap();
@@ -50,7 +51,7 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
-    let shared_state = SharedState { db: db.clone(), rpc_url, provider };
+    let shared_state = SharedState { db: db.clone(), provider, app_url };
 
     let eph = fs::read(tls_key_path).await.expect("gramine ratls rootCA.key not found");
 
@@ -76,13 +77,13 @@ async fn main() {
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::very_permissive())
         .with_state(shared_state);
-    let config = RustlsConfig::from_pem(gram_crt_print.as_bytes().to_vec(), eph).await.unwrap();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
-    //let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    // let config = RustlsConfig::from_pem(gram_crt_print.as_bytes().to_vec(), eph).await.unwrap();
+    // let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     tokio::spawn(async move {
-        //axum::serve(listener, app).await.unwrap();
-        axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
+        axum::serve(listener, app).await.unwrap();
+        // axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
     });
     let db_clone = db.clone();
     tokio::spawn(async move {

@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
-    primitives::{address, Address, Uint},
+    primitives::{Address, Uint},
     providers::{Provider, ProviderBuilder, WsConnect},
     rpc::types::{BlockNumberOrTag, Filter},
     sol,
@@ -21,7 +21,10 @@ sol!(
     "abi/nft.json"
 );
 
-pub const NFT_ADDRESS: Address = address!("B92414bA565D8d49E4aaaB45b78b354516006AF1");
+pub fn get_nft_address() -> eyre::Result<Address> {
+    let nft_address = std::env::var("NFT_ADDRESS")?;
+    Ok(Address::from_str(&nft_address)?)
+}
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
     db: Arc<Mutex<A>>,
@@ -29,10 +32,11 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
 ) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
+    let nft_address = get_nft_address()?;
 
-    let filter = Filter::new().address(NFT_ADDRESS).from_block(BlockNumberOrTag::Latest);
+    let filter = Filter::new().address(nft_address).from_block(BlockNumberOrTag::Latest);
 
-    log::info!("Subscribed to events for contract at: {}", NFT_ADDRESS.to_string());
+    log::info!("Subscribed to events for contract at: {}", nft_address.to_string());
 
     let sub = provider.subscribe_logs(&filter).await?;
     let mut stream = sub.into_stream();
@@ -88,7 +92,8 @@ pub async fn mint_nft(
     x_id: String,
     policy: String,
 ) -> eyre::Result<String> {
-    let nft = NFT::new(NFT_ADDRESS, provider);
+    let nft_address = get_nft_address()?;
+    let nft = NFT::new(nft_address, provider);
     let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
     let tx = mint.send().await?;
 
@@ -104,7 +109,8 @@ pub async fn redeem_nft(
     token_id: String,
     content: String,
 ) -> eyre::Result<String> {
-    let nft = NFT::new(NFT_ADDRESS, provider);
+    let nft_address = get_nft_address()?;
+    let nft = NFT::new(nft_address, provider);
     let token_id = Uint::from_str(&token_id)?;
     let redeem = nft.redeem(token_id, content, 0u8);
     let tx = redeem.send().await?;
@@ -131,6 +137,7 @@ pub async fn redeem_nft(
 mod tests {
     use alloy::{
         network::EthereumWallet,
+        primitives::address,
         signers::local::{coins_bip39::English, MnemonicBuilder},
     };
 

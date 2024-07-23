@@ -16,6 +16,7 @@ use crate::{
         wallet::WalletProvider,
     },
     db::{PendingNFT, TeleportDB, User},
+    oai,
     twitter::{authorize_token, get_user_x_info, request_oauth_token},
 };
 
@@ -62,6 +63,17 @@ pub struct RedeemQuery {
 #[derive(Serialize)]
 pub struct TxHashResponse {
     pub hash: String,
+}
+
+#[derive(Deserialize)]
+pub struct CheckRedeemQuery {
+    pub content: String,
+    pub policy: String,
+}
+
+#[derive(Serialize)]
+pub struct CheckRedeemResponse {
+    pub safe: bool,
 }
 
 #[derive(Clone)]
@@ -169,7 +181,7 @@ pub async fn mint<A: TeleportDB>(
 
 pub async fn redeem<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
-    Query(query): Query<RedeemQuery>,
+    Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
     let nft = db.get_nft(query.nft_id.clone()).await.expect("Failed to get NFT by id");
@@ -179,6 +191,14 @@ pub async fn redeem<A: TeleportDB>(
         .await
         .expect(format!("Failed to redeem NFT with id {}", nft.token_id).as_str());
     Json(TxHashResponse { hash: tx_hash })
+}
+
+pub async fn check_redeem<A: TeleportDB>(
+    State(_): State<SharedState<A>>,
+    Json(query): Json<CheckRedeemQuery>,
+) -> Json<CheckRedeemResponse> {
+    let safe = oai::is_tweet_safe(&query.content, &query.policy).await;
+    Json(CheckRedeemResponse { safe })
 }
 
 pub async fn get_tweet_id<A: TeleportDB>(

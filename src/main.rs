@@ -12,7 +12,7 @@ use endpoints::{
 use tokio::{fs, sync::Mutex};
 use tower_http::cors::CorsLayer;
 
-use crate::{actions::nft::subscribe_to_nft_events, db::TeleportDB};
+use crate::{actions::nft::subscribe_to_nft_events, db::TeleportDB, endpoints::check_redeem};
 
 mod actions;
 mod db;
@@ -72,7 +72,8 @@ async fn main() {
         .route("/new", axum::routing::get(new_user))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))
-        .route("/redeem", axum::routing::get(redeem))
+        .route("/redeem", axum::routing::post(redeem))
+        .route("/checkRedeem", axum::routing::post(check_redeem))
         .route("/tweetId", axum::routing::get(get_tweet_id))
         .route("/attestSgx", axum::routing::get(get_ratls_cert))
         .route("/", axum::routing::get(hello_world))

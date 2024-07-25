@@ -21,7 +21,7 @@ url = "2.5.1"
 serde_urlencoded = "0.7.1"
 serde_qs = "0.13.0"
 axum = "0.7.5"
-alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.1.0", features = [
+alloy = { git = "https://github.com/alloy-rs/alloy", version = "0.2.0", features = [
     "full",
     "signer-mnemonic"
 

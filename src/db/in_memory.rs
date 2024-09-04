@@ -6,7 +6,7 @@ use super::{PendingNFT, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
-    pub x_id_to_teleport_id: BTreeMap<String, String>,
+    pub x_id_to_address: BTreeMap<String, String>,
     pub users: BTreeMap<String, User>,
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
@@ -23,26 +23,26 @@ impl InMemoryDB {
 }
 
 impl TeleportDB for InMemoryDB {
-    async fn add_user(&mut self, teleport_id: String, user: User) -> eyre::Result<()> {
-        self.users.insert(teleport_id.clone(), user.clone());
+    async fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
+        self.users.insert(address.clone(), user.clone());
         if let Some(x_id) = user.x_id {
-            self.x_id_to_teleport_id.insert(x_id, teleport_id);
+            self.x_id_to_address.insert(x_id, address);
         }
 
         Ok(())
     }
 
-    async fn get_user_by_teleport_id(&self, teleport_id: String) -> eyre::Result<User> {
-        let user = self.users.get(&teleport_id).ok_or_else(|| eyre::eyre!("User not found"))?;
+    async fn get_user_by_address(&self, address: String) -> eyre::Result<User> {
+        let user = self.users.get(&address).ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
     }
 
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
-        let teleport_id = self
-            .x_id_to_teleport_id
+        let address = self
+            .x_id_to_address
             .get(&x_id)
-            .ok_or_else(|| eyre::eyre!("User teleport_id not found for x_id"))?;
-        let user = self.users.get(teleport_id).ok_or_else(|| eyre::eyre!("User not found"))?;
+            .ok_or_else(|| eyre::eyre!("User address not found for x_id"))?;
+        let user = self.users.get(address).ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
     }
 
@@ -65,7 +65,7 @@ impl TeleportDB for InMemoryDB {
             .pending_nfts
             .remove(&tx_hash)
             .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT { teleport_id: pending_nft.teleport_id, token_id };
+        let nft = NFT { address: pending_nft.address, token_id };
         self.nfts.insert(pending_nft.nft_id, nft);
         Ok(())
     }
@@ -97,14 +97,11 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            embedded_address: "address".to_string(),
-            sk: None,
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
-        let user = db.get_user_by_teleport_id("2".to_string()).await?;
+        let user = db.get_user_by_address("2".to_string()).await?;
         assert_eq!(user.access_token, "access token");
         assert_eq!(user.access_secret, "access secret");
-        assert_eq!(user.embedded_address, "address");
         Ok(())
     }
 
@@ -115,12 +112,9 @@ mod tests {
             x_id: None,
             access_token: "access token".to_string(),
             access_secret: "access secret".to_string(),
-            embedded_address: "address".to_string(),
-            sk: None,
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());
-        user.sk = Some("sk".to_string());
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         let fetched_user = db.get_user_by_x_id("1".to_string()).await?;
         assert_eq!(user, fetched_user);

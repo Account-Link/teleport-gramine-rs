@@ -4,7 +4,8 @@
 # Rust manifest example
 
 libos.entrypoint = "/gramine-ratls" 
-loader.log_level = "{{ log_level }}"
+ loader.log_level = "{{ log_level }}"
+
 
 loader.env.LD_LIBRARY_PATH = "/usr/local/lib:/usr{{ arch_libdir }}:{{ arch_libdir }}"
 
@@ -22,15 +23,15 @@ loader.uid = 65534
 loader.gid = 65534
 
 fs.mounts = [
+    { type = "encrypted", path = "/root/save", uri = "file:save_dir", key_name = "sgx_mrenclave" },
     { path = "/teleport.env", uri = "file:teleport.env" },
-  { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
-      { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
-  { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
+    { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
+    { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
+    { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
     { path = "/tmp", type = "tmpfs" },
-  { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },  # add this line
-  { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
-    { path = "/tmp/botCert.pem", uri = "file:/home/ecs-user/fullchain.pem" },
-    { path = "/tmp/botKey.pem", uri = "file:/home/ecs-user/privkey.pem" },
+    { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },  # add this line
+    { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
+
 ]
 
 
@@ -40,6 +41,10 @@ sgx.debug = true
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 sgx.remote_attestation = "dcap"
 
+sgx.allowed_files = [
+  "file:save_dir"
+
+]
 sgx.trusted_files = [
     "file:/usr/local/bin/gramine-ratls",
     "file:/usr{{ arch_libdir }}/",
@@ -48,9 +53,6 @@ sgx.trusted_files = [
   "file:{{ gramine.runtimedir() }}/",
   "file:{{ arch_libdir }}/",
     "file:teleport.env",
-    "file:main.db",
-"file:/home/ecs-user/privkey.pem",
-"file:/home/ecs-user/fullchain.pem",
   "file:/usr/lib/ssl/certs/",
   "file:/etc/ssl/certs/",
 
@@ -63,8 +65,4 @@ sgx.trusted_files = [
 # - any threads and threadpools you might be starting
 # - helper threads internal to Gramine — see:
 #   https://gramine.readthedocs.io/en/stable/manifest-syntax.html#number-of-threads
-sgx.enclave_size = "2G"
-sgx.max_threads = 128
-sys.insecure__allow_eventfd = true
-sys.stack.size = "2M"
-sys.brk.max_size = "256M"
+sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '32' }}

@@ -2,10 +2,9 @@ use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
-    network::TransactionBuilder,
-    primitives::{address, utils::parse_units, Address, Uint},
-    providers::{network::EthereumWallet, Provider, ProviderBuilder, WsConnect},
-    rpc::types::{BlockNumberOrTag, Filter, TransactionRequest},
+    primitives::{Address, Uint},
+    providers::{Provider, ProviderBuilder, WsConnect},
+    rpc::types::{BlockNumberOrTag, Filter},
     sol,
     sol_types::SolEventInterface,
 };
@@ -22,7 +21,10 @@ sol!(
     "abi/nft.json"
 );
 
-pub const NFT_ADDRESS: Address = address!("0A118618Edc63B90D95f96405B04963d4E2E2Aa3");
+pub fn get_nft_address() -> eyre::Result<Address> {
+    let nft_address = std::env::var("NFT_ADDRESS")?;
+    Ok(Address::from_str(&nft_address)?)
+}
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
     db: Arc<Mutex<A>>,
@@ -30,10 +32,11 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
 ) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
+    let nft_address = get_nft_address()?;
 
-    let filter = Filter::new().address(NFT_ADDRESS).from_block(BlockNumberOrTag::Latest);
+    let filter = Filter::new().address(nft_address).from_block(BlockNumberOrTag::Latest);
 
-    log::info!("Subscribed to events for contract at: {}", NFT_ADDRESS.to_string());
+    log::info!("Subscribed to events for contract at: {}", nft_address.to_string());
 
     let sub = provider.subscribe_logs(&filter).await?;
     let mut stream = sub.into_stream();
@@ -41,7 +44,7 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
     while let Some(log) = stream.next().await {
         if let Ok(event) = NFTEvents::decode_raw_log(log.topics(), &log.data().data, true) {
             match event {
-                NFTEvents::Redeem(redeem) => {
+                NFTEvents::RedeemTweet(redeem) => {
                     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
                     if safe {
                         let db_lock = db.lock().await;
@@ -89,7 +92,8 @@ pub async fn mint_nft(
     x_id: String,
     policy: String,
 ) -> eyre::Result<String> {
-    let nft = NFT::new(NFT_ADDRESS, provider);
+    let nft_address = get_nft_address()?;
+    let nft = NFT::new(nft_address, provider);
     let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
     let tx = mint.send().await?;
 
@@ -101,18 +105,14 @@ pub async fn mint_nft(
 }
 
 pub async fn redeem_nft(
-    wallet: EthereumWallet,
-    rpc_url: String,
+    provider: WalletProvider,
     token_id: String,
     content: String,
 ) -> eyre::Result<String> {
-    let rpc_url = rpc_url.parse()?;
-    let provider =
-        ProviderBuilder::new().with_recommended_fillers().wallet(wallet).on_http(rpc_url);
-
-    let nft = NFT::new(NFT_ADDRESS, provider);
+    let nft_address = get_nft_address()?;
+    let nft = NFT::new(nft_address, provider);
     let token_id = Uint::from_str(&token_id)?;
-    let redeem = nft.redeem(token_id, content);
+    let redeem = nft.redeem(token_id, content, 0u8);
     let tx = redeem.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -121,21 +121,25 @@ pub async fn redeem_nft(
     Ok(tx_hash.encode_hex_with_prefix())
 }
 
-pub async fn send_eth(
-    provider: WalletProvider,
-    recipient: Address,
-    amount: &str,
-) -> eyre::Result<()> {
-    let tx = TransactionRequest::default()
-        .with_to(recipient)
-        .with_value(parse_units(amount, "ether").unwrap().into());
-    let _ = provider.send_transaction(tx).await?;
-    Ok(())
-}
+// pub async fn send_eth(
+//     provider: WalletProvider,
+//     recipient: Address,
+//     amount: &str,
+// ) -> eyre::Result<()> {
+//     let tx = TransactionRequest::default()
+//         .with_to(recipient)
+//         .with_value(parse_units(amount, "ether").unwrap().into());
+//     let _ = provider.send_transaction(tx).await?;
+//     Ok(())
+// }
 
 #[cfg(test)]
 mod tests {
-    use alloy::signers::local::{coins_bip39::English, MnemonicBuilder};
+    use alloy::{
+        network::EthereumWallet,
+        primitives::address,
+        signers::local::{coins_bip39::English, MnemonicBuilder},
+    };
 
     use super::*;
     #[tokio::test]

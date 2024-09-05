@@ -1,0 +1,21 @@
+version: '3.9'
+
+services:
+
+  teleport:
+    image: teleport
+    build:
+      context: ./
+      dockerfile: Dockerfile
+      # args:
+    environment:
+      SGX: 1
+    volumes:
+      - untrustedhost:/root/untrustedhost
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+    devices:
+      - /dev/sgx_enclave
+      - /dev/sgx_provision
+
+volumes:
+  untrustedhost:

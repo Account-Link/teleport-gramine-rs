@@ -3,7 +3,7 @@
 
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
 
-SELF_EXE = target/release/exex
+SELF_EXE = target/release/teleport
 DB_FILE = target/release/main.db
 
 .PHONY: all

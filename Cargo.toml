@@ -34,3 +34,6 @@ http = "1.1.0"
 axum-server = {version = "0.6.0", features = ["tls-rustls"]}
 bincode = "1.3.3"
 getrandom = "0.2.15"
+
+acme-lib = "0.9.1"
+openssl = "0.10.63"

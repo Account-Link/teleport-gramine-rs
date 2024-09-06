@@ -77,7 +77,7 @@ async fn main() {
         .route("/tweetId", axum::routing::get(get_tweet_id))
         .route("/attestSgx", axum::routing::get(get_ratls_cert))
         .route("/", axum::routing::get(hello_world))
-        .layer(CorsLayer::very_permissive())
+        .layer(CorsLayer::permissive())
         .with_state(shared_state);
     // let config = RustlsConfig::from_pem(gram_crt_print.as_bytes().to_vec(), eph).await.unwrap();
     // let addr = SocketAddr::from(([0, 0, 0, 0], 3000));

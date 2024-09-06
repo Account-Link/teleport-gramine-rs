@@ -119,6 +119,30 @@
             font-size: 14px;
         }
     </style>
+    <script>
+        function postPolicy() {
+            const policy = "{{ policy }}";
+            const address = "{{ address }}";
+            const nft_id = "{{ nft_id }}";
+            fetch(`/mint`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ policy, address, nft_id })
+            })
+            .then(response => response.json())
+	    .then(data => {
+		if (window.opener && !window.opener.closed) {
+		    window.opener.postMessage(data, "*");
+		    window.close();
+		}
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
 </head>
 <body>
     <div class="container">
@@ -133,12 +157,12 @@
         <div class="main-text-container">
             <p class="main-text">
                 You are creating an account link on Teleport that allows anybody with the link to <strong class="orange-post">post once</strong> from your X account if their post passes the following LLM-enforced safeguard:
-                <span class="orange-quote">"no restriction, allow any post."</span>
+                <span class="orange-quote">{{ policy }}</span>
             </p>
         </div>
         <div class="buttons">
             <button class="btn btn-secondary">Cancel</button>
-            <button class="btn btn-primary">Continue</button>
+            <button class="btn btn-primary" onclick="postPolicy()">Continue</button>
         </div>
         <div class="permissions">
             <h2>You are getting the following security guarantees:</h2>

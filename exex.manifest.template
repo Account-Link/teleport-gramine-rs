@@ -3,7 +3,7 @@
 
 # Rust manifest example
 
-libos.entrypoint = "/gramine-ratls" 
+libos.entrypoint = "/target/release/teleport" 
  loader.log_level = "{{ log_level }}"
 
 
@@ -14,45 +14,49 @@ loader.env.RUST_BACKTRACE = "full"
 loader.env.RUST_LOG = "info"
 
 
-loader.argv = [
-    "gramine-ratls", "/tmp/crt.pem", "/tmp/key.pem", "--",
-    "target/release/exex",
-]
+loader.env.RPC_KEY = { passthrough = true }
+loader.env.NFT_MINTER_MNEMONIC = { passthrough = true }
+loader.env.APP_URL = { passthrough = true }
+loader.env.TWITTER_CONSUMER_KEY = { passthrough = true }
+loader.env.TWITTER_CONSUMER_SECRET = { passthrough = true }
+loader.env.OPENAI_API_KEY = { passthrough = true }
+loader.env.DATABASE_URL = { passthrough = true }
+
+loader.argv = ["target/release/teleport"]
+
+loader.entrypoint = "file:{{ gramine.libos }}"
 
 loader.uid = 65534
 loader.gid = 65534
 
 fs.mounts = [
-    { type = "encrypted", path = "/root/save", uri = "file:save_dir", key_name = "sgx_mrenclave" },
+    { type = "encrypted", path = "/root/save/", uri = "file:save_dir/", key_name = "_sgx_mrenclave" },
     { path = "/teleport.env", uri = "file:teleport.env" },
     { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
-    { path = "/gramine-ratls", uri = "file:{{ entrypoint }}" },
     { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
     { path = "/tmp", type = "tmpfs" },
     { path = "/usr/lib/ssl/certs/", uri = "file:/usr/lib/ssl/certs/" },  # add this line
     { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
-
+    { path = "/untrustedhost", uri = "file:untrustedhost/" },
 ]
-
+# fs.insecure__keys.debug_sgx_mrenclave = "ffeeddccbbaa99887766554433221100"
 
 sys.enable_extra_runtime_domain_names_conf = true
 
-sgx.debug = true
+sgx.debug = false
 sgx.edmm_enable = {{ 'true' if env.get('EDMM', '0') == '1' else 'false' }}
 sgx.remote_attestation = "dcap"
 
 sgx.allowed_files = [
-  "file:save_dir"
-
+  "file:untrustedhost"
 ]
 sgx.trusted_files = [
-    "file:/usr/local/bin/gramine-ratls",
     "file:/usr{{ arch_libdir }}/",
   "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
   "file:{{ gramine.runtimedir() }}/",
   "file:{{ arch_libdir }}/",
-    "file:teleport.env",
+  "file:teleport.env",
   "file:/usr/lib/ssl/certs/",
   "file:/etc/ssl/certs/",
 

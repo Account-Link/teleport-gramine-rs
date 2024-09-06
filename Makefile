@@ -3,7 +3,7 @@
 
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
 
-SELF_EXE = target/release/exex
+SELF_EXE = target/release/teleport
 DB_FILE = target/release/main.db
 
 .PHONY: all
@@ -18,6 +18,7 @@ else
 GRAMINE_LOG_LEVEL = error
 endif
 
+
 # Note that we're compiling in release mode regardless of the DEBUG setting passed
 # to Make, as compiling in debug mode results in an order of magnitude's difference in
 # performance that makes testing by running a benchmark with ab painful. The primary goal
@@ -28,7 +29,6 @@ $(SELF_EXE): Cargo.toml
 
 exex.manifest: exex.manifest.template
 	gramine-manifest \
-	-Dentrypoint=$$(command -v gramine-ratls) \
 		-Dlog_level=$(GRAMINE_LOG_LEVEL) \
 		-Darch_libdir=$(ARCH_LIBDIR) \
 		-Dself_exe=$(SELF_EXE) \
@@ -53,6 +53,8 @@ endif
 
 .PHONY: start-gramine-server
 start-gramine-server: all
+	$(eval include private.env)
+	$(eval export $(shell sed 's/=.*//' private.env))
 	$(GRAMINE) exex
 
 .PHONY: clean

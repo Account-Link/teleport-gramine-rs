@@ -6,7 +6,7 @@ use openssl::{
 };
 
 // from https://github.com/flashbots/gramine-andromeda-revm/blob/amiller-frame/src/main.rs
-pub fn create_csr(pkey: &PKey<pkey::Private>) -> eyre::Result<X509Req> {
+pub fn create_csr(domain: &str, pkey: &PKey<pkey::Private>) -> eyre::Result<X509Req> {
     //
     // the csr builder
     let mut req_bld = X509ReqBuilder::new().expect("X509ReqBuilder");
@@ -15,7 +15,7 @@ pub fn create_csr(pkey: &PKey<pkey::Private>) -> eyre::Result<X509Req> {
     x509_name.append_entry_by_text("C", "US").unwrap();
     x509_name.append_entry_by_text("ST", "IL").unwrap();
     x509_name.append_entry_by_text("O", "n/a").unwrap();
-    x509_name.append_entry_by_text("CN", "*.k37713.xyz").unwrap();
+    x509_name.append_entry_by_text("CN", domain).unwrap();
     let x509_name = x509_name.build();
 
     req_bld.set_subject_name(&x509_name).unwrap();
@@ -27,7 +27,7 @@ pub fn create_csr(pkey: &PKey<pkey::Private>) -> eyre::Result<X509Req> {
     let mut stack = Stack::new().expect("Stack::new");
     let ctx = req_bld.x509v3_context(None);
     let mut an = SubjectAlternativeName::new();
-    an.dns("*.k37713.xyz");
+    an.dns(domain);
 
     let ext = an.build(&ctx).expect("SubjectAlternativeName::build");
     stack.push(ext).expect("Stack::push");

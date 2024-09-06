@@ -37,3 +37,4 @@ getrandom = "0.2.15"
 
 acme-lib = "0.9.1"
 openssl = "0.10.63"
+sha2 = "0.10.8"

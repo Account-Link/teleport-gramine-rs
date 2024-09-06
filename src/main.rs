@@ -8,9 +8,7 @@ use alloy::{
 use tokio::time::Duration;
 
 use axum_server::tls_rustls::RustlsConfig;
-use endpoints::{
-    callback, get_ratls_cert, get_tweet_id, hello_world, mint, new_user, redeem, SharedState,
-};
+use endpoints::{callback, get_tweet_id, hello_world, mint, new_user, redeem, SharedState};
 use openssl::pkey::PKey;
 use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
@@ -25,6 +23,7 @@ mod cert;
 mod db;
 mod endpoints;
 mod oai;
+mod sgx_attest;
 mod twitter;
 
 const PRIVATE_KEY_PATH: &str = "data/private_key.pem";
@@ -54,9 +53,17 @@ async fn main() {
         pk
     };
 
-    let csr = create_csr(&pkey).unwrap();
+    let csr = create_csr(&tee_url, &pkey).unwrap();
     let csr_pem_bytes = csr.to_pem().unwrap();
     fs::write(CSR_PATH, csr_pem_bytes).await.expect("Failed to write csr to file");
+
+    let mut pk_bytes = pkey.public_key_to_pem().unwrap();
+    let mut csr_pem_bytes = csr.to_pem().unwrap();
+    pk_bytes.append(&mut csr_pem_bytes);
+    if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {
+        // handle quote
+        log::info!("quote: {:?}", quote);
+    }
 
     let signer =
         MnemonicBuilder::<English>::default().phrase(mnemonic).index(0).unwrap().build().unwrap();
@@ -84,7 +91,6 @@ async fn main() {
         .route("/redeem", axum::routing::post(redeem))
         .route("/checkRedeem", axum::routing::post(check_redeem))
         .route("/tweetId", axum::routing::get(get_tweet_id))
-        .route("/attestSgx", axum::routing::get(get_ratls_cert))
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::permissive())
         .with_state(shared_state);
@@ -97,7 +103,7 @@ async fn main() {
     let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
     let config =
         RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 3000));
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
     // let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
     tokio::spawn(async move {

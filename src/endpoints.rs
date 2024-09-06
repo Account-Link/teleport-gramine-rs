@@ -1,6 +1,5 @@
 use alloy::primitives::Address;
 use std::{str::FromStr, sync::Arc};
-use tokio::fs;
 
 use axum::{
     extract::{Query, State},
@@ -210,13 +209,6 @@ pub async fn get_tweet_id<A: TeleportDB>(
     drop(db);
 
     Json(TweetIdResponse { tweet_id })
-}
-
-pub async fn get_ratls_cert() -> Json<AttestationResponse> {
-    let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
-        .await
-        .expect("gramine ratls rootCA.crt not found");
-    Json(AttestationResponse { cert })
 }
 
 pub async fn hello_world() -> &'static str {

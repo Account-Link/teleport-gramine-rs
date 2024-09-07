@@ -29,6 +29,7 @@ mod twitter;
 const PRIVATE_KEY_PATH: &str = "data/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
 const CSR_PATH: &str = "untrustedhost/request.csr";
+const QUOTE_PATH: &str = "untrustedhost/quote.dat";
 
 #[tokio::main]
 async fn main() {
@@ -62,7 +63,8 @@ async fn main() {
     pk_bytes.append(&mut csr_pem_bytes);
     if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {
         // handle quote
-        log::info!("quote: {:?}", quote);
+        log::info!("Writing quote to file: {}", QUOTE_PATH);
+        fs::write(QUOTE_PATH, quote).await.expect("Failed to write quote to file");
     }
 
     let signer =

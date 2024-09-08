@@ -29,6 +29,12 @@ pub struct PendingNFT {
     pub nft_id: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
+pub struct Session {
+    pub x_id: String,
+    pub address: String,
+}
+
 pub trait TeleportDB {
     // async fn init(&mut self) -> eyre::Result<()>;
     // async fn open_from_file(file_path: &str) -> eyre::Result<Self>;
@@ -44,7 +50,7 @@ pub trait TeleportDB {
     async fn get_nft(&self, nft_id: String) -> eyre::Result<NFT>;
     async fn add_tweet(&mut self, token_id: String, tweet_id: String) -> eyre::Result<()>;
     async fn get_tweet(&self, token_id: String) -> eyre::Result<String>;
-    async fn add_session(&mut self, address: String) -> eyre::Result<String>;
-    async fn get_session(&self, session_id: String) -> eyre::Result<String>;
+    async fn add_session(&mut self, session: Session) -> eyre::Result<String>;
+    async fn get_session(&self, session_id: String) -> eyre::Result<Session>;
     async fn serialize(&self) -> eyre::Result<Vec<u8>>;
 }

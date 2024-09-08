@@ -8,7 +8,7 @@ use alloy::{
 use tokio::time::Duration;
 
 use axum_server::tls_rustls::RustlsConfig;
-use endpoints::{callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState};
+use endpoints::{approve_mint, callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState};
 use openssl::pkey::PKey;
 use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
@@ -25,6 +25,7 @@ mod endpoints;
 mod oai;
 mod sgx_attest;
 mod twitter;
+mod templates;
 
 const PRIVATE_KEY_PATH: &str = "data/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
@@ -88,6 +89,7 @@ async fn main() {
 
     let app = axum::Router::new()
         .route("/new", axum::routing::get(register_or_login))
+        .route("/approve", axum::routing::get(approve_mint))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))
         .route("/redeem", axum::routing::post(redeem))

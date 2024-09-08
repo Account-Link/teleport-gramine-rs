@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{PendingNFT, TeleportDB, User, NFT};
+use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
@@ -11,7 +11,7 @@ pub struct InMemoryDB {
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
-    pub sessions: BTreeMap<String, String>,
+    pub sessions: BTreeMap<String, Session>,
 }
 
 impl InMemoryDB {
@@ -86,13 +86,13 @@ impl TeleportDB for InMemoryDB {
         Ok(tweet_id.clone())
     }
 
-    async fn add_session(&mut self, x_id: String) -> eyre::Result<String> {
+    async fn add_session(&mut self, session: Session) -> eyre::Result<String> {
         let session_id: i128 = rand::random();
-        self.sessions.insert(session_id.to_string(), x_id);
+        self.sessions.insert(session_id.to_string(), session);
         Ok(session_id.to_string())
     }
 
-    async fn get_session(&self, session_id: String) -> eyre::Result<String> {
+    async fn get_session(&self, session_id: String) -> eyre::Result<Session> {
         let x_id = self.sessions.get(&session_id).ok_or_else(|| eyre::eyre!("Session not found"))?;
         Ok(x_id.clone())
     }

@@ -41,9 +41,9 @@ tokio-postgres = "0.7.2"
 rustls = "0.19.0"
 webpki-roots = "0.21.0"
 tokio-postgres-rustls = "0.8.0"
-tower-sessions = "0.13.0"
 rand = "0.8.5"
 axum-extra = {version="0.9.3", features=["cookie"]}
+askama = "0.12.1"
 
 [features]
 default = ["https"]

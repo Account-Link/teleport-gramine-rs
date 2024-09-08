@@ -6,9 +6,9 @@ use std::{str::FromStr, sync::Arc};
 
 use axum::{
     extract::{Query, State},
-    response::Redirect,
-    Json,
     http::StatusCode,
+    response::{IntoResponse, Redirect},
+    Json,
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
@@ -17,17 +17,12 @@ use crate::{
     actions::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
-    },
-    db::{AccessTokens, PendingNFT, TeleportDB},
-    oai,
-    twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
+    }, db::{self, AccessTokens, PendingNFT, Session, TeleportDB}, oai, templates::{HtmlTemplate, PolicyTemplate}, twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token}
 };
 
 use alloy::signers::Signer;
 
-use axum_extra::{
-    extract::cookie::{CookieJar, Cookie},
-};
+use axum_extra::extract::cookie::{Cookie, CookieJar};
 
 pub const SESSION_ID_COOKIE_NAME: &str = "teleport_session_id";
 
@@ -145,7 +140,8 @@ pub async fn callback<A: TeleportDB>(
     let access_tokens = AccessTokens { token: access_token, secret: access_secret };
 
     let x_info = get_user_x_info(access_tokens.clone()).await;
-    let session_id = db.add_session(x_info.id.clone()).await.expect("Failed to add session to database");
+    let session_id =
+        db.add_session(Session { x_id: x_info.id.clone(), address: address.clone()}).await.expect("Failed to add session to database");
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
@@ -161,7 +157,10 @@ pub async fn callback<A: TeleportDB>(
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
     let url_with_params =
         format!("{}/create?sig={:?}&success=true&{}", shared_state.app_url, sig, encoded_x_info);
-    (jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, session_id)), Redirect::temporary(&url_with_params))
+    (
+        jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, session_id)),
+        Redirect::temporary(&url_with_params),
+    )
 }
 
 pub async fn mint<A: TeleportDB>(
@@ -175,8 +174,8 @@ pub async fn mint<A: TeleportDB>(
 
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
-        let x_id = db.get_session(session_id.to_string()).await.expect("Failed to get session");
-        if x_id != user.x_id.clone().unwrap() {
+        let session = db.get_session(session_id.to_string()).await.expect("Failed to get session");
+        if session.x_id != user.x_id.clone().unwrap() {
             return Err(StatusCode::UNAUTHORIZED);
         }
     } else {
@@ -239,6 +238,25 @@ pub async fn get_tweet_id<A: TeleportDB>(
     drop(db);
 
     Json(TweetIdResponse { tweet_id })
+}
+
+pub async fn approve_mint<A: TeleportDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<MintQuery>,
+    jar: CookieJar,
+) -> impl IntoResponse {
+   if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
+        let session_id = session_id.value();
+        let db = shared_state.db.lock().await;
+        let session = db.get_session(session_id.to_string()).await.expect("Failed to get session");
+        if session.address != query.address {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+    } else {
+        return Err(StatusCode::UNAUTHORIZED);
+    };
+    let template = PolicyTemplate { policy: query.policy };
+    Ok(HtmlTemplate(template))
 }
 
 pub async fn hello_world() -> &'static str {

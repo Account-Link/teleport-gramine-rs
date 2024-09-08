@@ -11,6 +11,7 @@ pub struct InMemoryDB {
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
+    pub sessions: BTreeMap<String, String>,
 }
 
 impl InMemoryDB {
@@ -83,6 +84,17 @@ impl TeleportDB for InMemoryDB {
     async fn get_tweet(&self, token_id: String) -> eyre::Result<String> {
         let tweet_id = self.tweets.get(&token_id).ok_or_else(|| eyre::eyre!("Tweet not found"))?;
         Ok(tweet_id.clone())
+    }
+
+    async fn add_session(&mut self, x_id: String) -> eyre::Result<String> {
+        let session_id: i128 = rand::random();
+        self.sessions.insert(session_id.to_string(), x_id);
+        Ok(session_id.to_string())
+    }
+
+    async fn get_session(&self, session_id: String) -> eyre::Result<String> {
+        let x_id = self.sessions.get(&session_id).ok_or_else(|| eyre::eyre!("Session not found"))?;
+        Ok(x_id.clone())
     }
 }
 

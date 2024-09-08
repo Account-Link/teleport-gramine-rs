@@ -97,21 +97,30 @@ async fn main() {
         .layer(CorsLayer::permissive())
         .with_state(shared_state);
 
-    log::info!("Waiting for cert ...");
-    while !Path::new(CERTIFICATE_PATH).exists() {
-        sleep(Duration::from_secs(1)).await;
+    #[cfg(feature = "https")]
+    {
+        log::info!("Waiting for cert ...");
+        while !Path::new(CERTIFICATE_PATH).exists() {
+            sleep(Duration::from_secs(1)).await;
+        }
+        log::info!("Cert found");
+        let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
+        let config =
+            RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
+        let addr = SocketAddr::from(([0, 0, 0, 0], 8001));    
+        tokio::spawn(async move {
+            axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
+        });
     }
-    log::info!("Cert found");
-    let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
-    let config =
-        RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
-    // let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
 
-    tokio::spawn(async move {
-        // axum::serve(listener, app).await.unwrap();
-        axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
-    });
+    #[cfg(not(feature = "https"))]
+    {
+        let listener = tokio::net::TcpListener::bind("0.0.0.0:8001").await.unwrap();
+        tokio::spawn(async move {
+            axum::serve(listener, app).await.unwrap();
+        });
+    }
+
     let db_clone = db.clone();
     tokio::spawn(async move {
         subscribe_to_nft_events(db_clone, ws_rpc_url).await.unwrap();

@@ -8,3 +8,5 @@ exex.manifest
 exex.sig
 *.csr
 *.pem
+*.tmp
+certbot

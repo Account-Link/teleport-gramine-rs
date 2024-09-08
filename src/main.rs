@@ -8,7 +8,7 @@ use alloy::{
 use tokio::time::Duration;
 
 use axum_server::tls_rustls::RustlsConfig;
-use endpoints::{callback, get_tweet_id, hello_world, mint, new_user, redeem, SharedState};
+use endpoints::{callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState};
 use openssl::pkey::PKey;
 use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
@@ -72,7 +72,7 @@ async fn main() {
 
     let provider = ProviderBuilder::new()
         .with_recommended_fillers()
-        .wallet(signer.into())
+        .wallet(signer.clone().into())
         .on_http(rpc_url.parse().unwrap());
 
     let db = if std::path::Path::new(&db_path).exists() {
@@ -84,10 +84,10 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
-    let shared_state = SharedState { db: db.clone(), provider, app_url, tee_url };
+    let shared_state = SharedState { db: db.clone(), provider, app_url, tee_url, signer };
 
     let app = axum::Router::new()
-        .route("/new", axum::routing::get(new_user))
+        .route("/new", axum::routing::get(register_or_login))
         .route("/callback", axum::routing::get(callback))
         .route("/mint", axum::routing::get(mint))
         .route("/redeem", axum::routing::post(redeem))
@@ -115,7 +115,7 @@ async fn main() {
 
     #[cfg(not(feature = "https"))]
     {
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:8001").await.unwrap();
+        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
         tokio::spawn(async move {
             axum::serve(listener, app).await.unwrap();
         });

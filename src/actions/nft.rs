@@ -55,8 +55,7 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                         drop(db_lock);
                         if let Some(user) = user {
                             let tweet_id = send_tweet(
-                                user.access_token,
-                                user.access_secret,
+                                user.access_tokens.unwrap(),
                                 redeem.content.to_string(),
                             )
                             .await?;

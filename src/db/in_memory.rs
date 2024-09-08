@@ -88,30 +88,33 @@ impl TeleportDB for InMemoryDB {
 
 #[cfg(test)]
 mod tests {
+    use crate::db::AccessTokens;
+
     use super::*;
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
+        let access_tokens = AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let user = User {
             x_id: None,
-            access_token: "access token".to_string(),
-            access_secret: "access secret".to_string(),
+            access_tokens: Some(access_tokens.clone()),
+            oauth_tokens: access_tokens.clone(),
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         let user = db.get_user_by_address("2".to_string()).await?;
-        assert_eq!(user.access_token, "access token");
-        assert_eq!(user.access_secret, "access secret");
+        assert_eq!(user.access_tokens.unwrap(), access_tokens);
         Ok(())
     }
 
     #[tokio::test]
     async fn db_test_overwrite() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
+        let access_tokens = AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let mut user = User {
             x_id: None,
-            access_token: "access token".to_string(),
-            access_secret: "access secret".to_string(),
+            access_tokens: Some(access_tokens.clone()),
+            oauth_tokens: access_tokens.clone(),
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());

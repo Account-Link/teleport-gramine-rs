@@ -3,11 +3,18 @@ use serde::{Deserialize, Serialize};
 pub mod in_memory;
 // pub mod sqlite;
 
-#[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
+pub struct AccessTokens {
+    pub token: String,
+    pub secret: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]
 pub struct User {
     pub x_id: Option<String>,
-    pub access_token: String,
-    pub access_secret: String,
+    pub access_tokens: Option<AccessTokens>,
+    pub oauth_tokens: AccessTokens,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]

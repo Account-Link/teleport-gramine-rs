@@ -1,4 +1,7 @@
-use alloy::primitives::Address;
+use alloy::{
+    primitives::Address,
+    signers::{k256::ecdsa::SigningKey, local::LocalSigner},
+};
 use std::{str::FromStr, sync::Arc};
 
 use axum::{
@@ -14,14 +17,17 @@ use crate::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
     },
-    db::{PendingNFT, TeleportDB, User},
+    db::{AccessTokens, PendingNFT, TeleportDB},
     oai,
-    twitter::{authorize_token, get_user_x_info, request_oauth_token},
+    twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
 };
+
+use alloy::signers::Signer;
 
 #[derive(Deserialize)]
 pub struct NewUserQuery {
     address: String,
+    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
@@ -29,6 +35,7 @@ pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
     address: String,
+    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
@@ -79,43 +86,33 @@ pub struct CheckRedeemResponse {
 pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
+    pub signer: LocalSigner<SigningKey>,
     pub app_url: String,
     pub tee_url: String,
 }
 
-pub async fn new_user<A: TeleportDB>(
+pub async fn register_or_login<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
     let address = query.address;
+    let frontend_nonce = query.frontend_nonce;
 
-    let db_lock = shared_state.db.lock().await;
-    let existing_user = db_lock.get_user_by_address(address.clone()).await.ok();
-    if let Some(user) = existing_user {
-        if user.x_id.is_some() {
-            let x_info = get_user_x_info(user.access_token, user.access_secret).await;
-            let encoded_x_info = serde_urlencoded::to_string(&x_info)
-                .expect("Failed to encode x_info as query params");
-            let url_with_params = format!(
-                "{}/create?already_created=true&success=true&{}",
-                shared_state.app_url, encoded_x_info
-            );
-            return Redirect::temporary(&url_with_params);
-        }
-    }
-    drop(db_lock);
+    let callback_url =
+        get_callback_url(shared_state.tee_url.clone(), address.clone(), frontend_nonce);
 
-    let (oauth_token, oauth_token_secret) =
-        request_oauth_token(address.clone(), shared_state.tee_url)
-            .await
-            .expect("Failed to request oauth token");
-    let user =
-        User { x_id: None, access_token: oauth_token.clone(), access_secret: oauth_token_secret };
+    let oauth_tokens =
+        request_oauth_token(callback_url).await.expect("Failed to request oauth token");
+
     let mut db = shared_state.db.lock().await;
-    db.add_user(address.clone(), user).await.expect("Failed to add oauth tokens to database");
-    drop(db);
+    let mut existing_user = db.get_user_by_address(address.clone()).await.ok().unwrap_or_default();
+    existing_user.oauth_tokens = oauth_tokens.clone();
+    db.add_user(address.clone(), existing_user)
+        .await
+        .expect("Failed to add oauth tokens to database");
 
-    let url = format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_token);
+    let url =
+        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
 
     Redirect::temporary(&url)
 }
@@ -127,23 +124,34 @@ pub async fn callback<A: TeleportDB>(
     let oauth_token = query.oauth_token;
     let oauth_verifier = query.oauth_verifier;
     let address = query.address;
+    let frontend_nonce = query.frontend_nonce;
 
     let mut db = shared_state.db.lock().await;
-    let oauth_user =
+    let mut oauth_user =
         db.get_user_by_address(address.clone()).await.expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_user.access_token);
+    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
     let (access_token, access_secret) =
-        authorize_token(oauth_token, oauth_user.access_secret, oauth_verifier).await.unwrap();
-    let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
-    let user = User { x_id: Some(x_info.id.clone()), access_token, access_secret };
-    db.add_user(address, user.clone()).await.expect("Failed to add user to database");
-    drop(db);
+        authorize_token(oauth_user.oauth_tokens.clone(), oauth_verifier).await.unwrap();
+
+    let access_tokens = AccessTokens { token: access_token, secret: access_secret };
+
+    let x_info = get_user_x_info(access_tokens.clone()).await;
+
+    if oauth_user.x_id.is_none() {
+        oauth_user.x_id = Some(x_info.id.clone());
+        oauth_user.access_tokens = Some(access_tokens.clone());
+        db.add_user(address, oauth_user.clone()).await.expect("Failed to add user to database");
+        drop(db);
+    }
+
+    let msg = format!("nonce={}&x_id={}", frontend_nonce, x_info.id);
+    let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
     let url_with_params =
-        format!("{}/create?success=true&{}", shared_state.app_url, encoded_x_info);
+        format!("{}/create?sig={:?}&success=true&{}", shared_state.app_url, sig, encoded_x_info);
 
     Redirect::temporary(&url_with_params)
 }
@@ -183,7 +191,10 @@ pub async fn redeem<A: TeleportDB>(
     Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
-    let nft = db.get_nft(query.nft_id.clone()).await.unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id.to_string()));
+    let nft = db
+        .get_nft(query.nft_id.clone())
+        .await
+        .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id.to_string()));
     drop(db);
 
     let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)

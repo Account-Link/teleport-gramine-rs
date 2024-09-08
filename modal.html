@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authorize Teleport by Account.link</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f7f9fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 600px;
+            padding: 30px;
+        }
+        .twitter-logo {
+            width: 40px;
+            height: 40px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            font-size: 23px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+        .main-text-container {
+            margin: 0 20px 25px;
+        }
+        .main-text {
+            text-align: left;
+            line-height: 1.5;
+            color: #14171a;
+            font-size: 16px;
+        }
+        .orange-quote {
+            /* color: #FF9800; */
+            font-weight: 600;
+            display: block;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 12px 24px;
+            border-radius: 9999px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+        .btn-primary {
+            background-color: #1da1f2;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #fff;
+            color: #1da1f2;
+            border: 1px solid #1da1f2;
+        }
+        .permissions {
+            background-color: #e8f5e9; /* Light green background */
+            border: 1px solid #c8e6c9; /* Slightly darker green border */
+            border-radius: 4px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .permissions h2 {
+            font-size: 18px;
+            color: #2e7d32; /* Darker green for the heading */
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .permissions ul {
+            padding-left: 20px;
+            margin-bottom: 0;
+            color: #33691e; /* Dark green for list items */
+        }
+        .permissions li {
+            margin-bottom: 10px;
+        }
+        .app-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .app-logo {
+            width: 48px;
+            height: 48px;
+            margin-right: 15px;
+            background-color: #1da1f2;
+            border-radius: 12px;
+        }
+        .orange-post {
+            /* color: #FF9800; */
+        }
+        .app-details {
+            flex-grow: 1;
+        }
+        .app-name {
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        .app-url {
+            color: #657786;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authorize Teleport to create an account link?</h1>
+        <!-- <div class="app-info">
+            <div class="app-logo"></div>
+            <div class="app-details">
+                <div class="app-name">Teleport</div>
+                <div class="app-url">teleport.best</div>
+            </div>
+        </div> -->
+        <div class="main-text-container">
+            <p class="main-text">
+                You are creating an account link on Teleport that allows anybody with the link to <strong class="orange-post">post once</strong> from your X account if their post passes the following LLM-enforced safeguard:
+                <span class="orange-quote">"no restriction, allow any post."</span>
+            </p>
+        </div>
+        <div class="buttons">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-primary">Continue</button>
+        </div>
+        <div class="permissions">
+            <h2>You are getting the following security guarantees:</h2>
+            <ul>
+                <li>This page is served from the backend running in a trusted execution environment (TEE).</li>
+                <li>If an account link is created, then the you approved the LLM safeguard and clicked "continue" once. For example, if you only click "continue" 5 times, at most 5 posts will be made.</li>
+                <li>We will not try to protect the one-time-tokens themselves - they are shared with the frontend website for convenience.</li>
+                <li>The account link owner is restricted to only be able to post subject to LLM filter, they cannot follow/unfollow/like/post/repost/DM/update yor account settings.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

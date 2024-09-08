@@ -9,6 +9,8 @@ use axum::{
 };
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
+use rustls::ClientConfig;
+use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
     actions::{
@@ -208,6 +210,28 @@ pub async fn get_tweet_id<A: TeleportDB>(
     let db = shared_state.db.lock().await;
     let tweet_id = db.get_tweet(query.token_id.clone()).await.expect("Failed to get tweet id");
     drop(db);
+
+    let database_url = std::env::var("DATABASE_URL")
+        .expect("DATABASE_URL must be set");
+    let mut config = ClientConfig::new();
+    config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+    let tls = MakeRustlsConnect::new(config);
+    let (client, connection) = tokio_postgres::connect(
+        &database_url,
+        tls,
+    ).await.unwrap();
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            eprintln!("connection error: {}", e);
+        }
+    });
+    let token_id_int: i32 = query.token_id.parse().unwrap();
+    client.execute(
+        "UPDATE \"RedeemedIndex\" SET \"tweetId\" = $1 WHERE \"tokenId\" = $2",
+        &[&tweet_id, &token_id_int],
+    )
+    .await
+    .expect("Failed to update tweetId in RedeemedIndex");
 
     Json(TweetIdResponse { tweet_id })
 }

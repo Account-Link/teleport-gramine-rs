@@ -183,7 +183,7 @@ pub async fn redeem<A: TeleportDB>(
     Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
-    let nft = db.get_nft(query.nft_id.clone()).await.expect("Failed to get NFT by id");
+    let nft = db.get_nft(query.nft_id.clone()).await.unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id.to_string()));
     drop(db);
 
     let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)

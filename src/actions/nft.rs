@@ -14,6 +14,9 @@ use NFT::NFTEvents;
 
 use super::wallet::WalletProvider;
 use crate::{db::TeleportDB, oai, twitter::send_tweet};
+use rustls::ClientConfig;
+use tokio_postgres_rustls::MakeRustlsConnect;
+
 
 sol!(
     #[sol(rpc)]
@@ -62,6 +65,30 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                             db.add_tweet(redeem.tokenId.to_string(), tweet_id).await?;
                             drop(db);
                         }
+                        let database_url = std::env::var("DATABASE_URL")
+                            .expect("DATABASE_URL must be set");
+                        let mut config = ClientConfig::new();
+                        config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+                        let tls = MakeRustlsConnect::new(config);
+                        let (client, connection) = tokio_postgres::connect(
+                            &database_url,
+                            tls,
+                        ).await?;
+                        tokio::spawn(async move {
+                            if let Err(e) = connection.await {
+                                eprintln!("connection error: {}", e);
+                            }
+                        });
+                        let token_id_int: i32 = redeem.tokenId.to_string().parse().unwrap();
+                        client.execute(
+                            "DELETE FROM \"NftIndex\" WHERE \"tokenId\" = $1",
+                            &[&token_id_int],
+                        )
+                        .await?;
+                        log::info!(
+                            "NFT {} deleted on postgresdb.",
+                            redeem.tokenId.to_string()
+                        );
                     }
                 }
                 NFTEvents::NewTokenData(new_token_data) => {
@@ -76,6 +103,49 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                         "NFT minted with id {} to address {}",
                         new_token_data.tokenId.to_string(),
                         new_token_data.to.to_string()
+                    );
+                }
+                NFTEvents::Transfer(transfer) => {
+                    let from = transfer.from.to_string();
+                    let to = transfer.to.to_string();
+                    let token_id_int: i32 = transfer.tokenId.to_string().parse().unwrap();
+    
+                    let database_url = std::env::var("DATABASE_URL")
+                        .expect("DATABASE_URL must be set");
+                    let mut config = ClientConfig::new();
+                    config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+                    let tls = MakeRustlsConnect::new(config);
+                    let (client, connection) = tokio_postgres::connect(
+                        &database_url,
+                        tls,
+                    ).await?;
+                    tokio::spawn(async move {
+                        if let Err(e) = connection.await {
+                            eprintln!("connection error: {}", e);
+                        }
+                    });
+    
+                    if from == "0x0000000000000000000000000000000000000000" {
+                        // Do nothing
+                    } else if to == "0x0000000000000000000000000000000000000000" {
+                        client.execute(
+                            "DELETE FROM \"NftIndex\" WHERE \"tokenId\" = $1",
+                            &[&token_id_int],
+                        )
+                        .await?;
+                    } else {
+                        client.execute(
+                            "UPDATE \"NftIndex\" SET \"userId\" = $1 WHERE \"tokenId\" = $2",
+                            &[&to, &token_id_int],
+                        )
+                        .await?;
+                    }
+
+                    log::info!(
+                        "NFT {} transferred from {} to {}.",
+                        token_id_int,
+                        from,
+                        to
                     );
                 }
                 _ => continue,

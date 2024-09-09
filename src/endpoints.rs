@@ -2,6 +2,7 @@ use alloy::{
     primitives::Address,
     signers::{k256::ecdsa::SigningKey, local::LocalSigner},
 };
+use http::HeaderMap;
 use std::{str::FromStr, sync::Arc};
 
 use axum::{
@@ -171,9 +172,18 @@ pub async fn callback<A: TeleportDB>(
 
 pub async fn mint(
     jar: CookieJar,
+    headers: HeaderMap,
     State(shared_state): State<SharedState<InMemoryDB>>,
     Json(query): Json<MintQuery>,
 ) -> Result<Json<TxHashResponse>, StatusCode> {
+    if let Some(referer) = headers.get("Referer") {
+        let referer = referer.to_str().unwrap_or("");
+        if !referer.starts_with(&format!("{}/approve", shared_state.tee_url)) {
+            return Err(StatusCode::FORBIDDEN);
+        }
+    } else {
+        return Err(StatusCode::FORBIDDEN);
+    }
     let db = shared_state.db.lock().await;
     let user =
         db.get_user_by_address(query.address.clone()).await.expect("Failed to get user by address");

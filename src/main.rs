@@ -8,7 +8,9 @@ use alloy::{
 use tokio::time::Duration;
 
 use axum_server::tls_rustls::RustlsConfig;
-use endpoints::{approve_mint, callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState};
+use endpoints::{
+    approve_mint, callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState,
+};
 use openssl::pkey::PKey;
 use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
@@ -24,8 +26,8 @@ mod db;
 mod endpoints;
 mod oai;
 mod sgx_attest;
-mod twitter;
 mod templates;
+mod twitter;
 
 const PRIVATE_KEY_PATH: &str = "data/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
@@ -91,7 +93,7 @@ async fn main() {
         .route("/new", axum::routing::get(register_or_login))
         .route("/approve", axum::routing::get(approve_mint))
         .route("/callback", axum::routing::get(callback))
-        .route("/mint", axum::routing::get(mint))
+        .route("/mint", axum::routing::post(mint))
         .route("/redeem", axum::routing::post(redeem))
         .route("/checkRedeem", axum::routing::post(check_redeem))
         .route("/tweetId", axum::routing::get(get_tweet_id))
@@ -109,7 +111,7 @@ async fn main() {
         let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
         let config =
             RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
-        let addr = SocketAddr::from(([0, 0, 0, 0], 8001));    
+        let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
         tokio::spawn(async move {
             axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
         });

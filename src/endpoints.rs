@@ -17,7 +17,11 @@ use crate::{
     actions::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
-    }, db::{self, AccessTokens, PendingNFT, Session, TeleportDB}, oai, templates::{HtmlTemplate, PolicyTemplate}, twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token}
+    },
+    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
+    oai,
+    templates::{HtmlTemplate, PolicyTemplate},
+    twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
 };
 
 use alloy::signers::Signer;
@@ -140,8 +144,10 @@ pub async fn callback<A: TeleportDB>(
     let access_tokens = AccessTokens { token: access_token, secret: access_secret };
 
     let x_info = get_user_x_info(access_tokens.clone()).await;
-    let session_id =
-        db.add_session(Session { x_id: x_info.id.clone(), address: address.clone()}).await.expect("Failed to add session to database");
+    let session_id = db
+        .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
+        .await
+        .expect("Failed to add session to database");
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
@@ -163,10 +169,10 @@ pub async fn callback<A: TeleportDB>(
     )
 }
 
-pub async fn mint<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
-    Query(query): Query<MintQuery>,
+pub async fn mint(
     jar: CookieJar,
+    State(shared_state): State<SharedState<InMemoryDB>>,
+    Json(query): Json<MintQuery>,
 ) -> Result<Json<TxHashResponse>, StatusCode> {
     let db = shared_state.db.lock().await;
     let user =
@@ -174,7 +180,10 @@ pub async fn mint<A: TeleportDB>(
 
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
-        let session = db.get_session(session_id.to_string()).await.expect("Failed to get session");
+        let session = db.get_session(session_id.to_string()).await.expect(
+            "Failed to get
+    session",
+        );
         if session.x_id != user.x_id.clone().unwrap() {
             return Err(StatusCode::UNAUTHORIZED);
         }
@@ -212,12 +221,12 @@ pub async fn redeem<A: TeleportDB>(
     let nft = db
         .get_nft(query.nft_id.clone())
         .await
-        .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id.to_string()));
+        .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
     drop(db);
 
     let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)
         .await
-        .expect(format!("Failed to redeem NFT with id {}", nft.token_id).as_str());
+        .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
     Json(TxHashResponse { hash: tx_hash })
 }
 
@@ -245,17 +254,23 @@ pub async fn approve_mint<A: TeleportDB>(
     Query(query): Query<MintQuery>,
     jar: CookieJar,
 ) -> impl IntoResponse {
-   if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
+    if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
         let db = shared_state.db.lock().await;
-        let session = db.get_session(session_id.to_string()).await.expect("Failed to get session");
+        let session = db.get_session(session_id.to_string()).await.expect(
+            "Failed to get
+    session",
+        );
         if session.address != query.address {
+            log::info!("Session address does not match");
             return Err(StatusCode::UNAUTHORIZED);
         }
     } else {
-        return Err(StatusCode::UNAUTHORIZED);
+        log::info!("No session found");
+        // return Err(StatusCode::UNAUTHORIZED);
     };
-    let template = PolicyTemplate { policy: query.policy };
+    let template =
+        PolicyTemplate { policy: query.policy, address: query.address, nft_id: query.nft_id };
     Ok(HtmlTemplate(template))
 }
 

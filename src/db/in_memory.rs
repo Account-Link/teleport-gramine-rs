@@ -93,7 +93,8 @@ impl TeleportDB for InMemoryDB {
     }
 
     async fn get_session(&self, session_id: String) -> eyre::Result<Session> {
-        let x_id = self.sessions.get(&session_id).ok_or_else(|| eyre::eyre!("Session not found"))?;
+        let x_id =
+            self.sessions.get(&session_id).ok_or_else(|| eyre::eyre!("Session not found"))?;
         Ok(x_id.clone())
     }
 }
@@ -107,7 +108,8 @@ mod tests {
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
-        let access_tokens = AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
+        let access_tokens =
+            AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let user = User {
             x_id: None,
             access_tokens: Some(access_tokens.clone()),
@@ -122,7 +124,8 @@ mod tests {
     #[tokio::test]
     async fn db_test_overwrite() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
-        let access_tokens = AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
+        let access_tokens =
+            AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let mut user = User {
             x_id: None,
             access_tokens: Some(access_tokens.clone()),

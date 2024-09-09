@@ -92,10 +92,7 @@ pub async fn get_user_x_info(tokens: AccessTokens) -> UserInfo {
     user_info
 }
 
-pub async fn send_tweet(
-    tokens: AccessTokens,
-    tweet: String,
-) -> eyre::Result<String> {
+pub async fn send_tweet(tokens: AccessTokens, tweet: String) -> eyre::Result<String> {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY")?;
     let app_secret = std::env::var("TWITTER_CONSUMER_SECRET")?;
     let secrets =
@@ -137,13 +134,15 @@ pub async fn like_tweet(
     Ok(())
 }
 
-pub fn get_callback_url(callback_base_url: String, address: String, frontend_nonce: String) -> String {
+pub fn get_callback_url(
+    callback_base_url: String,
+    address: String,
+    frontend_nonce: String,
+) -> String {
     format!("{}/callback?address={}&frontend_nonce={}", callback_base_url, address, frontend_nonce)
 }
 
-pub async fn request_oauth_token(
-    callback_url: String,
-) -> eyre::Result<AccessTokens> {
+pub async fn request_oauth_token(callback_url: String) -> eyre::Result<AccessTokens> {
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
@@ -164,7 +163,10 @@ pub async fn request_oauth_token(
     let request_token_body =
         serde_urlencoded::from_bytes::<RequestTokenResponseBody>(&response_bytes)?;
     assert!(request_token_body.oauth_callback_confirmed);
-    Ok(AccessTokens { token: request_token_body.oauth_token, secret: request_token_body.oauth_token_secret })
+    Ok(AccessTokens {
+        token: request_token_body.oauth_token,
+        secret: request_token_body.oauth_token_secret,
+    })
 }
 
 pub async fn authorize_token(
@@ -209,20 +211,21 @@ mod tests {
     async fn e2e_oauth_test() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let callback_url = get_callback_url("http://localhost:8001".to_string(), 1.to_string(), 1.to_string());
-        let tokens =
-            request_oauth_token(callback_url).await.unwrap();
+        let callback_url =
+            get_callback_url("http://localhost:8001".to_string(), 1.to_string(), 1.to_string());
+        let tokens = request_oauth_token(callback_url).await.unwrap();
         log::info!("{:?}", tokens);
-        let url =
-            format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", tokens.token.clone());
+        let url = format!(
+            "https://api.twitter.com/oauth/authenticate?oauth_token={}",
+            tokens.token.clone()
+        );
         log::info!("Please visit: {}", url);
         let mut callback_url = String::new();
         std::io::stdin().read_line(&mut callback_url).unwrap();
         let url = url::Url::parse(&callback_url).unwrap();
         let callback_url_query = url.query().unwrap_or_default();
         let callback_url_query: CallbackUrlQuery = serde_qs::from_str(callback_url_query).unwrap();
-        let tokens =
-            authorize_token(tokens, callback_url_query.oauth_verifier).await.unwrap();
+        let tokens = authorize_token(tokens, callback_url_query.oauth_verifier).await.unwrap();
         log::info!("{:?}", tokens);
     }
 
@@ -237,7 +240,7 @@ mod tests {
         let access_secret =
             std::env::var("TEST_ACCESS_SECRET").expect("TEST_ACCESS_SECRET not set").to_string();
         let tokens = AccessTokens { token: access_token, secret: access_secret };
-        let _ = send_tweet(tokens,tweet_text).await;
+        let _ = send_tweet(tokens, tweet_text).await;
     }
 
     #[tokio::test]

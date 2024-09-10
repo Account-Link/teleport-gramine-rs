@@ -46,9 +46,9 @@ Behind the scenes, the backend mints an NFT on Base chain for each one-time use 
 
 ### Specifying a release
 
-The backend is tagged: 
+The backend is tagged: `v0.1`
 
-The MRENCLAVE is `a8bcffd5f7788f7761be6c051c471d329b721415bbae9b7b928861d1853b8578`
+The MRENCLAVE is `4e08b6556c9d835ca79e0815eeba0c8da88920d9fc4bba225fe9d2a7c26c53d9`
 
 ### Building
 
@@ -64,6 +64,8 @@ The goal of the build process is to be reproducible, such that auditors in the f
 The base of the Dockerfile is `gramineproject/gramine:1.7-jammy`, a base image provided by Gramine. This serves as an anchor point.
 
 The biggest limitation right now is having to install `build-essential`, which introduces system libraries that are subject to change as the package maintainers apply upgrades. As a workaround, we therefore also backing up the build image on Dockerhub, so that auditors can at least retrieve the image and interact with it this way. We should improve this process in the future.
+
+- https://hub.docker.com/layers/accountlink/teleport/003/images/sha256-101da8cb2c12003c9673d2c04dba9fabe30990938b13ffbbc8d5f9e33310a444?context=explore
 
 ### Listing certificates
 

@@ -1,11 +1,48 @@
-# Teleport
+# Teleport: liquefy your Twitter account
 
-See [AUDITING.md](AUDITING.md)
+Teleport creates "post once" links for your twitter account. Each link is destroyed after one use.
+
+When you create an account link, you can also define a safeguard policy that will be enforced by an LLM whenever somebody tries to redeem it. For example, to prevent spamming and inappropriate content, you can define a policy of “only allow posts about cute cats that have good positive pro-social vibes." Because the safeguard is implemented as a GPT-4o API call, you can choose to gate the posting by conditioning on external events such as 
+`only allow posting if Germany wins Spain in Eurocup 2024 on https://www.uefa.com/euro2024/fixtures-results`.
+Each account link is represented as an NFT that's minted to your on-chain address (the link sharing is done by creating a unique identifier to represent the ownership of that NFT). Once minted, the NFT can be auctioned off, put into an AMM pool, used as collateral, traded, or simply gifted.
+
+Those of you with web2 instincts will readily spot the potential to "sell ads" on your twitter, but we encourage more innovative and/or wholesome uses: let your friends roast you on your own X account if you lose a bet, tweet spicy takes without having to prepend "OH", or simply "lend" your established social media voice to those without a following who need the boost.
+
+### Key Features
+
+- *Programmable Access:* you can easily define AI-driven "social contracts" in the form of LLM safeguards on top of your one-time posting account links. Because those links are represented as NFTs, they can be easily composed with permissionless on-chain infra: auctions, exchanges.
+- Auditable Security: users can verify the system's integrity through certificate transparency and trusted-execution-environments (TEE) remote attestation. One post is one post, and there is no skipping of the LLM safeguard.
+
+The backend repo is open source at: https://github.com/Account-Link/teleport-gramine-rs
+
+The measurement for the backend enclave is:  `4e08b6556c9d835ca79e0815eeba0c8da88920d9fc4bba225fe9d2a7c26c53d9`
+
+The smart contract address is: [0xB92414bA565D8d49E4aaaB45b78b354516006AF1](https://sepolia.basescan.org/address/0xB92414bA565D8d49E4aaaB45b78b354516006AF1)
+
+## How does Teleport work?
+
+The core technology backing teleport is TEEs. Our idea is based on a series of work on secure account delegation (https://eprint.iacr.org/2018/160 ) and one-time programs (https://iacr.org/archive/crypto2008/51570039/51570039.pdf). Read about our approach here (tinyurl.com/web2enc). 
+
+## What does the TEE provide in Teleport.Best?
+
+The TEE is accomplishing two things for us:
+
+1. Our service cannot exceed the stated use. One post means one post. And no skipping the content filter.
+
+2. You don’t have to take our word about 1, you can check it for yourself.
+
+For more details on the security model and how to validate the remote attestation process, see [AUDITING.md](./AUDITING.md)
+
+## Now what? 
+Teleport is our submission to the TEE/acc movement. We are staunchly supportive of free open source code. TEEs are for everyone to use. The right to fractionalize and delegate your web2 accounts belongs to everyone. Our plan is to demonstrate leadership through accelerated development and public communication, then spend it on stimulating creative and wholesome uses.
 
 ## Disclaimers
 
 This is not production code. It has not been audited. It is a provocative stunt! Use it at your own risk.
 
-We are demonstrating a security-motivated *design*, which is all about using TEE to minimize trust in the server. Eventually it could even be run as a completely decentralized p2p network. But for now we’re simply hosting this ourselves.  Although instructions to auditors can be found in AUDITING.md, we have not yet commissioned any professional audit.
+We are demonstrating a security-motivated *design*, which is all about using TEE to minimize trust in the server. 
+Eventually it could even be run as a completely decentralized p2p network. 
+But for now we're simply hosting this ourselves.
+Although instructions to auditors can be found in AUDITING.md, we have not yet commissioned any professional audit.
 
 This is the last time we write anything in Gramine-SGX. Onward to TDX!

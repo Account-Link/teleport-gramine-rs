@@ -3,8 +3,8 @@
 
 # Rust manifest example
 
-libos.entrypoint = "/target/release/teleport" 
- loader.log_level = "{{ log_level }}"
+libos.entrypoint = "target/release/teleport" 
+loader.log_level = "{{ log_level }}"
 
 
 loader.env.LD_LIBRARY_PATH = "/usr/local/lib:/usr{{ arch_libdir }}:{{ arch_libdir }}"
@@ -51,7 +51,7 @@ sgx.allowed_files = [
   "file:untrustedhost"
 ]
 sgx.trusted_files = [
-    "file:/usr{{ arch_libdir }}/",
+  "file:/usr{{ arch_libdir }}/",
   "file:{{ gramine.libos }}",
   "file:{{ self_exe }}",
   "file:{{ gramine.runtimedir() }}/",

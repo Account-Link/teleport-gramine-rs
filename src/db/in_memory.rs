@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{PendingNFT, TeleportDB, User, NFT};
+use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
@@ -11,6 +11,7 @@ pub struct InMemoryDB {
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
+    pub sessions: BTreeMap<String, Session>,
 }
 
 impl InMemoryDB {
@@ -84,34 +85,51 @@ impl TeleportDB for InMemoryDB {
         let tweet_id = self.tweets.get(&token_id).ok_or_else(|| eyre::eyre!("Tweet not found"))?;
         Ok(tweet_id.clone())
     }
+
+    async fn add_session(&mut self, session: Session) -> eyre::Result<String> {
+        let session_id: i128 = rand::random();
+        self.sessions.insert(session_id.to_string(), session);
+        Ok(session_id.to_string())
+    }
+
+    async fn get_session(&self, session_id: String) -> eyre::Result<Session> {
+        let x_id =
+            self.sessions.get(&session_id).ok_or_else(|| eyre::eyre!("Session not found"))?;
+        Ok(x_id.clone())
+    }
 }
 
 #[cfg(test)]
 mod tests {
+    use crate::db::AccessTokens;
+
     use super::*;
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
+        let access_tokens =
+            AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let user = User {
             x_id: None,
-            access_token: "access token".to_string(),
-            access_secret: "access secret".to_string(),
+            access_tokens: Some(access_tokens.clone()),
+            oauth_tokens: access_tokens.clone(),
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         let user = db.get_user_by_address("2".to_string()).await?;
-        assert_eq!(user.access_token, "access token");
-        assert_eq!(user.access_secret, "access secret");
+        assert_eq!(user.access_tokens.unwrap(), access_tokens);
         Ok(())
     }
 
     #[tokio::test]
     async fn db_test_overwrite() -> eyre::Result<()> {
         let mut db = InMemoryDB::new();
+        let access_tokens =
+            AccessTokens { token: "access token".to_string(), secret: "access secret".to_string() };
         let mut user = User {
             x_id: None,
-            access_token: "access token".to_string(),
-            access_secret: "access secret".to_string(),
+            access_tokens: Some(access_tokens.clone()),
+            oauth_tokens: access_tokens.clone(),
         };
         db.add_user("2".to_string(), user.clone()).await.expect("Failed to add user tokens");
         user.x_id = Some("1".to_string());

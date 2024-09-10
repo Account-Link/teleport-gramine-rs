@@ -1,10 +1,14 @@
-use alloy::primitives::Address;
+use alloy::{
+    primitives::Address,
+    signers::{k256::ecdsa::SigningKey, local::LocalSigner},
+};
+use http::HeaderMap;
 use std::{str::FromStr, sync::Arc};
-use tokio::fs;
 
 use axum::{
     extract::{Query, State},
-    response::Redirect,
+    http::StatusCode,
+    response::{IntoResponse, Redirect},
     Json,
 };
 use serde::{Deserialize, Serialize};
@@ -17,14 +21,27 @@ use crate::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
     },
-    db::{PendingNFT, TeleportDB, User},
+    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
     oai,
-    twitter::{authorize_token, get_user_x_info, request_oauth_token},
+    templates::{HtmlTemplate, PolicyTemplate},
+    twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
 };
+
+use alloy::signers::Signer;
+
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+
+pub const SESSION_ID_COOKIE_NAME: &str = "teleport_session_id";
+
+fn default_str() -> String {
+    "none".to_string()
+}
 
 #[derive(Deserialize)]
 pub struct NewUserQuery {
     address: String,
+    #[serde(default = "default_str")]
+    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
@@ -32,6 +49,7 @@ pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
     address: String,
+    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
@@ -82,43 +100,42 @@ pub struct CheckRedeemResponse {
 pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
+    pub signer: LocalSigner<SigningKey>,
     pub app_url: String,
     pub tee_url: String,
 }
 
-pub async fn new_user<A: TeleportDB>(
+pub async fn cookietest<A: TeleportDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<()>,
+    jar: CookieJar,
+) -> (CookieJar, Redirect) {
+    (jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, "cookieasdf")),
+     Redirect::temporary("localhost"))
+}
+
+pub async fn register_or_login<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
     let address = query.address;
+    let frontend_nonce = query.frontend_nonce;
 
-    let db_lock = shared_state.db.lock().await;
-    let existing_user = db_lock.get_user_by_address(address.clone()).await.ok();
-    if let Some(user) = existing_user {
-        if user.x_id.is_some() {
-            let x_info = get_user_x_info(user.access_token, user.access_secret).await;
-            let encoded_x_info = serde_urlencoded::to_string(&x_info)
-                .expect("Failed to encode x_info as query params");
-            let url_with_params = format!(
-                "{}/create?already_created=true&success=true&{}",
-                shared_state.app_url, encoded_x_info
-            );
-            return Redirect::temporary(&url_with_params);
-        }
-    }
-    drop(db_lock);
+    let callback_url =
+        get_callback_url(shared_state.tee_url.clone(), address.clone(), frontend_nonce);
 
-    let (oauth_token, oauth_token_secret) =
-        request_oauth_token(address.clone(), shared_state.tee_url)
-            .await
-            .expect("Failed to request oauth token");
-    let user =
-        User { x_id: None, access_token: oauth_token.clone(), access_secret: oauth_token_secret };
+    let oauth_tokens =
+        request_oauth_token(callback_url).await.expect("Failed to request oauth token");
+
     let mut db = shared_state.db.lock().await;
-    db.add_user(address.clone(), user).await.expect("Failed to add oauth tokens to database");
-    drop(db);
+    let mut existing_user = db.get_user_by_address(address.clone()).await.ok().unwrap_or_default();
+    existing_user.oauth_tokens = oauth_tokens.clone();
+    db.add_user(address.clone(), existing_user)
+        .await
+        .expect("Failed to add oauth tokens to database");
 
-    let url = format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_token);
+    let url =
+        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
 
     Redirect::temporary(&url)
 }
@@ -126,38 +143,84 @@ pub async fn new_user<A: TeleportDB>(
 pub async fn callback<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<CallbackQuery>,
-) -> Redirect {
+    jar: CookieJar,
+) -> (CookieJar, Redirect) {
     let oauth_token = query.oauth_token;
     let oauth_verifier = query.oauth_verifier;
     let address = query.address;
+    let frontend_nonce = query.frontend_nonce;
 
     let mut db = shared_state.db.lock().await;
-    let oauth_user =
+    let mut oauth_user =
         db.get_user_by_address(address.clone()).await.expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_user.access_token);
+    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
     let (access_token, access_secret) =
-        authorize_token(oauth_token, oauth_user.access_secret, oauth_verifier).await.unwrap();
-    let x_info = get_user_x_info(access_token.clone(), access_secret.clone()).await;
-    let user = User { x_id: Some(x_info.id.clone()), access_token, access_secret };
-    db.add_user(address, user.clone()).await.expect("Failed to add user to database");
-    drop(db);
+        authorize_token(oauth_user.oauth_tokens.clone(), oauth_verifier).await.unwrap();
+
+    let access_tokens = AccessTokens { token: access_token, secret: access_secret };
+
+    let x_info = get_user_x_info(access_tokens.clone()).await;
+    let session_id = db
+        .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
+        .await
+        .expect("Failed to add session to database");
+
+    if oauth_user.x_id.is_none() {
+        oauth_user.x_id = Some(x_info.id.clone());
+        oauth_user.access_tokens = Some(access_tokens.clone());
+        db.add_user(address, oauth_user.clone()).await.expect("Failed to add user to database");
+        drop(db);
+    }
+
+    let msg = format!("nonce={}&x_id={}", frontend_nonce, x_info.id);
+    let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
     let url_with_params =
-        format!("{}/create?success=true&{}", shared_state.app_url, encoded_x_info);
-
-    Redirect::temporary(&url_with_params)
+        format!("{}/create?sig={:?}&success=true&{}", shared_state.app_url, sig, encoded_x_info);
+    (
+        jar.add(Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
+		.secure(true)
+		.http_only(false)
+		.same_site(SameSite::None)
+		.finish()
+	),
+        Redirect::temporary(&url_with_params),
+    )
 }
 
-pub async fn mint<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
-    Query(query): Query<MintQuery>,
-) -> Json<TxHashResponse> {
+pub async fn mint(
+    jar: CookieJar,
+    headers: HeaderMap,
+    State(shared_state): State<SharedState<InMemoryDB>>,
+    Json(query): Json<MintQuery>,
+) -> Result<Json<TxHashResponse>, StatusCode> {
+    if let Some(referer) = headers.get("Referer") {
+        let referer = referer.to_str().unwrap_or("");
+        if !referer.starts_with(&format!("https://{}/approve", shared_state.tee_url)) {
+            return Err(StatusCode::FORBIDDEN);
+        }
+    } else {
+        return Err(StatusCode::FORBIDDEN);
+    }
     let db = shared_state.db.lock().await;
     let user =
         db.get_user_by_address(query.address.clone()).await.expect("Failed to get user by address");
+
+    if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
+        let session_id = session_id.value();
+        let session = db.get_session(session_id.to_string()).await.expect(
+            "Failed to get
+    session",
+        );
+        if session.x_id != user.x_id.clone().unwrap() {
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+    } else {
+        return Err(StatusCode::UNAUTHORIZED);
+    }
     drop(db);
 
     let tx_hash = mint_nft(
@@ -178,7 +241,7 @@ pub async fn mint<A: TeleportDB>(
     .expect("Failed to add pending NFT");
     drop(db);
 
-    Json(TxHashResponse { hash: tx_hash })
+    Ok(Json(TxHashResponse { hash: tx_hash }))
 }
 
 pub async fn redeem<A: TeleportDB>(
@@ -186,12 +249,15 @@ pub async fn redeem<A: TeleportDB>(
     Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
-    let nft = db.get_nft(query.nft_id.clone()).await.unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id.to_string()));
+    let nft = db
+        .get_nft(query.nft_id.clone())
+        .await
+        .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
     drop(db);
 
     let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)
         .await
-        .expect(format!("Failed to redeem NFT with id {}", nft.token_id).as_str());
+        .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
     Json(TxHashResponse { hash: tx_hash })
 }
 
@@ -236,11 +302,29 @@ pub async fn get_tweet_id<A: TeleportDB>(
     Json(TweetIdResponse { tweet_id })
 }
 
-pub async fn get_ratls_cert() -> Json<AttestationResponse> {
-    let cert = fs::read_to_string(std::env::var("TLS_CERT_PATH").expect("TLS_CERT_PATH not set"))
-        .await
-        .expect("gramine ratls rootCA.crt not found");
-    Json(AttestationResponse { cert })
+pub async fn approve_mint<A: TeleportDB>(
+    State(shared_state): State<SharedState<A>>,
+    Query(query): Query<MintQuery>,
+    jar: CookieJar,
+) -> impl IntoResponse {
+    if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
+        let session_id = session_id.value();
+        let db = shared_state.db.lock().await;
+        let session = db.get_session(session_id.to_string()).await.expect(
+            "Failed to get
+    session",
+        );
+        if session.address != query.address {
+            log::info!("Session address does not match");
+            return Err(StatusCode::UNAUTHORIZED);
+        }
+    } else {
+        log::info!("No session found");
+        // return Err(StatusCode::UNAUTHORIZED);
+    };
+    let template =
+        PolicyTemplate { policy: query.policy, address: query.address, nft_id: query.nft_id };
+    Ok(HtmlTemplate(template))
 }
 
 pub async fn hello_world() -> &'static str {

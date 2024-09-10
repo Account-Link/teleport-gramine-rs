@@ -1,25 +1,34 @@
-FROM lukemathwalker/cargo-chef:latest-rust-1 AS chef
-WORKDIR /app
+FROM gramineproject/gramine:1.7-jammy AS builder
 
-FROM chef AS planner
-COPY . .
-RUN cargo chef prepare --recipe-path recipe.json
+RUN apt-get update && apt-get install -y jq build-essential libclang-dev
 
-FROM chef AS builder
-COPY --from=planner /app/recipe.json recipe.json
-# Build dependencies - this is the caching Docker layer!
-RUN cargo chef cook --release --recipe-path recipe.json
-# Build application
-COPY . .
-RUN cargo build --release --bin teleport
+WORKDIR /workdir
 
-# We do not need the Rust toolchain to run the binary!
-FROM debian:bookworm-slim AS runtime
-RUN apt update \
-    && apt install -y openssl ca-certificates \
-    && apt clean \
-    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-WORKDIR /app
-COPY --from=builder /app/target/release/teleport /usr/local/bin
-ENV RUST_LOG=info
-ENTRYPOINT ["/usr/local/bin/teleport"]
+RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
+ENV PATH="/root/.cargo/bin:${PATH}"
+RUN rustup toolchain install 1.75.0
+
+RUN gramine-sgx-gen-private-key
+
+RUN apt-get install -y pkg-config libssl-dev
+
+# Build just the dependencies (shorcut)
+COPY Cargo.lock Cargo.toml ./
+RUN mkdir src && touch src/lib.rs
+RUN cargo build --release
+RUN rm -r src
+
+# Now add our actual source
+COPY teleport.env Makefile README.md ./
+COPY src ./src
+COPY abi ./abi
+COPY templates ./templates
+
+# Build with rust
+RUN cargo build --release
+
+# Make and sign the gramine manifest
+COPY exex.manifest.template ./
+RUN make SGX=1 RA_TYPE=dcap
+
+CMD [ "gramine-sgx-sigstruct-view exex.sig" ]

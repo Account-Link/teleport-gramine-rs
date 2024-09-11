@@ -4,6 +4,9 @@ use serde::{Deserialize, Serialize};
 
 use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
+use rustls::ClientConfig;
+use tokio_postgres_rustls::MakeRustlsConnect;
+
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
     pub x_id_to_address: BTreeMap<String, String>,
@@ -66,8 +69,34 @@ impl TeleportDB for InMemoryDB {
             .pending_nfts
             .remove(&tx_hash)
             .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT { address: pending_nft.address, token_id };
+        let nft = NFT { address: pending_nft.address, token_id: token_id.clone() };
+        let nft_id_clone = pending_nft.nft_id.clone();
         self.nfts.insert(pending_nft.nft_id, nft);
+
+        let database_url = std::env::var("DATABASE_URL")
+                        .expect("DATABASE_URL must be set");
+        let mut config = ClientConfig::new();
+        config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+        let tls = MakeRustlsConnect::new(config);
+        let (client, connection) = tokio_postgres::connect(
+            &database_url,
+            tls,
+        ).await?;
+        tokio::spawn(async move {
+            if let Err(e) = connection.await {
+                eprintln!("connection error: {}", e);
+            }
+        });
+
+        let token_id_int: i32 = token_id.parse().unwrap();
+        // let nft_id_clone = pending_nft.nft_id;
+
+        client.execute(
+            "UPDATE \"NftIndex\" SET \"tokenId\" = $1 WHERE \"id\" = $2",
+            &[&token_id_int, &nft_id_clone],
+        )
+        .await?;
+
         Ok(())
     }
 

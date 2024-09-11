@@ -23,7 +23,7 @@ The smart contract address is: [0xB92414bA565D8d49E4aaaB45b78b354516006AF1](http
 
 The core technology backing teleport is TEEs. Our idea is based on a series of work on secure account delegation (https://eprint.iacr.org/2018/160 ) and one-time programs (https://iacr.org/archive/crypto2008/51570039/51570039.pdf). Read about our approach here (tinyurl.com/web2enc). 
 
-## What does the TEE provide in Teleport.Best?
+## What does the TEE provide in Teleport?
 
 The TEE is accomplishing two things for us:
 
@@ -32,6 +32,26 @@ The TEE is accomplishing two things for us:
 2. You don’t have to take our word about 1, you can check it for yourself.
 
 For more details on the security model and how to validate the remote attestation process, see [AUDITING.md](./AUDITING.md)
+
+## Is Teleport making some deeper point about the nature of property?
+Property rights are limited by enforceability. As we move into a new digital age with smart contracts and TEEs, enforcement becomes much more powerful, making new kinds of property rights become viable.
+ 
+Actually this is part of a broad trend where value capture moves upwards in the supply chain, towards user-facing apps and end users themselves. 
+- Past: “action” (physical property, labor)
+- Present: “intention” (organizations, intellectual property)
+- Future: “attention” (liquefied virtual property, sensitive information)
+
+We want to solve the scalable value exchange problem as property moves to the information level. 
+Correlation and mediation of property is happening at the information level inside Google’s server room with you and your friend’s data, instead of happening at the physical level of negotiation and barter. This trend expands the boundary property and makes the value exchange more efficient, but we see one major problem right now:
+The technology that can scale value exchange for information properties is decoupled from the majority of information properties. Crypto excels at composability and exchange, and web2 has a lot of valuable property, but due to poor interoperability (read/write) between them:
+- web3 people are forced to create valuable assets on-chain natively to bootstrap use cases (solution finding problem) instead of trying to solve huge pain points that already exist for the massive Internet users today
+- web2 people are forced to create non-functional markets to exchange value. If today I wanted to exchange or even delegate private digital resources such as my accounts, there is simply no platform to do that with low friction. 
+
+## Cool use of LLM. But what does this really have to do with AI?
+We consider Teleport to be a first step towards making multi-agent AI interactions real. 
+Instead of trying to make AIs pay each other using Bitcoin, now you can directly share an AI that has access to your social capital (which is programmable money in the higher dimensional value space, the LLM safeguard you define is quite literally a "social contract"). Sharing a link to make a bet with your friend to post something is a very tangible and lightweight experiment for cooperative AI with credible commitments over private digital resources. We want to start with “small, open-source model friendly use cases.” 
+We are optimistic about an autonomous future where everyone can share intelligent one-time-programs (or, self-enforcing commitments with privacy and integrity guarantees) with others securely. 
+In short, we are using web2 accounts as the substrate for autonomous agents to run on.
 
 ## Now what? 
 Teleport is our submission to the TEE/acc movement. We are staunchly supportive of free open source code. TEEs are for everyone to use. The right to fractionalize and delegate your web2 accounts belongs to everyone. Our plan is to demonstrate leadership through accelerated development and public communication, then spend it on stimulating creative and wholesome uses.

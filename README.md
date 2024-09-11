@@ -3,7 +3,8 @@
 Teleport creates "post once" links for your twitter account. Each link is destroyed after one use.
 
 When you create an account link, you can also define a safeguard policy that will be enforced by an LLM whenever somebody tries to redeem it. For example, to prevent spamming and inappropriate content, you can define a policy of “only allow posts about cute cats that have good positive pro-social vibes." Because the safeguard is implemented as a GPT-4o API call, you can choose to gate the posting by conditioning on external events such as 
-`only allow posting if Germany wins Spain in Eurocup 2024 on https://www.uefa.com/euro2024/fixtures-results`.
+"only allow posting if Germany wins Spain in Eurocup 2024 on https://www.uefa.com/euro2024/fixtures-results".
+
 Each account link is represented as an NFT that's minted to your on-chain address (the link sharing is done by creating a unique identifier to represent the ownership of that NFT). Once minted, the NFT can be auctioned off, put into an AMM pool, used as collateral, traded, or simply gifted.
 
 Those of you with web2 instincts will readily spot the potential to "sell ads" on your twitter, but we encourage more innovative and/or wholesome uses: let your friends roast you on your own X account if you lose a bet, tweet spicy takes without having to prepend "OH", or simply "lend" your established social media voice to those without a following who need the boost.
@@ -43,7 +44,7 @@ Actually this is part of a broad trend where value capture moves upwards in the 
 
 We want to solve the scalable value exchange problem as property moves to the information level. 
 Correlation and mediation of property is happening at the information level inside Google’s server room with you and your friend’s data, instead of happening at the physical level of negotiation and barter. This trend expands the boundary property and makes the value exchange more efficient, but we see one major problem right now:
-The technology that can scale value exchange for information properties is decoupled from the majority of information properties. Crypto excels at composability and exchange, and web2 has a lot of valuable property, but due to poor interoperability (read/write) between them:
+_The technology that can scale value exchange for information properties is decoupled from the majority of information properties._ Crypto excels at composability and exchange, and web2 has a lot of valuable property, but due to poor interoperability (read/write) between them:
 - web3 people are forced to create valuable assets on-chain natively to bootstrap use cases (solution finding problem) instead of trying to solve huge pain points that already exist for the massive Internet users today
 - web2 people are forced to create non-functional markets to exchange value. If today I wanted to exchange or even delegate private digital resources such as my accounts, there is simply no platform to do that with low friction. 
 

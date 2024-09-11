@@ -21,7 +21,7 @@ The smart contract address is: [0xB92414bA565D8d49E4aaaB45b78b354516006AF1](http
 
 ## How does Teleport work?
 
-The core technology backing teleport is TEEs. Our idea is based on a series of work on secure account delegation (https://eprint.iacr.org/2018/160 ) and one-time programs (https://iacr.org/archive/crypto2008/51570039/51570039.pdf). Read about our approach here (tinyurl.com/web2enc). 
+The core technology backing teleport is TEEs. Our idea is based on a series of work on [secure account delegation](https://eprint.iacr.org/2018/160) and [one-time programs](https://iacr.org/archive/crypto2008/51570039/51570039.pdf). Read about our approach [here](https://drive.google.com/file/d/1u5VA7KU58nxOdK2ME1c8KlgVTt8DkOuN/view). 
 
 ## What does the TEE provide in Teleport?
 

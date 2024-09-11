@@ -42,7 +42,7 @@ Actually this is part of a broad trend where value capture moves upwards in the 
 - Present: “intention” (organizations, intellectual property)
 - Future: “attention” (liquefied virtual property, sensitive information)
 
-**We want to solve the scalable value exchange problem as property moves to the information level. **
+**We want to solve the scalable value exchange problem as property moves to the information level.**
 
 Correlation and mediation of property is happening at the information level inside Google’s server room with you and your friend’s data, instead of happening at the physical level of negotiation and barter. This trend expands the boundary property and makes the value exchange more efficient, but we see one major problem right now:
 

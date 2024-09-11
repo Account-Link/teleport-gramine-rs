@@ -50,6 +50,10 @@ _The technology that can scale value exchange for information properties is deco
 - web3 people are forced to create valuable assets on-chain natively to bootstrap use cases (solution finding problem) instead of trying to solve huge pain points that already exist for the massive Internet users today
 - web2 people are forced to create non-functional markets to exchange value. If today I wanted to exchange or even delegate private digital resources such as my accounts, there is simply no platform to do that with low friction. 
 
+We see TEE offering the value exchange highway for the information age because it allows shared computation over private state. It brings web2 distribution channel to web3 and web3 programmability and composability to web2. 
+
+We take an approach to make tools that are auditable for safety (avoids excessive use) and only looks for synergetic wholesome use cases. We strive to create a secure, ethical, and innovative ecosystem that respects both user privacy and platform integrity. 
+
 ## Cool use of LLM. But what does this really have to do with AI?
 We consider Teleport to be a first step towards making multi-agent AI interactions real. 
 

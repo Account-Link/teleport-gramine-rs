@@ -19,7 +19,7 @@ RUN cargo build --release
 RUN rm -r src
 
 # Now add our actual source
-COPY teleport.env Makefile README.md ./
+COPY teleport.env Makefile ./
 COPY src ./src
 COPY abi ./abi
 COPY templates ./templates

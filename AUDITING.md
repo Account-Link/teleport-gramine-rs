@@ -48,7 +48,7 @@ Behind the scenes, the backend mints an NFT on Base chain for each one-time use 
 
 The backend is tagged: `v0.1`
 
-The MRENCLAVE is `4e08b6556c9d835ca79e0815eeba0c8da88920d9fc4bba225fe9d2a7c26c53d9`
+The MRENCLAVE is `6d63e420fbd32988baa7d1fceb467960faa48c7f53ff1d56d0384d0ceb910878`
 
 ### Building
 
@@ -65,7 +65,7 @@ The base of the Dockerfile is `gramineproject/gramine:1.7-jammy`, a base image p
 
 The biggest limitation right now is having to install `build-essential`, which introduces system libraries that are subject to change as the package maintainers apply upgrades. As a workaround, we therefore also backing up the build image on Dockerhub, so that auditors can at least retrieve the image and interact with it this way. We should improve this process in the future.
 
-- https://hub.docker.com/layers/accountlink/teleport/003/images/sha256-101da8cb2c12003c9673d2c04dba9fabe30990938b13ffbbc8d5f9e33310a444?context=explore
+- https://hub.docker.com/layers/accountlink/teleport/004/images/sha256-15cc5ebb7fb44234e8189cae5034908ebcfcb4872e9ba428001b7262e6e1a659?context=repo
 
 ### Listing certificates
 
@@ -78,9 +78,12 @@ python scripts/get-certs.py tee.teleport.best 2024-09-20
 
 To inspect a DCAP quote, we can use `gramine-sgx-quote-view`.
 
-To validate the quote, we can use one of the tools like SGX-DCAP-verify. TODO: complete these
+To validate the quote, we can use one of the tools like SGX-DCAP-verify.
+
+TODO: add more detail here!
 
 ### Analyzing the software
+
 The docker image includes the entire build environment.
 You can modify the source code or build parameters, including building with the gramine simulator `gramine-direct`.
 If you run the backend outside an enclave, it will run just fine except it will not output a quote.

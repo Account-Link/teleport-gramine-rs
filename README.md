@@ -2,8 +2,8 @@
 
 Teleport creates "post once" links for your twitter account. Each link is destroyed after one use.
 
-When you create an account link, you can also define a safeguard policy that will be enforced by an LLM whenever somebody tries to redeem it. For example, to prevent spamming and inappropriate content, you can define a policy of “only allow posts about cute cats that have good positive pro-social vibes." Because the safeguard is implemented as a GPT-4o API call, you can choose to gate the posting by conditioning on external events such as 
-"only allow posting if Germany wins Spain in Eurocup 2024 on https://www.uefa.com/euro2024/fixtures-results".
+When you create an account link, you can also define a safeguard policy that will be enforced by an LLM whenever somebody tries to redeem it. For example, to prevent spamming and inappropriate content, you can define a policy of `“only allow posts about cute cats that have good positive pro-social vibes."` Because the safeguard is implemented as a GPT-4o API call, you can choose to gate the posting by conditioning on external events such as 
+`"only allow posting if Germany wins Spain in Eurocup 2024 on https://www.uefa.com/euro2024/fixtures-results"`.
 
 Each account link is represented as an NFT that's minted to your on-chain address (the link sharing is done by creating a unique identifier to represent the ownership of that NFT). Once minted, the NFT can be auctioned off, put into an AMM pool, used as collateral, traded, or simply gifted.
 
@@ -42,20 +42,29 @@ Actually this is part of a broad trend where value capture moves upwards in the 
 - Present: “intention” (organizations, intellectual property)
 - Future: “attention” (liquefied virtual property, sensitive information)
 
-We want to solve the scalable value exchange problem as property moves to the information level. 
+**We want to solve the scalable value exchange problem as property moves to the information level. **
+
 Correlation and mediation of property is happening at the information level inside Google’s server room with you and your friend’s data, instead of happening at the physical level of negotiation and barter. This trend expands the boundary property and makes the value exchange more efficient, but we see one major problem right now:
+
 _The technology that can scale value exchange for information properties is decoupled from the majority of information properties._ Crypto excels at composability and exchange, and web2 has a lot of valuable property, but due to poor interoperability (read/write) between them:
 - web3 people are forced to create valuable assets on-chain natively to bootstrap use cases (solution finding problem) instead of trying to solve huge pain points that already exist for the massive Internet users today
 - web2 people are forced to create non-functional markets to exchange value. If today I wanted to exchange or even delegate private digital resources such as my accounts, there is simply no platform to do that with low friction. 
 
 ## Cool use of LLM. But what does this really have to do with AI?
 We consider Teleport to be a first step towards making multi-agent AI interactions real. 
+
 Instead of trying to make AIs pay each other using Bitcoin, now you can directly share an AI that has access to your social capital (which is programmable money in the higher dimensional value space, the LLM safeguard you define is quite literally a "social contract"). Sharing a link to make a bet with your friend to post something is a very tangible and lightweight experiment for cooperative AI with credible commitments over private digital resources. We want to start with “small, open-source model friendly use cases.” 
+
 We are optimistic about an autonomous future where everyone can share intelligent one-time-programs (or, self-enforcing commitments with privacy and integrity guarantees) with others securely. 
-In short, we are using web2 accounts as the substrate for autonomous agents to run on.
+
+In short, we are _using web2 accounts as the substrate for autonomous agents to run on_.
 
 ## Now what? 
-Teleport is our submission to the TEE/acc movement. We are staunchly supportive of free open source code. TEEs are for everyone to use. The right to fractionalize and delegate your web2 accounts belongs to everyone. Our plan is to demonstrate leadership through accelerated development and public communication, then spend it on stimulating creative and wholesome uses.
+- Teleport is our submission to the TEE/acc movement. 
+- We are staunchly supportive of free open source code. 
+- TEEs are for everyone to use. 
+- The right to fractionalize and delegate your web2 accounts belongs to everyone. 
+- Our plan is to demonstrate leadership through accelerated development and public communication, then spend it on stimulating creative and wholesome uses.
 
 ## Disclaimers
 

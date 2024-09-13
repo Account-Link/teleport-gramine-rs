@@ -106,8 +106,9 @@ pub async fn send_tweet(tokens: AccessTokens, tweet: String) -> eyre::Result<Str
         .body(body)
         .send()
         .await?;
-
-    let tweet_response: SendTweetResponse = resp.json().await?;
+    let resp_clone = resp.text().await?;
+    let tweet_response: SendTweetResponse = serde_json::from_str(&resp_clone)
+	.expect(&format!("Failed to parse SendTweetResponse: {:?}", resp_clone));
     log::info!("Tweet response: {:?}", tweet_response);
     Ok(tweet_response.data.id)
 }

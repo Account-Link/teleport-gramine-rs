@@ -9,7 +9,7 @@ use tokio_postgres_rustls::MakeRustlsConnect;
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
-    pub x_id_to_address: BTreeMap<String, String>,
+    pub oauths: BTreeMap<String, String>,
     pub users: BTreeMap<String, User>,
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
@@ -27,26 +27,24 @@ impl InMemoryDB {
 }
 
 impl TeleportDB for InMemoryDB {
-    async fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
-        self.users.insert(address.clone(), user.clone());
-        if let Some(x_id) = user.x_id {
-            self.x_id_to_address.insert(x_id, address);
-        }
 
+    async fn add_oauth(&mut self, token: String, secret: String) -> eyre::Result<()> {
+	self.oauths.insert(token, secret);
+	Ok(())
+    }
+
+    async fn get_oauth(&mut self, token: String) -> eyre::Result<String> {
+	let secret = self.oauths.get(&token).ok_or_else(|| eyre::eyre!("OAuth not found"))?;
+	Ok(secret.to_string())
+    }
+
+    async fn add_user(&mut self, user: User) -> eyre::Result<()> {
+        self.users.insert(user.x_id.clone().expect("no x_id"), user.clone());
         Ok(())
     }
 
-    async fn get_user_by_address(&self, address: String) -> eyre::Result<User> {
-        let user = self.users.get(&address).ok_or_else(|| eyre::eyre!("User not found"))?;
-        Ok(user.clone())
-    }
-
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
-        let address = self
-            .x_id_to_address
-            .get(&x_id)
-            .ok_or_else(|| eyre::eyre!("User address not found for x_id"))?;
-        let user = self.users.get(address).ok_or_else(|| eyre::eyre!("User not found"))?;
+        let user = self.users.get(&x_id).ok_or_else(|| eyre::eyre!("User not found"))?;
         Ok(user.clone())
     }
 

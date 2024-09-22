@@ -21,7 +21,7 @@ use crate::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
     },
-    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
+    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB, User},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
     twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
@@ -39,21 +39,17 @@ fn default_str() -> String {
 
 #[derive(Deserialize)]
 pub struct NewUserQuery {
-    address: String,
-    #[serde(default = "default_str")]
-    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
 pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
-    address: String,
-    frontend_nonce: String,
 }
 
 #[derive(Deserialize)]
 pub struct MintQuery {
+    x_id: String,
     address: String,
     policy: String,
     nft_id: String,
@@ -118,21 +114,15 @@ pub async fn register_or_login<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
-    let address = query.address;
-    let frontend_nonce = query.frontend_nonce;
 
     let callback_url =
-        get_callback_url(shared_state.tee_url.clone(), address.clone(), frontend_nonce);
+        get_callback_url(shared_state.tee_url.clone());
 
     let oauth_tokens =
         request_oauth_token(callback_url).await.expect("Failed to request oauth token");
 
     let mut db = shared_state.db.lock().await;
-    let mut existing_user = db.get_user_by_address(address.clone()).await.ok().unwrap_or_default();
-    existing_user.oauth_tokens = oauth_tokens.clone();
-    db.add_user(address.clone(), existing_user)
-        .await
-        .expect("Failed to add oauth tokens to database");
+    db.add_oauth(oauth_tokens.token.clone(), oauth_tokens.secret).await.expect("couldn't add");
 
     let url =
         format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
@@ -147,33 +137,42 @@ pub async fn callback<A: TeleportDB>(
 ) -> (CookieJar, Redirect) {
     let oauth_token = query.oauth_token;
     let oauth_verifier = query.oauth_verifier;
-    let address = query.address;
-    let frontend_nonce = query.frontend_nonce;
 
     let mut db = shared_state.db.lock().await;
-    let mut oauth_user =
-        db.get_user_by_address(address.clone()).await.expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
+    let secret = db.get_oauth(oauth_token.clone()).await.expect("no oauth");
 
+    let oauth_tokens = AccessTokens { token: oauth_token.clone(), secret: secret };
     let (access_token, access_secret) =
-        authorize_token(oauth_user.oauth_tokens.clone(), oauth_verifier).await.unwrap();
+        authorize_token(oauth_tokens.clone(), oauth_verifier).await.unwrap();
 
     let access_tokens = AccessTokens { token: access_token, secret: access_secret };
 
     let x_info = get_user_x_info(access_tokens.clone()).await;
     let session_id = db
-        .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
+        .add_session(Session { x_id: x_info.id.clone() })
         .await
         .expect("Failed to add session to database");
+
+    let existing_user = User {
+	x_id: Some(x_info.id.clone()),
+	oauth_tokens: oauth_tokens.clone(),
+	access_tokens: Some(access_tokens.clone()) };
+    db.add_user(existing_user)
+        .await
+        .expect("Failed to add oauth tokens to database");
+
+    let mut oauth_user =
+        db.get_user_by_x_id(x_info.id.clone()).await.expect("Failed to get oauth tokens");
+    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens.clone());
-        db.add_user(address, oauth_user.clone()).await.expect("Failed to add user to database");
+        db.add_user(oauth_user.clone()).await.expect("Failed to add user to database");
         drop(db);
     }
 
-    let msg = format!("nonce={}&x_id={}", frontend_nonce, x_info.id);
+    let msg = format!("x_id={}", x_info.id);
     let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
 
     let encoded_x_info =
@@ -207,7 +206,7 @@ pub async fn mint(
     }
     let db = shared_state.db.lock().await;
     let user =
-        db.get_user_by_address(query.address.clone()).await.expect("Failed to get user by address");
+        db.get_user_by_x_id(query.x_id.clone()).await.expect("Failed to get user by address");
 
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
@@ -314,16 +313,12 @@ pub async fn approve_mint<A: TeleportDB>(
             "Failed to get
     session",
         );
-        if session.address != query.address {
-            log::info!("Session address does not match");
-            return Err(StatusCode::UNAUTHORIZED);
-        }
     } else {
         log::info!("No session found");
-        // return Err(StatusCode::UNAUTHORIZED);
+        return Err(StatusCode::UNAUTHORIZED);
     };
     let template =
-        PolicyTemplate { policy: query.policy, address: query.address, nft_id: query.nft_id };
+        PolicyTemplate { policy: query.policy, address: query.address, nft_id: query.nft_id, x_id: query.x_id };
     Ok(HtmlTemplate(template))
 }
 

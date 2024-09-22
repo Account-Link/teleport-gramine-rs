@@ -31,14 +31,14 @@ pub struct PendingNFT {
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
 pub struct Session {
     pub x_id: String,
-    pub address: String,
 }
 
 pub trait TeleportDB {
     // async fn init(&mut self) -> eyre::Result<()>;
     // async fn open_from_file(file_path: &str) -> eyre::Result<Self>;
-    async fn add_user(&mut self, address: String, user: User) -> eyre::Result<()>;
-    async fn get_user_by_address(&self, address: String) -> eyre::Result<User>;
+    async fn add_oauth(&mut self, token: String, secret: String) -> eyre::Result<()>;
+    async fn get_oauth(&mut self, token: String) -> eyre::Result<String>;
+    async fn add_user(&mut self, user: User) -> eyre::Result<()>;
     async fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User>;
     async fn add_pending_nft(
         &mut self,

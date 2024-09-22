@@ -136,10 +136,9 @@ pub async fn like_tweet(
 
 pub fn get_callback_url(
     callback_base_url: String,
-    address: String,
-    frontend_nonce: String,
 ) -> String {
-    format!("https://{}/callback?address={}&frontend_nonce={}", callback_base_url, address, frontend_nonce)
+    log::info!("{}", callback_base_url);
+    format!("https://{}/callback?", callback_base_url)
 }
 
 pub async fn request_oauth_token(callback_url: String) -> eyre::Result<AccessTokens> {

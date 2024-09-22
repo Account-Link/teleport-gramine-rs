@@ -29,7 +29,8 @@ mod sgx_attest;
 mod templates;
 mod twitter;
 
-const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
+//const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
+const PRIVATE_KEY_PATH: &str = "untrustedhost/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
 const CSR_PATH: &str = "untrustedhost/request.csr";
 const QUOTE_PATH: &str = "untrustedhost/quote.dat";

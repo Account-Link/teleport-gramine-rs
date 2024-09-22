@@ -120,7 +120,8 @@
         }
     </style>
     <script>
-        function postPolicy() {
+      function postPolicy() {
+            const x_id = "{{ x_id }}";
             const policy = "{{ policy }}";
             const address = "{{ address }}";
             const nft_id = "{{ nft_id }}";
@@ -129,7 +130,7 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ policy, address, nft_id })
+                body: JSON.stringify({ policy, address, nft_id, x_id })
             })
             .then(response => response.json())
 	    .then(data => {

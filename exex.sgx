@@ -4126,11 +4126,11 @@ sha256 = "1d6fe4ba2cd5c69908a5d8b30821964ee1d4fadb3f5563e6c3ce01e4c82b2390"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapparmor.so.1"
-sha256 = "ce060ce6289a3e288dc30de1cc41b216ef5f6b8ccd18c20f70f1d6b796920d04"
+sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapparmor.so.1.8.2"
-sha256 = "ce060ce6289a3e288dc30de1cc41b216ef5f6b8ccd18c20f70f1d6b796920d04"
+sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libappstream.so.0.15.2"
@@ -4158,19 +4158,19 @@ sha256 = "dcfae5c1cc7deb7f592c82c2c47d9c73b6c5f8f63b0bbb0a793f68bce6ec9cb3"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapt-pkg.so.6.0"
-sha256 = "15f84324ca8cfac298f38dddc99c25c4c346d4a5c72ab14ca589dff22ddd79bb"
+sha256 = "4e3f282617ba5db07b3d759be18083a59e972f5c10ce2d942b8a773f3bb429c9"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapt-pkg.so.6.0.0"
-sha256 = "15f84324ca8cfac298f38dddc99c25c4c346d4a5c72ab14ca589dff22ddd79bb"
+sha256 = "4e3f282617ba5db07b3d759be18083a59e972f5c10ce2d942b8a773f3bb429c9"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapt-private.so.0.0"
-sha256 = "7cb526ddf0dfabe9a09677058ff2960b179ec35267972f299bdb49b3d312a260"
+sha256 = "e6b491271ce73f500eb4b55d78981d67b764657a1e2bd6e05f8317670b2967ed"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapt-private.so.0.0.0"
-sha256 = "7cb526ddf0dfabe9a09677058ff2960b179ec35267972f299bdb49b3d312a260"
+sha256 = "e6b491271ce73f500eb4b55d78981d67b764657a1e2bd6e05f8317670b2967ed"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libarchive.so.13"
@@ -8242,19 +8242,19 @@ sha256 = "4ac353956ed9ead49f041c45523d5ff31811cd9f8e9a5f1cf42dfd2abfe6da85"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiff.a"
-sha256 = "6bd1bdc092430affd6948c6b82c0979afeff271530a248e6b5d7e642151112b0"
+sha256 = "4c764f7dd04d63476e05b2f8880549332cb079233a5322dd3afdf3ce94c5d509"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiff.so"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiff.so.5"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiff.so.5.7.0"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiffxx.a"
@@ -8262,15 +8262,15 @@ sha256 = "7da3764b9e919feca42243f53fc643ac2d71b68b97562cbac3212c6a6aa201ba"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiffxx.so"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiffxx.so.5"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtiffxx.so.5.7.0"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libtinfo.a"
@@ -15502,7 +15502,7 @@ sha256 = "eddd24c66083d89b1e5bcd4bf3b1930751bf087b0f3e1bde59afd10923892576"
 
 [[sgx.trusted_files]]
 uri = "file:target/release/teleport"
-sha256 = "23aa2793ddd3fa5a9359af3cc91dc969ff80dd8c7376285cbd7e5fc8d717dd04"
+sha256 = "1ff3fe99fcf191e24fc128a58673ded69e9887be2a194f4bd307f5b0d4bd35c0"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/ImageMagick-6.9.11/bin-q16/Magick-config"
@@ -19542,11 +19542,11 @@ sha256 = "1d6fe4ba2cd5c69908a5d8b30821964ee1d4fadb3f5563e6c3ce01e4c82b2390"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapparmor.so.1"
-sha256 = "ce060ce6289a3e288dc30de1cc41b216ef5f6b8ccd18c20f70f1d6b796920d04"
+sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapparmor.so.1.8.2"
-sha256 = "ce060ce6289a3e288dc30de1cc41b216ef5f6b8ccd18c20f70f1d6b796920d04"
+sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libappstream.so.0.15.2"
@@ -19574,19 +19574,19 @@ sha256 = "dcfae5c1cc7deb7f592c82c2c47d9c73b6c5f8f63b0bbb0a793f68bce6ec9cb3"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapt-pkg.so.6.0"
-sha256 = "15f84324ca8cfac298f38dddc99c25c4c346d4a5c72ab14ca589dff22ddd79bb"
+sha256 = "4e3f282617ba5db07b3d759be18083a59e972f5c10ce2d942b8a773f3bb429c9"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapt-pkg.so.6.0.0"
-sha256 = "15f84324ca8cfac298f38dddc99c25c4c346d4a5c72ab14ca589dff22ddd79bb"
+sha256 = "4e3f282617ba5db07b3d759be18083a59e972f5c10ce2d942b8a773f3bb429c9"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapt-private.so.0.0"
-sha256 = "7cb526ddf0dfabe9a09677058ff2960b179ec35267972f299bdb49b3d312a260"
+sha256 = "e6b491271ce73f500eb4b55d78981d67b764657a1e2bd6e05f8317670b2967ed"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapt-private.so.0.0.0"
-sha256 = "7cb526ddf0dfabe9a09677058ff2960b179ec35267972f299bdb49b3d312a260"
+sha256 = "e6b491271ce73f500eb4b55d78981d67b764657a1e2bd6e05f8317670b2967ed"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libarchive.so.13"
@@ -23658,19 +23658,19 @@ sha256 = "4ac353956ed9ead49f041c45523d5ff31811cd9f8e9a5f1cf42dfd2abfe6da85"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiff.a"
-sha256 = "6bd1bdc092430affd6948c6b82c0979afeff271530a248e6b5d7e642151112b0"
+sha256 = "4c764f7dd04d63476e05b2f8880549332cb079233a5322dd3afdf3ce94c5d509"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiff.so"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiff.so.5"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiff.so.5.7.0"
-sha256 = "0fbe6f9e4045a92ca7a6581b79168003f0a2e3021d2d6c58becf464cb612c695"
+sha256 = "48d7f5f1b4218516fde1e8b5e0c6cac618b5de6bfe1625300a49404d287ee14d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiffxx.a"
@@ -23678,15 +23678,15 @@ sha256 = "7da3764b9e919feca42243f53fc643ac2d71b68b97562cbac3212c6a6aa201ba"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiffxx.so"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiffxx.so.5"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtiffxx.so.5.7.0"
-sha256 = "6d4c5ddf4d5785a1871100f780f558f94d5e42452d32d7416f6b813c8584feee"
+sha256 = "d854289aedddb4bb7b5df9fb25f03632b50ce8adc995660107a90abe6364b6d5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libtinfo.a"
@@ -30918,7 +30918,7 @@ sha256 = "eddd24c66083d89b1e5bcd4bf3b1930751bf087b0f3e1bde59afd10923892576"
 
 [[sgx.trusted_files]]
 uri = "file:teleport.env"
-sha256 = "67a7139534fded827d06e8263d397cbf8049fd9dcc10c0ca5534a72d0147e451"
+sha256 = "582680885b86e2a986e79662c7e38c08c1bd345bdc88dd2069f3440b0f86ef58"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/002c0b4f.0"
@@ -31223,6 +31223,10 @@ sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/93bc0acc.0"
 sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/93fee43a.0"
+sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/9482e63a.0"
@@ -31774,7 +31778,7 @@ sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/adoptium/cacerts"
-sha256 = "5be104055c7bfc4bc8f34cb35f6af8f06e2035451fe5cf98cef4e255c5eed48d"
+sha256 = "518124a7cf28db85b9f6a51cb1b0e31d61d64e8cd108a8ee3b14bda69fcc6d7d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/aee5f10d.0"
@@ -31895,10 +31899,6 @@ sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/e113c810.0"
 sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/e149fe8c.0"
-sha256 = "a26ce77a4c350c0a123c09841a7989c1fb80c4a11fa0373485e1e5b094c5f028"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/e18bfb83.0"
@@ -32022,7 +32022,7 @@ sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/ssl-cert-snakeoil.pem"
-sha256 = "a26ce77a4c350c0a123c09841a7989c1fb80c4a11fa0373485e1e5b094c5f028"
+sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/vTrus_ECC_Root_CA.pem"
@@ -32335,6 +32335,10 @@ sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/93bc0acc.0"
 sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/93fee43a.0"
+sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/9482e63a.0"
@@ -32886,7 +32890,7 @@ sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/adoptium/cacerts"
-sha256 = "5be104055c7bfc4bc8f34cb35f6af8f06e2035451fe5cf98cef4e255c5eed48d"
+sha256 = "518124a7cf28db85b9f6a51cb1b0e31d61d64e8cd108a8ee3b14bda69fcc6d7d"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/aee5f10d.0"
@@ -33007,10 +33011,6 @@ sha256 = "8c1306d5c64b43ce6c189b8450f27160aaff3f504211ca6819af6035ae1a7d73"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/e113c810.0"
 sha256 = "d1e1969cdbc656bb4c568116fe2d9b4f8b02b170dc20193b86a26c046f4b35a7"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/e149fe8c.0"
-sha256 = "a26ce77a4c350c0a123c09841a7989c1fb80c4a11fa0373485e1e5b094c5f028"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/e18bfb83.0"
@@ -33134,7 +33134,7 @@ sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/ssl-cert-snakeoil.pem"
-sha256 = "a26ce77a4c350c0a123c09841a7989c1fb80c4a11fa0373485e1e5b094c5f028"
+sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/vTrus_ECC_Root_CA.pem"

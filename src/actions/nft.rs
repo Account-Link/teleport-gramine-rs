@@ -13,7 +13,11 @@ use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
 use super::wallet::WalletProvider;
-use crate::{db::TeleportDB, oai, twitter::send_tweet};
+use crate::{
+    db::TeleportDB,
+    oai,
+    twitter::{builder::TwitterBuilder, tweet::Tweet},
+};
 use rustls::ClientConfig;
 use tokio_postgres_rustls::MakeRustlsConnect;
 
@@ -30,6 +34,7 @@ pub fn get_nft_address() -> eyre::Result<Address> {
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
     db: Arc<Mutex<A>>,
+    twitter_builder: TwitterBuilder,
     ws_rpc_url: String,
 ) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
@@ -53,9 +58,11 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                         let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
                         drop(db_lock);
                         if let Some(user) = user {
-                            let tweet_id =
-                                send_tweet(user.access_tokens.unwrap(), redeem.content.to_string())
-                                    .await?;
+                            let client =
+                                twitter_builder.with_auth(user.access_tokens.unwrap().into());
+
+                            let tweet = Tweet::new(redeem.content.to_string());
+                            let tweet_id = client.raw_tweet(tweet).await?;
 
                             let mut db = db.lock().await;
                             db.add_tweet(redeem.tokenId.to_string(), tweet_id).await?;

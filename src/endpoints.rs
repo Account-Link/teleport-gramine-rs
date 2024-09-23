@@ -11,9 +11,9 @@ use axum::{
     response::{IntoResponse, Redirect},
     Json,
 };
+use rustls::ClientConfig;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
-use rustls::ClientConfig;
 use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
@@ -21,10 +21,10 @@ use crate::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
     },
-    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
+    db::{in_memory::InMemoryDB, PendingNFT, Session, TeleportDB},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
-    twitter::{authorize_token, get_callback_url, get_user_x_info, request_oauth_token},
+    twitter::{builder::TwitterBuilder, get_callback_url},
 };
 
 use alloy::signers::Signer;
@@ -103,6 +103,7 @@ pub struct SharedState<A: TeleportDB> {
     pub signer: LocalSigner<SigningKey>,
     pub app_url: String,
     pub tee_url: String,
+    pub twitter_builder: TwitterBuilder,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -110,8 +111,7 @@ pub async fn cookietest<A: TeleportDB>(
     Query(query): Query<()>,
     jar: CookieJar,
 ) -> (CookieJar, Redirect) {
-    (jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, "cookieasdf")),
-     Redirect::temporary("localhost"))
+    (jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, "cookieasdf")), Redirect::temporary("localhost"))
 }
 
 pub async fn register_or_login<A: TeleportDB>(
@@ -124,12 +124,15 @@ pub async fn register_or_login<A: TeleportDB>(
     let callback_url =
         get_callback_url(shared_state.tee_url.clone(), address.clone(), frontend_nonce);
 
-    let oauth_tokens =
-        request_oauth_token(callback_url).await.expect("Failed to request oauth token");
+    let oauth_tokens = shared_state
+        .twitter_builder
+        .request_oauth_token(callback_url)
+        .await
+        .expect("Failed to request oauth token");
 
     let mut db = shared_state.db.lock().await;
     let mut existing_user = db.get_user_by_address(address.clone()).await.ok().unwrap_or_default();
-    existing_user.oauth_tokens = oauth_tokens.clone();
+    existing_user.oauth_tokens = oauth_tokens.clone().into();
     db.add_user(address.clone(), existing_user)
         .await
         .expect("Failed to add oauth tokens to database");
@@ -155,12 +158,20 @@ pub async fn callback<A: TeleportDB>(
         db.get_user_by_address(address.clone()).await.expect("Failed to get oauth tokens");
     assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
-    let (access_token, access_secret) =
-        authorize_token(oauth_user.oauth_tokens.clone(), oauth_verifier).await.unwrap();
+    let token_pair = shared_state
+        .twitter_builder
+        .authorize_token(
+            oauth_user.oauth_tokens.token.clone(),
+            oauth_user.oauth_tokens.secret.clone(),
+            oauth_verifier,
+        )
+        .await
+        .unwrap();
 
-    let access_tokens = AccessTokens { token: access_token, secret: access_secret };
+    let access_tokens = token_pair.clone().into();
+    let twitter_client = shared_state.twitter_builder.with_auth(token_pair);
+    let x_info = twitter_client.get_user_info().await.expect("Failed to get user info");
 
-    let x_info = get_user_x_info(access_tokens.clone()).await;
     let session_id = db
         .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
         .await
@@ -168,7 +179,7 @@ pub async fn callback<A: TeleportDB>(
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
-        oauth_user.access_tokens = Some(access_tokens.clone());
+        oauth_user.access_tokens = Some(access_tokens);
         db.add_user(address, oauth_user.clone()).await.expect("Failed to add user to database");
         drop(db);
     }
@@ -181,12 +192,12 @@ pub async fn callback<A: TeleportDB>(
     let url_with_params =
         format!("{}/create?sig={:?}&success=true&{}", shared_state.app_url, sig, encoded_x_info);
     (
-        jar.add(Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
-		.secure(true)
-		.http_only(false)
-		.same_site(SameSite::None)
-		.finish()
-	),
+        jar.add(
+            Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
+                .secure(true)
+                .http_only(false)
+                .same_site(SameSite::None),
+        ),
         Redirect::temporary(&url_with_params),
     )
 }
@@ -277,27 +288,24 @@ pub async fn get_tweet_id<A: TeleportDB>(
     let tweet_id = db.get_tweet(query.token_id.clone()).await.expect("Failed to get tweet id");
     drop(db);
 
-    let database_url = std::env::var("DATABASE_URL")
-        .expect("DATABASE_URL must be set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
     let mut config = ClientConfig::new();
     config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
     let tls = MakeRustlsConnect::new(config);
-    let (client, connection) = tokio_postgres::connect(
-        &database_url,
-        tls,
-    ).await.unwrap();
+    let (client, connection) = tokio_postgres::connect(&database_url, tls).await.unwrap();
     tokio::spawn(async move {
         if let Err(e) = connection.await {
             eprintln!("connection error: {}", e);
         }
     });
     let token_id_int: i32 = query.token_id.parse().unwrap();
-    client.execute(
-        "UPDATE \"RedeemedIndex\" SET \"tweetId\" = $1 WHERE \"tokenId\" = $2",
-        &[&tweet_id, &token_id_int],
-    )
-    .await
-    .expect("Failed to update tweetId in RedeemedIndex");
+    client
+        .execute(
+            "UPDATE \"RedeemedIndex\" SET \"tweetId\" = $1 WHERE \"tokenId\" = $2",
+            &[&tweet_id, &token_id_int],
+        )
+        .await
+        .expect("Failed to update tweetId in RedeemedIndex");
 
     Json(TweetIdResponse { tweet_id })
 }

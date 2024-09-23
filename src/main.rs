@@ -9,7 +9,8 @@ use tokio::time::Duration;
 
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
-    approve_mint, callback, get_tweet_id, hello_world, mint, redeem, register_or_login, SharedState, cookietest
+    approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
+    SharedState,
 };
 use openssl::pkey::PKey;
 use tokio::{fs, sync::Mutex, time::sleep};
@@ -17,7 +18,7 @@ use tower_http::cors::CorsLayer;
 
 use crate::{
     actions::nft::subscribe_to_nft_events, cert::create_csr, db::TeleportDB,
-    endpoints::check_redeem,
+    endpoints::check_redeem, twitter::builder::TwitterBuilder,
 };
 
 mod actions;
@@ -44,16 +45,21 @@ async fn main() {
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
     let rpc_url = std::env::var("RPC_URL").expect("RPC_URL not set");
     let tee_url = std::env::var("TEE_URL").expect("TEE_URL not set");
-        
+
     // Private API values
     let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
     let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
 
+    let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
+    let app_secret =
+        std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
+
+    let twitter_builder = TwitterBuilder::new(app_key, app_secret);
+
     let ws_rpc_url = ws_rpc_url + &rpc_key;
     let rpc_url = rpc_url + &rpc_key;
-
 
     let pkey = if std::path::Path::new(PRIVATE_KEY_PATH).exists() {
         let pk_bytes = fs::read(PRIVATE_KEY_PATH).await.expect("Failed to read pk file");
@@ -95,13 +101,20 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
-    let shared_state = SharedState { db: db.clone(), provider, app_url, tee_url, signer };
+    let shared_state = SharedState {
+        db: db.clone(),
+        provider,
+        app_url,
+        tee_url,
+        signer,
+        twitter_builder: twitter_builder.clone(),
+    };
 
     let app = axum::Router::new()
         .route("/new", axum::routing::get(register_or_login))
         .route("/approve", axum::routing::get(approve_mint))
         .route("/callback", axum::routing::get(callback))
-        .route("/cookietest", axum::routing::get(cookietest))	
+        .route("/cookietest", axum::routing::get(cookietest))
         .route("/mint", axum::routing::post(mint))
         .route("/redeem", axum::routing::post(redeem))
         .route("/checkRedeem", axum::routing::post(check_redeem))
@@ -136,7 +149,7 @@ async fn main() {
 
     let db_clone = db.clone();
     tokio::spawn(async move {
-        subscribe_to_nft_events(db_clone, ws_rpc_url).await.unwrap();
+        subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url).await.unwrap();
     });
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
     let db = db.lock().await;
@@ -146,4 +159,3 @@ async fn main() {
     log::info!("Saved db to file: {}", db_path);
     log::info!("Shutting down gracefully");
 }
- 

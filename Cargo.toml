@@ -10,7 +10,7 @@ rusqlite = { version = "0.31.0", features = ["bundled", "serialize"] }
 
 tokio = { version = "1.29.1", features = ["macros", "rt-multi-thread", "signal"] }
 reqwest-oauth1 = "0.2.4"
-reqwest = { version = "0.11.10" }
+reqwest = { version = "0.11.10", features = ["json", "multipart"] }
 log = "0.4.21"
 env_logger = "0.11.3"
 serde = "1.0.203"
@@ -46,6 +46,8 @@ chrono = "0.4.38"
 rand = "0.8.5"
 axum-extra = {version="0.9.3", features=["cookie"]}
 askama = "0.12.1"
+serde_with = "3.9.0"
+oauth1-request = "0.3.3"
 
 [features]
 default = ["https"]

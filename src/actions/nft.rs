@@ -87,29 +87,27 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
                         let tweet_id = "";
                         let safeguard = redeem.policy;
                         let content = redeem.content;
-                        let id = cuid::cuid().unwrap();
+                        let id = cuid::cuid2();
 
                         client.execute(
                             "INSERT INTO \"RedeemedIndex\" (\"id\", \"creatorUserId\", \"tokenId\", \"tweetId\", \"twitterUserName\", \"safeguard\", \"content\") VALUES ($1, $2, $3, $4, $5, $6, $7)",
                             &[&id, &creator_user_id, &token_id_int, &tweet_id, &twitter_user_name, &safeguard, &content],
                         )
                         .await?;
-                        
+
                         client.execute(
                             "UPDATE \"User\" SET \"haveBeenRedeemed\" = \"haveBeenRedeemed\" + 1 WHERE \"id\" = $1",
                             &[&creator_user_id],
                         ).await?;
 
-                        client.execute(
-                            "DELETE FROM \"NftIndex\" WHERE \"tokenId\" = $1",
-                            &[&token_id_int],
-                        )
-                        .await?;
+                        client
+                            .execute(
+                                "DELETE FROM \"NftIndex\" WHERE \"tokenId\" = $1",
+                                &[&token_id_int],
+                            )
+                            .await?;
 
-                        log::info!(
-                            "NFT {} deleted on postgresdb.",
-                            redeem.tokenId.to_string()
-                        );
+                        log::info!("NFT {} deleted on postgresdb.", redeem.tokenId.to_string());
                     }
                 }
                 NFTEvents::NewTokenData(new_token_data) => {

@@ -2,6 +2,7 @@ use rusqlite_from_row::FromRow;
 use serde::{Deserialize, Serialize};
 
 use crate::twitter::auth::TwitterTokenPair;
+pub mod client_db;
 pub mod in_memory;
 // pub mod sqlite;
 

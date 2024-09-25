@@ -51,6 +51,7 @@ async fn main() {
     let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
 
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
@@ -149,7 +150,7 @@ async fn main() {
 
     let db_clone = db.clone();
     tokio::spawn(async move {
-        subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url).await.unwrap();
+        subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url, database_url).await.unwrap();
     });
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
     let db = db.lock().await;

@@ -99,11 +99,11 @@ async fn handle_redeem_tweet<A: TeleportDB>(
         let db_lock = db.lock().await;
         let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
         drop(db_lock);
+        let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
+
         if let Some(user) = user {
             let client = twitter_builder
                 .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens")?.into());
-
-            let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
 
             // to be backwards compatible for now
             if let Ok(parsed_tweet_content) = serde_json::from_str::<TweetContent>(&redeem.content)
@@ -116,7 +116,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
                 }
             }
 
-            let mut tweet = Tweet::new(tweet_content.text);
+            let mut tweet = Tweet::new(tweet_content.text.clone());
             if let Some(media_id) = tweet_content.media_url {
                 tweet.set_media_ids(vec![media_id]);
             }
@@ -150,7 +150,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
 
         let tweet_id = "";
         let safeguard = redeem.policy;
-        let content = redeem.content;
+        let content = tweet_content.text;
         let id = cuid::cuid2();
 
         client.execute(

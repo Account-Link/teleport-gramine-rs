@@ -60,32 +60,44 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
 
     while let Some(log) = stream.next().await {
         if let Ok(event) = NFTEvents::decode_raw_log(log.topics(), &log.data().data, true) {
-            match event {
-                NFTEvents::RedeemTweet(redeem) => {
-                    if let Err(e) =
-                        handle_redeem_tweet(db.clone(), twitter_builder.clone(), redeem).await
-                    {
-                        log::error!("Error handling RedeemTweet event: {:?}", e);
-                    }
+            let db = db.clone();
+            let twitter_builder = twitter_builder.clone();
+            tokio::spawn(async move {
+                if let Err(e) = handle_event(db, twitter_builder, log.transaction_hash, event).await
+                {
+                    log::error!("Error handling event: {:?}", e);
                 }
-                NFTEvents::NewTokenData(new_token_data) => {
-                    if let Err(e) =
-                        handle_new_token_data(db.clone(), log.transaction_hash, new_token_data)
-                            .await
-                    {
-                        log::error!("Error handling NewTokenData event: {:?}", e);
-                    }
-                }
-                NFTEvents::Transfer(transfer) => {
-                    if let Err(e) = handle_transfer(transfer).await {
-                        log::error!("Error handling Transfer event: {:?}", e);
-                    }
-                }
-                _ => continue,
-            }
+            });
         }
     }
 
+    Ok(())
+}
+
+async fn handle_event<A: TeleportDB>(
+    db: Arc<Mutex<A>>,
+    twitter_builder: TwitterBuilder,
+    tx_hash: Option<FixedBytes<32>>,
+    event: NFTEvents,
+) -> eyre::Result<()> {
+    match event {
+        NFTEvents::RedeemTweet(redeem) => {
+            if let Err(e) = handle_redeem_tweet(db.clone(), twitter_builder, redeem).await {
+                log::error!("Error handling RedeemTweet event: {:?}", e);
+            }
+        }
+        NFTEvents::NewTokenData(new_token_data) => {
+            if let Err(e) = handle_new_token_data(db.clone(), tx_hash, new_token_data).await {
+                log::error!("Error handling NewTokenData event: {:?}", e);
+            }
+        }
+        NFTEvents::Transfer(transfer) => {
+            if let Err(e) = handle_transfer(transfer).await {
+                log::error!("Error handling Transfer event: {:?}", e);
+            }
+        }
+        _ => {}
+    };
     Ok(())
 }
 
@@ -97,7 +109,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
     if safe {
         let db_lock = db.lock().await;
-        let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).await.ok();
+        let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).ok();
         drop(db_lock);
         let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
 
@@ -124,9 +136,10 @@ async fn handle_redeem_tweet<A: TeleportDB>(
             let tweet_id = client.raw_tweet(tweet).await?;
 
             let mut db = db.lock().await;
-            db.add_tweet(redeem.tokenId.to_string(), tweet_id).await?;
+            db.add_tweet(redeem.tokenId.to_string(), tweet_id)?;
             drop(db);
         }
+
         let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let mut config = ClientConfig::new();
         config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
@@ -177,12 +190,31 @@ async fn handle_new_token_data<A: TeleportDB>(
     new_token_data: NewTokenData,
 ) -> eyre::Result<()> {
     let mut db = db.lock().await;
-    db.promote_pending_nft(
+    let nft_id = db.promote_pending_nft(
         transaction_hash.ok_or_eyre("Transaction hash is missing")?.encode_hex_with_prefix(),
         new_token_data.tokenId.to_string(),
-    )
-    .await?;
+    )?;
     drop(db);
+
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+    let mut config = ClientConfig::new();
+    config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
+    let tls = MakeRustlsConnect::new(config);
+    let (client, connection) = tokio_postgres::connect(&database_url, tls).await?;
+    tokio::spawn(async move {
+        if let Err(e) = connection.await {
+            log::error!("connection error: {}", e);
+        }
+    });
+
+    let token_id_int: i32 = new_token_data.tokenId.to_string().parse()?;
+
+    client
+        .execute(
+            "UPDATE \"NftIndex\" SET \"tokenId\" = $1 WHERE \"id\" = $2",
+            &[&token_id_int, &nft_id],
+        )
+        .await?;
     log::info!(
         "NFT minted with id {} to address {}",
         new_token_data.tokenId.to_string(),

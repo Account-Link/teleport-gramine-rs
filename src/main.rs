@@ -153,7 +153,7 @@ async fn main() {
     });
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
     let db = db.lock().await;
-    let serialized = db.serialize().await.unwrap();
+    let serialized = db.serialize().unwrap();
     let serialized_bytes = serialized.to_vec();
     fs::write(&db_path, serialized_bytes).await.expect("Failed to save serialized data to file");
     log::info!("Saved db to file: {}", db_path);

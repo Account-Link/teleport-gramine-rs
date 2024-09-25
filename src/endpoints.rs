@@ -131,11 +131,9 @@ pub async fn register_or_login<A: TeleportDB>(
         .expect("Failed to request oauth token");
 
     let mut db = shared_state.db.lock().await;
-    let mut existing_user = db.get_user_by_address(address.clone()).await.ok().unwrap_or_default();
+    let mut existing_user = db.get_user_by_address(address.clone()).ok().unwrap_or_default();
     existing_user.oauth_tokens = oauth_tokens.clone().into();
-    db.add_user(address.clone(), existing_user)
-        .await
-        .expect("Failed to add oauth tokens to database");
+    db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
 
     let url =
         format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
@@ -155,7 +153,7 @@ pub async fn callback<A: TeleportDB>(
 
     let mut db = shared_state.db.lock().await;
     let mut oauth_user =
-        db.get_user_by_address(address.clone()).await.expect("Failed to get oauth tokens");
+        db.get_user_by_address(address.clone()).expect("Failed to get oauth tokens");
     assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
     let token_pair = shared_state
@@ -174,13 +172,12 @@ pub async fn callback<A: TeleportDB>(
 
     let session_id = db
         .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
-        .await
         .expect("Failed to add session to database");
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens);
-        db.add_user(address, oauth_user.clone()).await.expect("Failed to add user to database");
+        db.add_user(address, oauth_user.clone()).expect("Failed to add user to database");
         drop(db);
     }
 
@@ -218,14 +215,11 @@ pub async fn mint(
     }
     let db = shared_state.db.lock().await;
     let user =
-        db.get_user_by_address(query.address.clone()).await.expect("Failed to get user by address");
+        db.get_user_by_address(query.address.clone()).expect("Failed to get user by address");
 
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
-        let session = db.get_session(session_id.to_string()).await.expect(
-            "Failed to get
-    session",
-        );
+        let session = db.get_session(session_id.to_string()).expect("Failed to getsession");
         if session.x_id != user.x_id.clone().unwrap() {
             return Err(StatusCode::UNAUTHORIZED);
         }
@@ -248,7 +242,6 @@ pub async fn mint(
         tx_hash.clone(),
         PendingNFT { address: query.address, nft_id: query.nft_id.clone() },
     )
-    .await
     .expect("Failed to add pending NFT");
     drop(db);
 
@@ -262,7 +255,6 @@ pub async fn redeem<A: TeleportDB>(
     let db = shared_state.db.lock().await;
     let nft = db
         .get_nft(query.nft_id.clone())
-        .await
         .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
     drop(db);
 
@@ -285,7 +277,7 @@ pub async fn get_tweet_id<A: TeleportDB>(
     Query(query): Query<TweetIdQuery>,
 ) -> Json<TweetIdResponse> {
     let db = shared_state.db.lock().await;
-    let tweet_id = db.get_tweet(query.token_id.clone()).await.expect("Failed to get tweet id");
+    let tweet_id = db.get_tweet(query.token_id.clone()).expect("Failed to get tweet id");
     drop(db);
 
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
@@ -318,7 +310,7 @@ pub async fn approve_mint<A: TeleportDB>(
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
         let db = shared_state.db.lock().await;
-        let session = db.get_session(session_id.to_string()).await.expect(
+        let session = db.get_session(session_id.to_string()).expect(
             "Failed to get
     session",
         );

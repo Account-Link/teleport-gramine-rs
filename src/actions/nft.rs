@@ -10,6 +10,7 @@ use alloy::{
 };
 use eyre::OptionExt;
 use futures_util::stream::StreamExt;
+use serde::Deserialize;
 use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
@@ -29,6 +30,12 @@ sol!(
     NFT,
     "abi/nft.json"
 );
+
+#[derive(Deserialize)]
+struct TweetContent {
+    text: String,
+    media_url: Option<String>,
+}
 
 pub fn get_nft_address() -> eyre::Result<Address> {
     let nft_address = std::env::var("NFT_ADDRESS")?;
@@ -96,7 +103,24 @@ async fn handle_redeem_tweet<A: TeleportDB>(
             let client = twitter_builder
                 .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens")?.into());
 
-            let tweet = Tweet::new(redeem.content.to_string());
+            let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
+
+            // to be backwards compatible for now
+            if let Ok(parsed_tweet_content) = serde_json::from_str::<TweetContent>(&redeem.content)
+            {
+                tweet_content.text = parsed_tweet_content.text;
+                if let Some(media_url) = parsed_tweet_content.media_url {
+                    let media_bytes = reqwest::get(media_url).await?.bytes().await?.to_vec();
+                    let media_id = client.upload_media(media_bytes, None).await?;
+                    tweet_content.media_url = Some(media_id);
+                }
+            }
+
+            let mut tweet = Tweet::new(tweet_content.text);
+            if let Some(media_id) = tweet_content.media_url {
+                tweet.set_media_ids(vec![media_id]);
+            }
+
             let tweet_id = client.raw_tweet(tweet).await?;
 
             let mut db = db.lock().await;

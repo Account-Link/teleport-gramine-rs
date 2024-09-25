@@ -295,7 +295,7 @@ pub async fn get_tweet_id<A: TeleportDB>(
     let (client, connection) = tokio_postgres::connect(&database_url, tls).await.unwrap();
     tokio::spawn(async move {
         if let Err(e) = connection.await {
-            eprintln!("connection error: {}", e);
+            log::error!("connection error: {}", e);
         }
     });
     let token_id_int: i32 = query.token_id.parse().unwrap();

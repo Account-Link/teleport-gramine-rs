@@ -73,29 +73,26 @@ impl TeleportDB for InMemoryDB {
         let nft_id_clone = pending_nft.nft_id.clone();
         self.nfts.insert(pending_nft.nft_id, nft);
 
-        let database_url = std::env::var("DATABASE_URL")
-                        .expect("DATABASE_URL must be set");
+        let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
         let mut config = ClientConfig::new();
         config.root_store.add_server_trust_anchors(&webpki_roots::TLS_SERVER_ROOTS);
         let tls = MakeRustlsConnect::new(config);
-        let (client, connection) = tokio_postgres::connect(
-            &database_url,
-            tls,
-        ).await?;
+        let (client, connection) = tokio_postgres::connect(&database_url, tls).await?;
         tokio::spawn(async move {
             if let Err(e) = connection.await {
-                eprintln!("connection error: {}", e);
+                log::error!("connection error: {}", e);
             }
         });
 
         let token_id_int: i32 = token_id.parse().unwrap();
         // let nft_id_clone = pending_nft.nft_id;
 
-        client.execute(
-            "UPDATE \"NftIndex\" SET \"tokenId\" = $1 WHERE \"id\" = $2",
-            &[&token_id_int, &nft_id_clone],
-        )
-        .await?;
+        client
+            .execute(
+                "UPDATE \"NftIndex\" SET \"tokenId\" = $1 WHERE \"id\" = $2",
+                &[&token_id_int, &nft_id_clone],
+            )
+            .await?;
 
         Ok(())
     }

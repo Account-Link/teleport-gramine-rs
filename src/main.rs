@@ -28,7 +28,7 @@ mod endpoints;
 mod oai;
 mod sgx_attest;
 mod templates;
-mod twitter;
+pub mod twitter;
 
 const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";

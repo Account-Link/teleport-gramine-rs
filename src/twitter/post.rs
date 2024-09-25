@@ -32,22 +32,51 @@ impl TwitterClient<'_> {
             .send()
             .await?;
 
-        let tweet_response: SendTweetResponse = resp.json().await?;
-        log::info!("Tweet response: {:?}", tweet_response);
-        Ok(tweet_response.data.id)
+        let body = resp.text().await?;
+
+        let tweet_response: Result<SendTweetResponse, _> = serde_json::from_str(&body);
+        match tweet_response {
+            Ok(response) => {
+                log::info!("Tweet response: {:?}", response);
+                Ok(response.data.id)
+            }
+            Err(e) => {
+                log::error!("Failed to decode tweet response: {:?}, body: {}", e, body);
+                Err(eyre::eyre!("Failed to decode tweet response"))
+            }
+        }
     }
 
-    pub async fn upload_media(&self, media_bytes: Vec<u8>) -> eyre::Result<String> {
-        let form = reqwest::multipart::Form::new()
+    pub async fn upload_media(
+        &self,
+        media_bytes: Vec<u8>,
+        additional_owners: Option<Vec<String>>,
+    ) -> eyre::Result<String> {
+        let mut form = reqwest::multipart::Form::new()
             .part("media", reqwest::multipart::Part::bytes(media_bytes));
+        if let Some(additional_owners) = additional_owners {
+            form = form.text("additional_owners", additional_owners.join(","));
+        }
         let resp = self
             .client
             .post("https://upload.twitter.com/1.1/media/upload.json".to_string())
             .multipart(form)
             .send()
             .await?;
-        let media_upload_response: MediaUploadResponse = resp.json().await?;
-        Ok(media_upload_response.media_id_string)
+        let body = resp.text().await?;
+        let media_upload_response: Result<MediaUploadResponse, _> = serde_json::from_str(&body);
+        match media_upload_response {
+            Ok(response) => {
+                log::info!("Media upload response: {:?}", response);
+                Ok(response.media_id_string)
+            }
+            Err(e) => {
+                log::error!("Failed to decode media upload response: {:?}, body: {}", e, body);
+                Err(eyre::eyre!("Failed to decode media upload response"))
+            }
+        }
+        // let media_upload_response: MediaUploadResponse = resp.json().await?;
+        // Ok(media_upload_response.media_id_string)
     }
 
     // pub async fn tweet(&self, tweet: String) -> eyre::Result<String> {

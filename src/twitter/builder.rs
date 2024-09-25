@@ -1,8 +1,6 @@
 use oauth1_request::signature_method::hmac_sha1::HmacSha1;
 use reqwest_oauth1::{Client, OAuthClientProvider, Secrets, Signer};
 
-use crate::db::AccessTokens;
-
 use super::auth::{self, TwitterTokenPair};
 
 #[derive(Debug, Clone)]

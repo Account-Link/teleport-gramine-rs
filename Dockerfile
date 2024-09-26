@@ -14,7 +14,7 @@ RUN apt-get install -y pkg-config libssl-dev
 
 # Build just the dependencies (shorcut)
 COPY Cargo.lock Cargo.toml ./
-RUN mkdir src && touch src/lib.rs
+RUN mkdir src && echo "fn main() {}" > src/main.rs
 RUN cargo build --release
 RUN rm -r src
 

@@ -10,3 +10,4 @@ exex.sig
 *.pem
 *.tmp
 certbot
+tokens.json

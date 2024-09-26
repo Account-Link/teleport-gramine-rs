@@ -11,14 +11,14 @@ pub fn create_csr(domain: &str, pkey: &PKey<pkey::Private>) -> eyre::Result<X509
     // the csr builder
     let mut req_bld = X509ReqBuilder::new().expect("X509ReqBuilder");
 
-    let mut x509_name = openssl::x509::X509NameBuilder::new().unwrap();
-    x509_name.append_entry_by_text("C", "US").unwrap();
-    x509_name.append_entry_by_text("ST", "IL").unwrap();
-    x509_name.append_entry_by_text("O", "n/a").unwrap();
-    x509_name.append_entry_by_text("CN", domain).unwrap();
+    let mut x509_name = openssl::x509::X509NameBuilder::new()?;
+    x509_name.append_entry_by_text("C", "US")?;
+    x509_name.append_entry_by_text("ST", "IL")?;
+    x509_name.append_entry_by_text("O", "n/a")?;
+    x509_name.append_entry_by_text("CN", domain)?;
     let x509_name = x509_name.build();
 
-    req_bld.set_subject_name(&x509_name).unwrap();
+    req_bld.set_subject_name(&x509_name)?;
 
     // set private/public key in builder
     req_bld.set_pubkey(pkey).expect("set_pubkey");

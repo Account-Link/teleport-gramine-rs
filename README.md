@@ -16,7 +16,7 @@ Those of you with web2 instincts will readily spot the potential to "sell ads" o
 
 The backend repo is open source at: https://github.com/Account-Link/teleport-gramine-rs
 
-The measurement for the backend enclave is:  `6d63e420fbd32988baa7d1fceb467960faa48c7f53ff1d56d0384d0ceb910878`
+The measurement for the backend enclave is:  `a689ac31808c464bd71a4f97ae12fd60084ee61f377aa56b21ee96aa9519fad9`
 
 The smart contract address is: [0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8](https://basescan.org/address/0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8)
 

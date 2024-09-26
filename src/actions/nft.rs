@@ -57,8 +57,7 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
     let sub = provider.subscribe_logs(&filter).await?;
     let mut stream = sub.into_stream();
 
-    let client_db = ClientDB::new(database_url).await?;
-    let client_db = Arc::new(Mutex::new(client_db));
+    let client_db = ClientDB::new(database_url);
 
     while let Some(log) = stream.next().await {
         if let Ok(event) = NFTEvents::decode_raw_log(log.topics(), &log.data().data, true) {
@@ -80,7 +79,7 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
 
 async fn handle_event<A: TeleportDB>(
     db: Arc<Mutex<A>>,
-    client_db: Arc<Mutex<ClientDB>>,
+    client_db: ClientDB,
     twitter_builder: TwitterBuilder,
     tx_hash: Option<FixedBytes<32>>,
     event: NFTEvents,
@@ -108,7 +107,7 @@ async fn handle_event<A: TeleportDB>(
 
 async fn handle_redeem_tweet<A: TeleportDB>(
     db: Arc<Mutex<A>>,
-    client_db: Arc<Mutex<ClientDB>>,
+    client_db: ClientDB,
     twitter_builder: TwitterBuilder,
     redeem: RedeemTweet,
 ) -> eyre::Result<()> {
@@ -147,7 +146,6 @@ async fn handle_redeem_tweet<A: TeleportDB>(
         }
 
         let token_id = redeem.tokenId.to_string();
-        let client_db = client_db.lock().await;
         let token_owner = client_db.get_token_owner(token_id.clone()).await?;
         client_db
             .add_redeemed_tweet(
@@ -166,7 +164,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
 
 async fn handle_new_token_data<A: TeleportDB>(
     db: Arc<Mutex<A>>,
-    client_db: Arc<Mutex<ClientDB>>,
+    client_db: ClientDB,
     transaction_hash: Option<FixedBytes<32>>,
     new_token_data: NewTokenData,
 ) -> eyre::Result<()> {
@@ -178,9 +176,7 @@ async fn handle_new_token_data<A: TeleportDB>(
     drop(db);
 
     let token_id = new_token_data.tokenId.to_string();
-    let client_db = client_db.lock().await;
     client_db.set_token_id(token_id.clone(), nft_id).await?;
-    drop(client_db);
     log::info!(
         "NFT minted with id {} to address {}",
         new_token_data.tokenId.to_string(),
@@ -189,12 +185,11 @@ async fn handle_new_token_data<A: TeleportDB>(
     Ok(())
 }
 
-async fn handle_transfer(client_db: Arc<Mutex<ClientDB>>, transfer: Transfer) -> eyre::Result<()> {
+async fn handle_transfer(client_db: ClientDB, transfer: Transfer) -> eyre::Result<()> {
     let from = transfer.from.to_string();
     let to = transfer.to.to_string();
     let token_id = transfer.tokenId.to_string();
 
-    let client_db = client_db.lock().await;
     if from == "0x0000000000000000000000000000000000000000" {
         // Do nothing
     } else if to == "0x0000000000000000000000000000000000000000" {
@@ -202,7 +197,6 @@ async fn handle_transfer(client_db: Arc<Mutex<ClientDB>>, transfer: Transfer) ->
     } else {
         client_db.update_token_owner(token_id.clone(), to.clone()).await?;
     }
-    drop(client_db);
 
     log::info!("NFT {} transferred from {} to {}.", token_id, from, to);
     Ok(())

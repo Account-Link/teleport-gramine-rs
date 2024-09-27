@@ -2,10 +2,10 @@ use alloy::{
     network::{Ethereum, EthereumWallet},
     providers::{
         fillers::{
-            BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
-            WalletFiller,
+            BlobGasFiller, CachedNonceManager, ChainIdFiller, FillProvider, GasFiller, JoinFill,
+            NonceFiller, WalletFiller,
         },
-        Identity, RootProvider,
+        Identity, ProviderBuilder, RootProvider,
     },
     transports::http::{Client, Http},
 };
@@ -14,7 +14,10 @@ pub type WalletProvider = FillProvider<
     JoinFill<
         JoinFill<
             Identity,
-            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
+            JoinFill<
+                GasFiller,
+                JoinFill<BlobGasFiller, JoinFill<NonceFiller<CachedNonceManager>, ChainIdFiller>>,
+            >,
         >,
         WalletFiller<EthereumWallet>,
     >,
@@ -22,6 +25,20 @@ pub type WalletProvider = FillProvider<
     Http<Client>,
     Ethereum,
 >;
+
+pub fn get_provider(rpc_url: String, wallet: EthereumWallet) -> WalletProvider {
+    let provider = ProviderBuilder::new()
+        .filler(JoinFill::new(
+            GasFiller,
+            JoinFill::new(
+                BlobGasFiller,
+                JoinFill::new(NonceFiller::default(), ChainIdFiller::default()),
+            ),
+        ))
+        .wallet(wallet)
+        .on_http(rpc_url.parse().unwrap());
+    provider
+}
 
 // pub fn gen_sk() -> eyre::Result<String> {
 //     let mut buf = [0u8; 32];

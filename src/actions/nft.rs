@@ -257,6 +257,8 @@ mod tests {
         signers::local::{coins_bip39::English, MnemonicBuilder},
     };
 
+    use crate::actions::wallet::get_provider;
+
     use super::*;
     #[tokio::test]
     async fn test_mint_nft() {
@@ -274,10 +276,7 @@ mod tests {
             .build()
             .unwrap();
         let wallet = EthereumWallet::from(signer);
-        let provider = ProviderBuilder::new()
-            .with_recommended_fillers()
-            .wallet(wallet)
-            .on_http(rpc_url.parse().unwrap());
+        let provider = get_provider(rpc_url, wallet);
         mint_nft(provider, recipient_address, 1.to_string(), "policy".to_string()).await.unwrap();
     }
 }

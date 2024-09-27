@@ -13,12 +13,12 @@ use axum::{
 };
 use rustls::ClientConfig;
 use serde::{Deserialize, Serialize};
-use tokio::sync::Mutex;
+use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
     actions::{
-        nft::{mint_nft, redeem_nft},
+        nft::{mint_nft, redeem_nft, NFTAction},
         wallet::WalletProvider,
     },
     db::{in_memory::InMemoryDB, PendingNFT, Session, TeleportDB},
@@ -99,11 +99,11 @@ pub struct CheckRedeemResponse {
 #[derive(Clone)]
 pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
-    pub provider: WalletProvider,
     pub signer: LocalSigner<SigningKey>,
     pub app_url: String,
     pub tee_url: String,
     pub twitter_builder: TwitterBuilder,
+    pub nft_action_sender: mpsc::Sender<(NFTAction, oneshot::Sender<String>)>,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -228,14 +228,16 @@ pub async fn mint(
     }
     drop(db);
 
-    let tx_hash = mint_nft(
-        shared_state.provider,
-        Address::from_str(&query.address).expect("Failed to parse user address"),
-        user.x_id.expect("User x_id not set"),
-        query.policy,
-    )
-    .await
-    .expect("Failed to mint NFT");
+    let nft_action = NFTAction::Mint {
+        recipient: Address::from_str(&query.address).expect("Failed to parse user address"),
+        policy: query.policy,
+        nft_id: user.x_id.expect("User x_id not set"),
+    };
+
+    let (sender, tx_hash) = oneshot::channel();
+
+    shared_state.nft_action_sender.send((nft_action, sender)).await.unwrap();
+    let tx_hash = tx_hash.await.unwrap();
 
     let mut db = shared_state.db.lock().await;
     db.add_pending_nft(
@@ -258,9 +260,13 @@ pub async fn redeem<A: TeleportDB>(
         .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
     drop(db);
 
-    let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)
-        .await
-        .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
+    let nft_action = NFTAction::Redeem { token_id: nft.token_id.clone(), content: query.content };
+
+    let (sender, tx_hash) = oneshot::channel();
+
+    shared_state.nft_action_sender.send((nft_action, sender)).await.unwrap();
+    let tx_hash = tx_hash.await.unwrap();
+
     Json(TxHashResponse { hash: tx_hash })
 }
 

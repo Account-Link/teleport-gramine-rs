@@ -5,7 +5,7 @@ use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
-use tokio::time::Duration;
+use tokio::{sync::mpsc, time::Duration};
 
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
@@ -17,7 +17,10 @@ use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    actions::{nft::subscribe_to_nft_events, wallet::get_provider},
+    actions::{
+        nft::{nft_action_consumer, subscribe_to_nft_events},
+        wallet::get_provider,
+    },
     cert::create_csr,
     db::TeleportDB,
     endpoints::check_redeem,
@@ -102,13 +105,14 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
+    let (sender, receiver) = mpsc::channel(100);
     let shared_state = SharedState {
         db: db.clone(),
-        provider,
         app_url,
         tee_url,
         signer,
         twitter_builder: twitter_builder.clone(),
+        nft_action_sender: sender,
     };
 
     let app = axum::Router::new()
@@ -151,6 +155,9 @@ async fn main() {
     let db_clone = db.clone();
     tokio::spawn(async move {
         subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url, database_url).await.unwrap();
+    });
+    tokio::spawn(async move {
+        nft_action_consumer(receiver, provider).await;
     });
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
     let db = db.lock().await;

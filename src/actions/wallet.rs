@@ -2,8 +2,8 @@ use alloy::{
     network::{Ethereum, EthereumWallet},
     providers::{
         fillers::{
-            BlobGasFiller, CachedNonceManager, ChainIdFiller, FillProvider, GasFiller, JoinFill,
-            NonceFiller, WalletFiller,
+            BlobGasFiller, ChainIdFiller, FillProvider, GasFiller, JoinFill, NonceFiller,
+            WalletFiller,
         },
         Identity, ProviderBuilder, RootProvider,
     },
@@ -14,10 +14,7 @@ pub type WalletProvider = FillProvider<
     JoinFill<
         JoinFill<
             Identity,
-            JoinFill<
-                GasFiller,
-                JoinFill<BlobGasFiller, JoinFill<NonceFiller<CachedNonceManager>, ChainIdFiller>>,
-            >,
+            JoinFill<GasFiller, JoinFill<BlobGasFiller, JoinFill<NonceFiller, ChainIdFiller>>>,
         >,
         WalletFiller<EthereumWallet>,
     >,

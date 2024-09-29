@@ -10,8 +10,8 @@ use alloy::{
 };
 use eyre::OptionExt;
 use futures_util::stream::StreamExt;
-use serde::Deserialize;
-use tokio::sync::Mutex;
+use serde::{Deserialize, Serialize};
+use tokio::sync::{mpsc, oneshot, Mutex};
 use NFT::NFTEvents;
 
 use self::NFT::{NewTokenData, RedeemTweet, Transfer};
@@ -237,6 +237,37 @@ pub async fn redeem_nft(
     Ok(tx_hash.encode_hex_with_prefix())
 }
 
+#[derive(Debug, Serialize)]
+pub enum NFTAction {
+    Redeem { token_id: String, content: String },
+    Mint { recipient: Address, policy: String, nft_id: String },
+}
+
+pub async fn nft_action_consumer(
+    mut receiver: mpsc::Receiver<(NFTAction, oneshot::Sender<String>)>,
+    provider: WalletProvider,
+) {
+    while let Some(action) = receiver.recv().await {
+        let (action, sender) = action;
+        let tx_hash = match action {
+            NFTAction::Redeem { token_id, content } => {
+                redeem_nft(provider.clone(), token_id, content).await
+            }
+            NFTAction::Mint { recipient, policy, nft_id } => {
+                mint_nft(provider.clone(), recipient, nft_id, policy).await
+            }
+        };
+
+        if let Ok(tx_hash) = tx_hash {
+            if let Err(e) = sender.send(tx_hash) {
+                log::error!("Failed to send tx hash to sender: {:?}", e);
+            }
+        } else {
+            log::error!("Failed to send tx hash to sender");
+        }
+    }
+}
+
 // pub async fn send_eth(
 //     provider: WalletProvider,
 //     recipient: Address,
@@ -257,6 +288,8 @@ mod tests {
         signers::local::{coins_bip39::English, MnemonicBuilder},
     };
 
+    use crate::actions::wallet::get_provider;
+
     use super::*;
     #[tokio::test]
     async fn test_mint_nft() {
@@ -274,10 +307,7 @@ mod tests {
             .build()
             .unwrap();
         let wallet = EthereumWallet::from(signer);
-        let provider = ProviderBuilder::new()
-            .with_recommended_fillers()
-            .wallet(wallet)
-            .on_http(rpc_url.parse().unwrap());
+        let provider = get_provider(rpc_url, wallet);
         mint_nft(provider, recipient_address, 1.to_string(), "policy".to_string()).await.unwrap();
     }
 }

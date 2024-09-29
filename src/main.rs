@@ -5,7 +5,7 @@ use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
-use tokio::time::Duration;
+use tokio::{sync::mpsc, time::Duration};
 
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
@@ -17,8 +17,14 @@ use tokio::{fs, sync::Mutex, time::sleep};
 use tower_http::cors::CorsLayer;
 
 use crate::{
-    actions::nft::subscribe_to_nft_events, cert::create_csr, db::TeleportDB,
-    endpoints::check_redeem, twitter::builder::TwitterBuilder,
+    actions::{
+        nft::{nft_action_consumer, subscribe_to_nft_events},
+        wallet::get_provider,
+    },
+    cert::create_csr,
+    db::TeleportDB,
+    endpoints::check_redeem,
+    twitter::builder::TwitterBuilder,
 };
 
 mod actions;
@@ -89,10 +95,7 @@ async fn main() {
     let signer =
         MnemonicBuilder::<English>::default().phrase(mnemonic).index(0).unwrap().build().unwrap();
 
-    let provider = ProviderBuilder::new()
-        .with_recommended_fillers()
-        .wallet(signer.clone().into())
-        .on_http(rpc_url.parse().unwrap());
+    let provider = get_provider(rpc_url, signer.clone().into());
 
     let db = if std::path::Path::new(&db_path).exists() {
         let serialized_bytes = fs::read(&db_path).await.expect("Failed to read db file");
@@ -103,13 +106,14 @@ async fn main() {
         db::in_memory::InMemoryDB::new()
     };
     let db = Arc::new(Mutex::new(db));
+    let (sender, receiver) = mpsc::channel(100);
     let shared_state = SharedState {
         db: db.clone(),
-        provider,
         app_url,
         tee_url,
         signer,
         twitter_builder: twitter_builder.clone(),
+        nft_action_sender: sender,
     };
 
     let app = axum::Router::new()
@@ -152,6 +156,9 @@ async fn main() {
     let db_clone = db.clone();
     tokio::spawn(async move {
         subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url, database_url).await.unwrap();
+    });
+    tokio::spawn(async move {
+        nft_action_consumer(receiver, provider).await;
     });
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
     let db = db.lock().await;

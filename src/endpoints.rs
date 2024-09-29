@@ -39,13 +39,14 @@ fn default_str() -> String {
 
 #[derive(Deserialize)]
 pub struct NewUserQuery {
+    frontend_url: Option<String>,
 }
 
 #[derive(Deserialize)]
 pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
-    frontend_url: Option<String>,
+    frontend_url: String,
 }
 
 #[derive(Deserialize)]
@@ -116,8 +117,7 @@ pub async fn register_or_login<A: TeleportDB>(
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
 
-    let callback_url =
-        get_callback_url(shared_state.tee_url.clone());
+    let callback_url = format!("https://{}/callback?frontend_url={}", shared_state.tee_url.clone(), query.frontend_url.unwrap_or(shared_state.app_url));
 
     let oauth_tokens = shared_state
         .twitter_builder
@@ -187,11 +187,9 @@ pub async fn callback<A: TeleportDB>(
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-
-    let app_url = query.frontend_url.unwrap_or(shared_state.app_url);
     
     let url_with_params =
-        format!("{}/create?sig={:?}&success=true&{}", app_url, sig, encoded_x_info);
+        format!("{}/create?sig={:?}&success=true&{}", query.frontend_url, sig, encoded_x_info);
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))

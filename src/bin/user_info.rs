@@ -1,14 +1,21 @@
 use std::{
     fs::File,
-    io::{BufReader, Read},
+    io::BufReader,
+    sync::{Arc, Mutex},
 };
 
 use rayon::prelude::*;
-use teleport::twitter::{auth::TwitterTokenPair, builder::TwitterBuilder, tweet::Tweet};
+use teleport::twitter::{auth::TwitterTokenPair, builder::TwitterBuilder};
 
 #[derive(serde::Deserialize)]
 struct Tokens {
     tokens: Vec<TwitterTokenPair>,
+}
+
+#[derive(serde::Serialize)]
+struct UserInfo {
+    username: String,
+    x_id: String,
 }
 
 #[tokio::main]
@@ -25,23 +32,20 @@ async fn main() {
     let reader = BufReader::new(file);
     let tokens: Tokens = serde_json::from_reader(reader).unwrap();
 
-    let file = File::open("data/test.jpg").unwrap();
-    let img_buffer = BufReader::new(file);
-    let mut img = Vec::new();
-    img_buffer.into_inner().read_to_end(&mut img).unwrap();
-
     let runtime = tokio::runtime::Runtime::new().unwrap();
+    let user_infos: Vec<UserInfo> = Vec::new();
+    let user_infos = Arc::new(Mutex::new(user_infos));
     tokens.tokens.par_iter().for_each(|token_pair| {
         let client = twitter.with_auth(token_pair.clone());
-
-        let media_id = runtime.block_on(client.upload_media(img.clone(), None)).unwrap();
-
-        let mut tweet = Tweet::new(format!("libmev takeover 3 :o"));
-        tweet.set_media_ids(vec![media_id]);
-        let res = runtime.block_on(client.raw_tweet(tweet));
-        if let Err(e) = res {
-            log::error!("Error sending tweet: {:?}", e);
-        }
+        let info = runtime.block_on(client.get_user_info()).unwrap();
+        let info = UserInfo { username: info.username, x_id: info.id };
+        let mut user_infos = user_infos.lock().unwrap();
+        user_infos.push(info);
+        drop(user_infos);
     });
     drop(runtime);
+    let file = File::create("user_infos.json").unwrap();
+    let user_infos = user_infos.lock().unwrap();
+    let user_infos = user_infos.as_slice();
+    serde_json::to_writer_pretty(file, user_infos).unwrap();
 }

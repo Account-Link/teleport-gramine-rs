@@ -1,0 +1,13 @@
+[project]
+name = "teleport-exex"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "flask>=3.0.3",
+    "pyotp>=2.9.0",
+    "requests>=2.32.3",
+    "selenium>=4.25.0",
+    "web3>=7.3.0",
+]

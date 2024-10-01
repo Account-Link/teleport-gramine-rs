@@ -5,6 +5,7 @@ edition = "2021"
 default-run = "teleport"
 
 [dependencies]
+hex = "0.4"
 eyre = "0.6.12"
 futures = "0.3.30"
 rusqlite = { version = "0.31.0", features = ["bundled", "serialize"] }

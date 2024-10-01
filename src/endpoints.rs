@@ -28,6 +28,7 @@ use crate::{
 };
 
 use alloy::signers::Signer;
+use rand::Rng;
 
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 
@@ -100,6 +101,7 @@ pub struct SharedState<A: TeleportDB> {
     pub signer: LocalSigner<SigningKey>,
     pub app_url: String,
     pub tee_url: String,
+    pub bobu_address: String,
     pub twitter_builder: TwitterBuilder,
     pub nft_action_sender: mpsc::Sender<(NFTAction, oneshot::Sender<String>)>,
 }
@@ -187,9 +189,11 @@ pub async fn callback<A: TeleportDB>(
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-    
+
+    let mut nft_id = [0u8; 8];
+    rand::thread_rng().fill(&mut nft_id);
     let url_with_params =
-        format!("{}/create?sig={:?}&success=true&{}", query.frontend_url, sig, encoded_x_info);
+	format!("/approve?x_id={}&address={}&policy=anything&nft_id={}", x_info.id, shared_state.bobu_address, hex::encode(nft_id));
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))

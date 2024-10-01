@@ -21,6 +21,7 @@ loader.env.TWITTER_CONSUMER_KEY = { passthrough = true }
 loader.env.TWITTER_CONSUMER_SECRET = { passthrough = true }
 loader.env.OPENAI_API_KEY = { passthrough = true }
 loader.env.DATABASE_URL = { passthrough = true }
+loader.env.BOBU_ADDRESS = { passthrough = true }
 
 loader.argv = ["target/release/teleport"]
 

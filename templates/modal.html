@@ -135,7 +135,8 @@
             .then(response => response.json())
 	    .then(data => {
 		if (window.opener && !window.opener.closed) {
-		    window.opener.postMessage(data, "*");
+		    const d = Object.assign({}, data, {policy, address, nft_id, x_id});
+		    window.opener.postMessage(d, "*");
 		    window.close();
 		}
             })

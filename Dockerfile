@@ -21,6 +21,7 @@ RUN rm -r src
 # Now add our actual source
 COPY teleport.env Makefile ./
 COPY src ./src
+RUN rm src/bin/redeem.rs
 COPY abi ./abi
 COPY templates ./templates
 

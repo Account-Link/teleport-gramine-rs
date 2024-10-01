@@ -3,7 +3,7 @@ use std::{net::SocketAddr, path::Path, sync::Arc};
 use acme_lib::create_rsa_key;
 use alloy::{
     providers::ProviderBuilder,
-    signers::local::{coins_bip39::English, MnemonicBuilder},
+    signers::local::{coins_bip39::English, PrivateKeySigner},
 };
 use tokio::{sync::mpsc, time::Duration};
 
@@ -37,6 +37,7 @@ mod templates;
 pub mod twitter;
 
 //const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
+const WALLET_PATH: &str = "untrustedhost/wallet.key";
 const PRIVATE_KEY_PATH: &str = "untrustedhost/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
 const CSR_PATH: &str = "untrustedhost/request.csr";
@@ -92,8 +93,16 @@ async fn main() {
         fs::write(QUOTE_PATH, quote).await.expect("Failed to write quote to file");
     }
 
-    let signer =
-        MnemonicBuilder::<English>::default().phrase(mnemonic).index(0).unwrap().build().unwrap();
+    // Generate a random wallet (24 word phrase) at custom derivation path.
+    let signer = if std::path::Path::new(WALLET_PATH).exists() {
+	let p_bytes = fs::read(WALLET_PATH).await.expect("failed to read wallet");
+	PrivateKeySigner::from_slice(&p_bytes).unwrap()
+    } else {
+	let signer = PrivateKeySigner::random();
+	fs::write(WALLET_PATH,signer.to_bytes()).await.expect("failed to write wallet");
+	signer
+    };
+    log::info!("Signer address:{}", signer.address());
 
     let provider = get_provider(rpc_url, signer.clone().into());
 

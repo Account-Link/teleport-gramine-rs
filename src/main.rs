@@ -36,9 +36,10 @@ mod sgx_attest;
 mod templates;
 pub mod twitter;
 
-//const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
-const WALLET_PATH: &str = "untrustedhost/wallet.key";
-const PRIVATE_KEY_PATH: &str = "untrustedhost/private_key.pem";
+const WALLET_PATH: &str = "/root/save/wallet.key";
+//const WALLET_PATH: &str = "untrustedhost/wallet.key";
+const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
+//const PRIVATE_KEY_PATH: &str = "untrustedhost/private_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
 const CSR_PATH: &str = "untrustedhost/request.csr";
 const QUOTE_PATH: &str = "untrustedhost/quote.dat";

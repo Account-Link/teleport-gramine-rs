@@ -28,20 +28,13 @@ impl InMemoryDB {
 impl TeleportDB for InMemoryDB {
 
     fn add_oauth(&mut self, token: String, secret: String) -> eyre::Result<()> {
-	let file_path = Path::new("/root/save/oauths").join(format!("{}.oauth", token));
-	log::info!("Writing oauth to file: {:?}", file_path.clone());	
-	let mut file = File::create(file_path)?;
-	file.write_all(secret.as_bytes())?;
-	//self.oauths.insert(token, secret);
+	self.oauths.insert(token, secret);
 	Ok(())
     }
 
     fn get_oauth(&mut self, token: String) -> eyre::Result<String> {
-	let file_path = Path::new("/root/save/oauths").join(format!("{}.oauth", token));
-        let secret = read_to_string(file_path)?;
-        Ok(secret)
-	//let secret = self.oauths.get(&token).ok_or_else(|| eyre::eyre!("OAuth not found"))?;
-	//Ok(secret.to_string())
+	let secret = self.oauths.get(&token).ok_or_else(|| eyre::eyre!("OAuth not found"))?;
+	Ok(secret.to_string())
     }
 
     fn add_user(&mut self, user: User) -> eyre::Result<()> {

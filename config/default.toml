@@ -1,0 +1,5 @@
+[paths]
+private_key = "/root/save/private_key.pem"
+certificate = "untrustedhost/certificate.pem"
+csr = "untrustedhost/request.csr"
+quote = "untrustedhost/quote.dat"

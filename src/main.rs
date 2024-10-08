@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     #[cfg(feature = "production")]
     let csr = create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
     #[cfg(feature = "production")]
-    handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
+    sgx_attest::handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
 
     let signer = MnemonicBuilder::<English>::default()
         .phrase(config.nft_minter_mnemonic)
@@ -165,19 +165,4 @@ fn create_app(shared_state: SharedState<InMemoryDB>) -> axum::Router {
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::permissive())
         .with_state(shared_state)
-}
-
-#[cfg(feature = "production")]
-async fn handle_sgx_attestation(
-    quote_path: &Path,
-    private_key: &PKey<openssl::pkey::Private>,
-    csr: &X509Req,
-) {
-    let mut pk_bytes = private_key.public_key_to_pem().unwrap();
-    let mut csr_pem_bytes = csr.to_pem().unwrap();
-    pk_bytes.append(&mut csr_pem_bytes);
-    if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {
-        log::info!("Writing quote to file: {}", quote_path.display());
-        fs::write(quote_path, quote).await.expect("Failed to write quote to file");
-    }
 }

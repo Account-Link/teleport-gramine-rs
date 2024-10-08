@@ -5,7 +5,9 @@ edition = "2021"
 default-run = "teleport"
 
 [dependencies]
-figment = { version = "0.10", features = ["env", "toml"] }
+config = "0.14.0"
+strum = "0.26"
+strum_macros = "0.26"
 eyre = "0.6.12"
 futures = "0.3.30"
 rusqlite = { version = "0.31.0", features = ["bundled", "serialize"] }

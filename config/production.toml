@@ -1,0 +1,15 @@
+# choose environment to be either "Development", "Staging", or "Production"
+environment = "Production"
+
+# APP_URL: The URL where the Teleport service is hosted. This varies depending on the environment:
+APP_URL = "teleport.best"
+# TEE_URL: The URL where the Trusted Execution Environment (TEE) is hosted.
+TEE_URL = "https://tee.teleport.best"
+# WS_RPC_URL: WebSocket URL for the blockchain node provider
+WS_RPC_URL = "wss://base-mainnet.g.alchemy.com/v2/"
+# RPC_URL: HTTP URL for the blockchain node provider
+RPC_URL = "https://base-mainnet.g.alchemy.com/v2/"
+# NFT_ADDRESS: On-chain address of the deployed NFT contract used for minting and managing NFTs
+NFT_ADDRESS = "0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8"
+# DB_PATH: Path to the SQLite database file for application state in the production environment
+DB_PATH = "db.production.sqlite"

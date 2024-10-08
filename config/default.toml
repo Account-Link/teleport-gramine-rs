@@ -1,18 +1,5 @@
-[paths]
-private_key = "/root/save/private_key.pem"
-certificate = "untrustedhost/certificate.pem"
-csr = "untrustedhost/request.csr"
-quote = "untrustedhost/quote.dat"
-
-# TEE_URL: The URL where the Trusted Execution Environment (TEE) is hosted.
-# Local development: typically `http://localhost:3000`
-# Staging/Production: the actual deployed TEE domain, e.g. `https://tee.teleport.best`
-TEE_URL = "http://localhost:3000"
-# APP_URL: The URL where the Teleport service is hosted. This varies depending on the environment:
-#  - Local development: typically `http://localhost:8000`
-#  - Staging/Production: the actual deployed domain
-APP_URL = "http://localhost:8000"
-# choose environment to be either "Development" or "Production"
-environment = "Development"
-# DB_PATH: the in memory SQLite database file for application state of Axum server
-DB_PATH = "db.sqlite"
+[tee]
+private_key_path = "/root/save/private_key.pem"
+certificate_path = "untrustedhost/certificate.pem"
+csr_save_path = "untrustedhost/request.csr"
+quote_path = "untrustedhost/quote.dat"

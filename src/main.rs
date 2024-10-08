@@ -62,14 +62,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let app = router::create_router(shared_state);
 
     match config.environment {
-        config::Environment::Production => {
+        config::Environment::Production | config::Environment::Staging => {
             server_setup::setup_production_server(
                 app,
-                &config.paths.private_key,
-                &config.paths.csr,
-                &config.paths.quote,
+                &config.tee.private_key_path,
+                &config.tee.csr_save_path,
+                &config.tee.quote_path,
                 &config.tee_url,
-                &config.paths.certificate,
+                &config.tee.certificate_path,
             )
             .await?
         }

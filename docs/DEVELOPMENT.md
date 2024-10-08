@@ -10,25 +10,20 @@ This guide provides essential information for developers working on the Teleport
 - Linux distribution with SGX support (e.g., Ubuntu 20.04 LTS)
 - SGX driver installed (follow manufacturer instructions)
 
-### Configs
+### Configuration
 
-#### config/default.toml
+The configuration is loaded from multiple sources in the following order:
 
-This file contains the default configuration for the application. It is used to set the environment to `Development` by default.
+1. `config/default.toml`: Contains default settings for all environments, including paths to essential files for TEE server setup and remote attestation.
+2. Environment-specific config file: `config/{environment}.toml` (e.g., `config/development.toml`, `config/staging.toml`, `config/production.toml`)
+   - The environment is determined by the `RUN_MODE` environment variable, defaulting to "development" if not set.
+   - Valid options for `RUN_MODE` are: development, staging, production.
+   - Each environment has its specific configuration file with tailored settings.
+3. Environment variables with the prefix "APP_".
 
-It also contains the default paths to the private key, certificate, CSR, and quote files. These files are used to set up the certificate for TEE server.
+Sources are merged from top to bottom, with values in later sources overriding those in previous sources.
 
-#### private.env
-
-Create a `private.env` file by copying the variables from [private.env.example](../private.env.example) and filling in the necessary values. This file contains sensitive information and should never be committed to version control.
-
-#### teleport.env
-
-Similarly, create a `teleport.env` file using [teleport.env.example](../teleport.env.example) as a template. This file contains less sensitive configuration:
-
-Ensure all three files are properly configured before running the application.
-
-// TODO: Clean up and explain order of precedence in configuration setup
+Additionally, create a `private.env` file by copying variables from [private.env.example](../private.env.example) and filling in the required values. This file contains sensitive information and should not be committed to version control.
 
 ## Docker Configuration
 

@@ -7,15 +7,14 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
-      # args:
     environment:
-      - SGX=1
+      - SGX=1  # Enable SGX support
     env_file: "private.env"
     volumes:
-      - ./save_dir:/workdir/save_dir
-      - ./untrustedhost:/workdir/untrustedhost
-      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket
+      - ./save_dir:/workdir/save_dir  # Persistent data storage
+      - ./untrustedhost:/workdir/untrustedhost  # Untrusted host interactions
+      - /var/run/aesmd/aesm.socket:/var/run/aesmd/aesm.socket  # SGX architectural enclave service manager socket
     devices:
-      - /dev/sgx_enclave
-      - /dev/sgx_provision
+      - /dev/sgx_enclave  # SGX enclave device
+      - /dev/sgx_provision  # SGX provisioning device
 

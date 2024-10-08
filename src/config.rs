@@ -9,6 +9,7 @@ use serde::Deserialize;
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub paths: PathConfig,
+    pub environment: Environment,
 
     // TODO: add proper nested config structure for env vars
     pub ws_rpc_url: String,
@@ -29,6 +30,12 @@ pub struct PathConfig {
     pub certificate: PathBuf,
     pub csr: PathBuf,
     pub quote: PathBuf,
+}
+
+#[derive(Debug, PartialEq, Deserialize)]
+pub enum Environment {
+    Development,
+    Production,
 }
 
 impl Config {

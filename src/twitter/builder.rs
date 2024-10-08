@@ -14,8 +14,11 @@ pub struct TwitterClient<'a> {
 }
 
 impl TwitterBuilder {
-    pub fn new(consumer_key: String, consumer_secret: String) -> Self {
-        Self { consumer_key, consumer_secret }
+    pub fn new(consumer_key: &str, consumer_secret: &str) -> Self {
+        Self {
+            consumer_key: consumer_key.to_string(),
+            consumer_secret: consumer_secret.to_string(),
+        }
     }
 
     pub async fn request_oauth_token(

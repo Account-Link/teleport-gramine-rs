@@ -20,7 +20,7 @@ async fn main() {
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
     // let tweet_count = 5;
-    let twitter = TwitterBuilder::new(app_key, app_secret);
+    let twitter = TwitterBuilder::new(&app_key, &app_secret);
 
     let file = File::open("tokens.json").unwrap();
     let reader = BufReader::new(file);

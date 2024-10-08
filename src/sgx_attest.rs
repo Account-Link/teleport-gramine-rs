@@ -38,7 +38,6 @@ pub fn sgx_attest(input: Vec<u8>) -> eyre::Result<Vec<u8>> {
     Ok(quote)
 }
 
-#[cfg(feature = "production")]
 pub async fn handle_sgx_attestation(
     quote_path: &Path,
     private_key: &PKey<openssl::pkey::Private>,

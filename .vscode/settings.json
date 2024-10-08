@@ -1,7 +1,4 @@
 {
     "rust-analyzer.check.command": "clippy",
-    "rust-analyzer.cargo.features": [
-        "production"
-    ],
     "editor.formatOnSave": true,
 }

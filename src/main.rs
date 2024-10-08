@@ -21,9 +21,7 @@ mod templates;
 pub mod twitter;
 
 // Production-specific modules
-#[cfg(feature = "production")]
 mod cert;
-#[cfg(feature = "production")]
 mod sgx_attest;
 
 #[tokio::main]
@@ -33,20 +31,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = config::Config::new().expect("Failed to load configuration");
 
     let twitter_builder =
-        TwitterBuilder::new(config.twitter_consumer_key, config.twitter_consumer_secret);
+        TwitterBuilder::new(&config.twitter_consumer_key, &config.twitter_consumer_secret);
 
     let ws_rpc_url = format!("{}{}", config.ws_rpc_url, config.rpc_key);
     let rpc_url = format!("{}{}", config.rpc_url, config.rpc_key);
 
-    #[cfg(feature = "production")]
-    let private_key = cert::load_or_create_private_key(&config.paths.private_key).await;
-    #[cfg(feature = "production")]
-    let csr = cert::create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
-    #[cfg(feature = "production")]
-    sgx_attest::handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
-
     let signer = MnemonicBuilder::<English>::default()
-        .phrase(config.nft_minter_mnemonic)
+        .phrase(config.nft_minter_mnemonic.clone())
         .index(0)
         .unwrap()
         .build()
@@ -62,20 +53,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let shared_state = SharedState {
         db: db.clone(),
         provider,
-        app_url: config.app_url,
-        tee_url: config.tee_url,
+        app_url: config.app_url.clone(),
+        tee_url: config.tee_url.clone(),
         signer,
         twitter_builder: twitter_builder.clone(),
     };
 
     let app = router::create_router(shared_state);
 
-    #[cfg(feature = "production")]
-    server_setup::setup_server(app, private_key, config.paths.certificate).await?;
-
-    #[cfg(not(feature = "production"))]
-    server_setup::setup_server(app).await?;
-
+    match config.environment {
+        config::Environment::Production => {
+            server_setup::setup_production_server(
+                app,
+                &config.paths.private_key,
+                &config.paths.csr,
+                &config.paths.quote,
+                &config.tee_url,
+                &config.paths.certificate,
+            )
+            .await?
+        }
+        config::Environment::Development => server_setup::setup_development_server(app).await?,
+    }
     // spawn nft event subscription
     let db_clone = db.clone();
     tokio::spawn(async move {

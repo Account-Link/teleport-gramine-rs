@@ -1,4 +1,6 @@
-use std::{net::SocketAddr, path::Path, sync::Arc};
+use std::{path::Path, sync::Arc};
+use tokio::{fs, sync::Mutex};
+use tower_http::cors::CorsLayer;
 
 use alloy::{
     providers::ProviderBuilder,
@@ -7,37 +9,42 @@ use alloy::{
 use db::in_memory::InMemoryDB;
 use endpoints::{
     approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
-    SharedState,
-};
-use tokio::{fs, sync::Mutex, time::Duration};
-use tower_http::cors::CorsLayer;
-#[cfg(feature = "production")]
-use {
-    acme_lib::create_rsa_key, axum_server::tls_rustls::RustlsConfig, openssl::pkey::PKey,
-    openssl::x509::X509Req,
+    SharedState, check_redeem,
 };
 
-#[cfg(feature = "production")]
-use crate::cert::create_csr;
 use crate::{
-    actions::nft::subscribe_to_nft_events, db::TeleportDB, endpoints::check_redeem,
+    actions::nft::subscribe_to_nft_events,
+    db::TeleportDB,
     twitter::builder::TwitterBuilder,
 };
 
-mod actions;
+// Production-specific imports
 #[cfg(feature = "production")]
-mod cert;
+use {
+    acme_lib::create_rsa_key,
+    openssl::pkey::PKey,
+    openssl::x509::X509Req,
+    crate::cert::create_csr,
+};
+
+// Common modules
+mod actions;
 mod config;
 mod db;
 mod endpoints;
 mod oai;
-#[cfg(feature = "production")]
-mod sgx_attest;
 mod templates;
 pub mod twitter;
+mod server_setup;
+
+// Production-specific modules
+#[cfg(feature = "production")]
+mod cert;
+#[cfg(feature = "production")]
+mod sgx_attest;
 
 #[tokio::main]
-async fn main() {
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let config = config::Config::new().expect("Failed to load configuration");
@@ -50,10 +57,8 @@ async fn main() {
 
     #[cfg(feature = "production")]
     let private_key = load_or_create_private_key(&config.paths.private_key).await;
-
     #[cfg(feature = "production")]
     let csr = create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
-
     #[cfg(feature = "production")]
     handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
 
@@ -83,10 +88,10 @@ async fn main() {
     let app = create_app(shared_state);
 
     #[cfg(feature = "production")]
-    setup_production_server(app, &private_key, &config.paths.certificate).await;
+    server_setup::setup_server(app, private_key, config.paths.certificate).await?;
 
-    #[cfg(feature = "dev")]
-    setup_dev_server(app).await;
+    #[cfg(not(feature = "production"))]
+    server_setup::setup_server(app).await?;
 
     // spawn nft event subscription
     let db_clone = db.clone();
@@ -106,6 +111,8 @@ async fn main() {
         .expect("Failed to save serialized data to file");
     log::info!("Saved db to file: {}", config.db_path);
     log::info!("Shutting down gracefully");
+
+    Ok(())
 }
 
 #[cfg(feature = "production")]
@@ -125,9 +132,9 @@ async fn load_or_create_private_key(private_key_path: &Path) -> PKey<openssl::pk
 async fn create_and_save_csr(
     csr_path: &Path,
     tee_url: &str,
-    pkey: &PKey<openssl::pkey::Private>,
+    private_key: &PKey<openssl::pkey::Private>,
 ) -> X509Req {
-    let csr = create_csr(tee_url, pkey).unwrap();
+    let csr = create_csr(tee_url, private_key).unwrap();
     let csr_pem_bytes = csr.to_pem().unwrap();
     fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
     csr
@@ -161,42 +168,12 @@ fn create_app(shared_state: SharedState<InMemoryDB>) -> axum::Router {
 }
 
 #[cfg(feature = "production")]
-async fn setup_production_server(
-    app: axum::Router,
-    private_key: &PKey<openssl::pkey::Private>,
-    certificate_path: &Path,
-) {
-    log::info!("Waiting for cert ...");
-    while !certificate_path.exists() {
-        tokio::time::sleep(Duration::from_secs(1)).await;
-    }
-    log::info!("Cert found");
-    let cert = fs::read(certificate_path).await.expect("cert not found");
-    let config =
-        RustlsConfig::from_pem(cert, private_key.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
-    let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
-    tokio::spawn(async move {
-        axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
-    });
-}
-
-#[cfg(feature = "dev")]
-async fn setup_dev_server(app: axum::Router) {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    log::info!("Dev server running on http://{}", addr);
-    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
-    tokio::spawn(async move {
-        axum::serve(listener, app).await.unwrap();
-    });
-}
-
-#[cfg(feature = "production")]
 async fn handle_sgx_attestation(
     quote_path: &Path,
-    pkey: &PKey<openssl::pkey::Private>,
+    private_key: &PKey<openssl::pkey::Private>,
     csr: &X509Req,
 ) {
-    let mut pk_bytes = pkey.public_key_to_pem().unwrap();
+    let mut pk_bytes = private_key.public_key_to_pem().unwrap();
     let mut csr_pem_bytes = csr.to_pem().unwrap();
     pk_bytes.append(&mut csr_pem_bytes);
     if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {

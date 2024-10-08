@@ -55,4 +55,3 @@ rayon = "1.10.0"
 [features]
 default = ["production"]
 production = []
-dev = []

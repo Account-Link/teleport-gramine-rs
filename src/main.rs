@@ -4,7 +4,6 @@ use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
-use db::in_memory::InMemoryDB;
 use endpoints::SharedState;
 use tokio::sync::Mutex;
 // Production-specific imports
@@ -13,9 +12,7 @@ use {
     crate::cert::create_csr, acme_lib::create_rsa_key, openssl::pkey::PKey, openssl::x509::X509Req,
 };
 
-use crate::{
-    actions::nft::subscribe_to_nft_events, db::TeleportDB, twitter::builder::TwitterBuilder,
-};
+use crate::{actions::nft::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
 
 // Common modules
 mod actions;
@@ -66,7 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .wallet(signer.clone().into())
         .on_http(rpc_url.parse().unwrap());
 
-    let db = load_or_create_db(&config.db_path).await;
+    let db = db::utils::load_or_create_db(&config.db_path).await;
     let db = Arc::new(Mutex::new(db));
     let shared_state = SharedState {
         db: db.clone(),
@@ -95,13 +92,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // handle shutdown
     tokio::signal::ctrl_c().await.expect("failed to listen for event");
-    let db = db.lock().await;
-    let serialized = db.serialize().unwrap();
-    let serialized_bytes = serialized.to_vec();
-    tokio::fs::write(&config.db_path, serialized_bytes)
-        .await
-        .expect("Failed to save serialized data to file");
-    log::info!("Saved db to file: {}", config.db_path);
+    db::utils::save_db_on_shutdown(db, &config.db_path).await;
     log::info!("Shutting down gracefully");
 
     Ok(())
@@ -130,16 +121,4 @@ async fn create_and_save_csr(
     let csr_pem_bytes = csr.to_pem().unwrap();
     tokio::fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
     csr
-}
-
-async fn load_or_create_db(db_path: &str) -> InMemoryDB {
-    let path = std::path::Path::new(db_path);
-    if path.exists() {
-        let serialized_bytes = tokio::fs::read(&path).await.expect("Failed to read db file");
-        let db = InMemoryDB::deserialize(&serialized_bytes);
-        log::info!("Loaded db from file: {}", db_path);
-        db
-    } else {
-        db::in_memory::InMemoryDB::new()
-    }
 }

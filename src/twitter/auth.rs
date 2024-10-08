@@ -30,6 +30,8 @@ pub async fn request_oauth_token(
     callback_url: String,
 ) -> eyre::Result<TwitterTokenPair> {
     let secrets = reqwest_oauth1::Secrets::new(app_key, app_secret);
+    log::info!("Requesting OAuth token");
+    log::info!("Callback URL: {}", callback_url);
     let query = RequestTokenRequestQuery { oauth_callback: callback_url.to_string() };
     let response = reqwest_oauth1::Client::new()
         .post("https://api.twitter.com/oauth/request_token")

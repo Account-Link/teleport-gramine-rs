@@ -1,8 +1,10 @@
-use std::collections::BTreeMap;
-use std::path::Path;
-use std::fs::{File,read_to_string};
-use std::io::{Read,Write};
 use serde::{Deserialize, Serialize};
+use std::{
+    collections::BTreeMap,
+    fs::{read_to_string, File},
+    io::Write,
+    path::Path,
+};
 
 use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
@@ -27,32 +29,30 @@ impl InMemoryDB {
 }
 
 impl TeleportDB for InMemoryDB {
-
     fn add_oauth(&mut self, token: String, secret: String) -> eyre::Result<()> {
-	self.oauths.insert(token, secret);
-	Ok(())
+        self.oauths.insert(token, secret);
+        Ok(())
     }
 
     fn get_oauth(&mut self, token: String) -> eyre::Result<String> {
-	let secret = self.oauths.get(&token).ok_or_else(|| eyre::eyre!("OAuth not found"))?;
-	Ok(secret.to_string())
+        let secret = self.oauths.get(&token).ok_or_else(|| eyre::eyre!("OAuth not found"))?;
+        Ok(secret.to_string())
     }
 
     fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
-	let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
-	log::info!("Saving user to file: {:?}", file_path.clone());
-	let mut file = File::create(file_path)?;
-	let contents = serde_json::to_string(&user)?;
-	file.write_all(contents.as_bytes())?;
+        let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
+        log::info!("Saving user to file: {:?}", file_path.clone());
+        let mut file = File::create(file_path)?;
+        let contents = serde_json::to_string(&user)?;
+        file.write_all(contents.as_bytes())?;
         //self.users.insert(user.x_id.clone().expect("no x_id"), user.clone());
         Ok(())
     }
 
-
     fn get_user_by_address(&self, address: String) -> eyre::Result<User> {
-	let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
+        let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
         let contents = read_to_string(file_path)?;
-        let user : User = serde_json::from_str(&contents)?;
+        let user: User = serde_json::from_str(&contents)?;
         Ok(user.clone())
     }
 

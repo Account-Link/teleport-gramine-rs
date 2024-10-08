@@ -24,7 +24,8 @@ pub type WalletProvider = FillProvider<
 >;
 
 pub fn get_provider(rpc_url: String, wallet: EthereumWallet) -> WalletProvider {
-    let provider = ProviderBuilder::new()
+    
+    ProviderBuilder::new()
         .filler(JoinFill::new(
             GasFiller,
             JoinFill::new(
@@ -33,8 +34,7 @@ pub fn get_provider(rpc_url: String, wallet: EthereumWallet) -> WalletProvider {
             ),
         ))
         .wallet(wallet)
-        .on_http(rpc_url.parse().unwrap());
-    provider
+        .on_http(rpc_url.parse().unwrap())
 }
 
 // pub fn gen_sk() -> eyre::Result<String> {

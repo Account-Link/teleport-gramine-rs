@@ -17,20 +17,17 @@ use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
-    actions::{
-        nft::{mint_nft, redeem_nft, NFTAction},
-        wallet::WalletProvider,
-    },
-    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB, User},
+    actions::nft::NFTAction,
+    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
-    twitter::{builder::TwitterBuilder, get_callback_url},
+    twitter::builder::TwitterBuilder,
 };
 
 use alloy::signers::Signer;
-use rand::Rng;
 
 use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use eyre::OptionExt;
 
 pub const SESSION_ID_COOKIE_NAME: &str = "teleport_session_id";
 
@@ -118,10 +115,14 @@ pub async fn register_or_login<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
-
     let address = query.address;
 
-    let callback_url = format!("https://{}/callback?address={}&frontend_url={}", shared_state.tee_url.clone(), address.clone(), query.frontend_url.unwrap_or(shared_state.app_url));
+    let callback_url = format!(
+        "https://{}/callback?address={}&frontend_url={}",
+        shared_state.tee_url.clone(),
+        address.clone(),
+        query.frontend_url.unwrap_or(shared_state.app_url)
+    );
 
     let oauth_tokens = shared_state
         .twitter_builder
@@ -164,7 +165,7 @@ pub async fn callback<A: TeleportDB>(
         .await
         .unwrap();
 
-    let access_tokens : AccessTokens = token_pair.clone().into();
+    let access_tokens: AccessTokens = token_pair.clone().into();
     let twitter_client = shared_state.twitter_builder.with_auth(token_pair);
     let x_info = twitter_client.get_user_info().await.expect("Failed to get user info");
 
@@ -226,10 +227,24 @@ pub async fn mint(
     }
     drop(db);
 
+    let client = shared_state
+        .twitter_builder
+        .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens").unwrap().into());
+
+    let user_info = client.get_user_info().await.expect("Failed to get user info");
+
+    let username = if user_info.username.starts_with("@") {
+        user_info.username
+    } else {
+        format!("@{}", user_info.username)
+    };
+
     let nft_action = NFTAction::Mint {
         recipient: Address::from_str(&query.address).expect("Failed to parse user address"),
         policy: query.policy,
         nft_id: user.x_id.expect("User x_id not set"),
+        username,
+        pfp_url: user_info.profile_image_url,
     };
 
     let (sender, tx_hash) = oneshot::channel();
@@ -314,10 +329,8 @@ pub async fn approve_mint<A: TeleportDB>(
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
         let db = shared_state.db.lock().await;
-        let session = db.get_session(session_id.to_string()).expect(
-            "Failed to get session",
-        );
-	if session.address != query.address {
+        let session = db.get_session(session_id.to_string()).expect("Failed to get session");
+        if session.address != query.address {
             log::info!("Session address does not match");
             return Err(StatusCode::UNAUTHORIZED);
         }
@@ -325,8 +338,12 @@ pub async fn approve_mint<A: TeleportDB>(
         log::info!("No session found");
         return Err(StatusCode::UNAUTHORIZED);
     }
-    let template =
-        PolicyTemplate { policy: query.policy, address: query.address, nft_id: query.nft_id, x_id: "".to_string() };
+    let template = PolicyTemplate {
+        policy: query.policy,
+        address: query.address,
+        nft_id: query.nft_id,
+        x_id: "".to_string(),
+    };
     Ok(HtmlTemplate(template))
 }
 

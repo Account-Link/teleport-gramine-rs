@@ -207,10 +207,12 @@ pub async fn mint_nft(
     recipient: Address,
     x_id: String,
     policy: String,
+    username: String,
+    pfp_url: String,
 ) -> eyre::Result<String> {
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
-    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
+    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, username, pfp_url);
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -240,7 +242,7 @@ pub async fn redeem_nft(
 #[derive(Debug, Serialize)]
 pub enum NFTAction {
     Redeem { token_id: String, content: String },
-    Mint { recipient: Address, policy: String, nft_id: String },
+    Mint { recipient: Address, policy: String, nft_id: String, username: String, pfp_url: String },
 }
 
 pub async fn nft_action_consumer(
@@ -253,8 +255,8 @@ pub async fn nft_action_consumer(
             NFTAction::Redeem { token_id, content } => {
                 redeem_nft(provider.clone(), token_id, content).await
             }
-            NFTAction::Mint { recipient, policy, nft_id } => {
-                mint_nft(provider.clone(), recipient, nft_id, policy).await
+            NFTAction::Mint { recipient, policy, nft_id, username, pfp_url } => {
+                mint_nft(provider.clone(), recipient, nft_id, policy, username, pfp_url).await
             }
         };
 
@@ -308,6 +310,15 @@ mod tests {
             .unwrap();
         let wallet = EthereumWallet::from(signer);
         let provider = get_provider(rpc_url, wallet);
-        mint_nft(provider, recipient_address, 1.to_string(), "policy".to_string()).await.unwrap();
+        mint_nft(
+            provider,
+            recipient_address,
+            1.to_string(),
+            "policy".to_string(),
+            "username".to_string(),
+            "pfp_url".to_string(),
+        )
+        .await
+        .unwrap();
     }
 }

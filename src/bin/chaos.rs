@@ -36,7 +36,7 @@ async fn main() {
 
         let media_id = runtime.block_on(client.upload_media(img.clone(), None)).unwrap();
 
-        let mut tweet = Tweet::new(format!("libmev takeover 3 :o"));
+        let mut tweet = Tweet::new("libmev takeover 3 :o".to_string());
         tweet.set_media_ids(vec![media_id]);
         let res = runtime.block_on(client.raw_tweet(tweet));
         if let Err(e) = res {

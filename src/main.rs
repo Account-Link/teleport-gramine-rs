@@ -1,10 +1,7 @@
 use std::{net::SocketAddr, path::Path, sync::Arc};
 
 use acme_lib::create_rsa_key;
-use alloy::{
-    providers::ProviderBuilder,
-    signers::local::{coins_bip39::English, PrivateKeySigner},
-};
+use alloy::signers::local::PrivateKeySigner;
 use tokio::{sync::mpsc, time::Duration};
 
 use axum_server::tls_rustls::RustlsConfig;
@@ -94,12 +91,12 @@ async fn main() {
 
     // Generate a random wallet (24 word phrase) at custom derivation path.
     let signer = if std::path::Path::new(WALLET_PATH).exists() {
-	let p_bytes = fs::read(WALLET_PATH).await.expect("failed to read wallet");
-	PrivateKeySigner::from_slice(&p_bytes).unwrap()
+        let p_bytes = fs::read(WALLET_PATH).await.expect("failed to read wallet");
+        PrivateKeySigner::from_slice(&p_bytes).unwrap()
     } else {
-	let signer = PrivateKeySigner::random();
-	fs::write(WALLET_PATH,signer.to_bytes()).await.expect("failed to write wallet");
-	signer
+        let signer = PrivateKeySigner::random();
+        fs::write(WALLET_PATH, signer.to_bytes()).await.expect("failed to write wallet");
+        signer
     };
     log::info!("Signer address:{}", signer.address());
 

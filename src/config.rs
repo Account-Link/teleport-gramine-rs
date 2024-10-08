@@ -43,6 +43,11 @@ impl Config {
         dotenv::dotenv().ok();
         dotenv::from_filename("/teleport.env").ok();
 
-        Figment::new().merge(Toml::file("config/default.toml").nested()).merge(Env::raw()).extract()
+        let config = Figment::new()
+            .merge(Toml::file("config/default.toml").nested())
+            .merge(Env::raw())
+            .extract()?;
+        log::info!("{:?}", config);
+        Ok(config)
     }
 }

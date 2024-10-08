@@ -10,35 +10,25 @@ This guide provides essential information for developers working on the Teleport
 - Linux distribution with SGX support (e.g., Ubuntu 20.04 LTS)
 - SGX driver installed (follow manufacturer instructions)
 
-### Environment Variables
+### Configs
+
+#### config/default.toml
+
+This file contains the default configuration for the application. It is used to set the environment to `Development` by default.
+
+It also contains the default paths to the private key, certificate, CSR, and quote files. These files are used to set up the certificate for TEE server.
 
 #### private.env
 
-Create a `private.env` file by copying the variables from [private.env.example](../private.env.example) and filling in the necessary values. This file contains sensitive information and should never be committed to version control. The key variables include:
-
-- `APP_URL`: The URL where the Teleport service is hosted. This varies depending on the environment:
-  - Local development: typically `http://localhost:8000`
-  - Staging/Production: the actual deployed domain
-- `DATABASE_URL`: The connection string for the Vercel PostgreSQL database that is also used by the frontend. It might look like: `postgres://username:password@localhost:5432/mydatabase`
-- `RPC_KEY`: API key for blockchain RPC interactions
-- `NFT_MINTER_MNEMONIC`: Mnemonic phrase to derive the private key for the NFT minting account (first derived account is used)
-- `OPENAI_API_KEY`: Required for accessing OpenAI services, specifically for safety assessment of tweets using the GPT-4o model
-- `TWITTER_API_KEY`: Authentication key for the Twitter API
-- `TWITTER_API_SECRET`: Secret associated with the Twitter API credentials, used alongside the API key for secure authentication
+Create a `private.env` file by copying the variables from [private.env.example](../private.env.example) and filling in the necessary values. This file contains sensitive information and should never be committed to version control.
 
 #### teleport.env
 
 Similarly, create a `teleport.env` file using [teleport.env.example](../teleport.env.example) as a template. This file contains less sensitive configuration:
 
-- `TEE_URL`: The URL where the Trusted Execution Environment (TEE) is hosted. Like `APP_URL`, this varies by environment:
-  - Local development: typically `http://localhost:3000`
-  - Staging/Production: the actual deployed TEE domain
-- `WS_RPC_URL`: WebSocket URL for the blockchain node provider
-- `RPC_URL`: HTTP URL for the blockchain node provider
-- `NFT_ADDRESS`: On-chain address of the deployed NFT contract used for minting and managing NFTs
-- `DB_PATH`: Path to the in memory SQLite database file for application state of Axum server
+Ensure all three files are properly configured before running the application.
 
-Ensure both files are properly configured before running the application. These environment variables are crucial for the proper functioning of various components, including database connections, blockchain interactions, API integrations, and service configurations across different deployment environments.
+// TODO: Clean up and explain order of precedence in configuration setup
 
 ## Docker Configuration
 

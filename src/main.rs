@@ -1,30 +1,20 @@
 use std::{path::Path, sync::Arc};
-use tokio::{fs, sync::Mutex};
-use tower_http::cors::CorsLayer;
 
 use alloy::{
     providers::ProviderBuilder,
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
 use db::in_memory::InMemoryDB;
-use endpoints::{
-    approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
-    SharedState, check_redeem,
-};
-
-use crate::{
-    actions::nft::subscribe_to_nft_events,
-    db::TeleportDB,
-    twitter::builder::TwitterBuilder,
-};
-
+use endpoints::SharedState;
+use tokio::sync::Mutex;
 // Production-specific imports
 #[cfg(feature = "production")]
 use {
-    acme_lib::create_rsa_key,
-    openssl::pkey::PKey,
-    openssl::x509::X509Req,
-    crate::cert::create_csr,
+    crate::cert::create_csr, acme_lib::create_rsa_key, openssl::pkey::PKey, openssl::x509::X509Req,
+};
+
+use crate::{
+    actions::nft::subscribe_to_nft_events, db::TeleportDB, twitter::builder::TwitterBuilder,
 };
 
 // Common modules
@@ -33,15 +23,17 @@ mod config;
 mod db;
 mod endpoints;
 mod oai;
+mod server_setup;
 mod templates;
 pub mod twitter;
-mod server_setup;
 
 // Production-specific modules
 #[cfg(feature = "production")]
 mod cert;
 #[cfg(feature = "production")]
 mod sgx_attest;
+
+mod router;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -85,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         twitter_builder: twitter_builder.clone(),
     };
 
-    let app = create_app(shared_state);
+    let app = router::create_router(shared_state);
 
     #[cfg(feature = "production")]
     server_setup::setup_server(app, private_key, config.paths.certificate).await?;
@@ -106,7 +98,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = db.lock().await;
     let serialized = db.serialize().unwrap();
     let serialized_bytes = serialized.to_vec();
-    fs::write(&config.db_path, serialized_bytes)
+    tokio::fs::write(&config.db_path, serialized_bytes)
         .await
         .expect("Failed to save serialized data to file");
     log::info!("Saved db to file: {}", config.db_path);
@@ -118,12 +110,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 #[cfg(feature = "production")]
 async fn load_or_create_private_key(private_key_path: &Path) -> PKey<openssl::pkey::Private> {
     if private_key_path.exists() {
-        let pk_bytes = fs::read(private_key_path).await.expect("Failed to read pk file");
+        let pk_bytes = tokio::fs::read(private_key_path).await.expect("Failed to read pk file");
         PKey::private_key_from_pem(pk_bytes.as_slice()).unwrap()
     } else {
         let pk = create_rsa_key(2048);
         let pk_bytes = pk.private_key_to_pem_pkcs8().unwrap();
-        fs::write(private_key_path, pk_bytes).await.expect("Failed to write pk to file");
+        tokio::fs::write(private_key_path, pk_bytes).await.expect("Failed to write pk to file");
         pk
     }
 }
@@ -136,33 +128,18 @@ async fn create_and_save_csr(
 ) -> X509Req {
     let csr = create_csr(tee_url, private_key).unwrap();
     let csr_pem_bytes = csr.to_pem().unwrap();
-    fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
+    tokio::fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
     csr
 }
 
 async fn load_or_create_db(db_path: &str) -> InMemoryDB {
     let path = std::path::Path::new(db_path);
     if path.exists() {
-        let serialized_bytes = fs::read(&path).await.expect("Failed to read db file");
+        let serialized_bytes = tokio::fs::read(&path).await.expect("Failed to read db file");
         let db = InMemoryDB::deserialize(&serialized_bytes);
         log::info!("Loaded db from file: {}", db_path);
         db
     } else {
         db::in_memory::InMemoryDB::new()
     }
-}
-
-fn create_app(shared_state: SharedState<InMemoryDB>) -> axum::Router {
-    axum::Router::new()
-        .route("/new", axum::routing::get(register_or_login))
-        .route("/approve", axum::routing::get(approve_mint))
-        .route("/callback", axum::routing::get(callback))
-        .route("/cookietest", axum::routing::get(cookietest))
-        .route("/mint", axum::routing::post(mint))
-        .route("/redeem", axum::routing::post(redeem))
-        .route("/checkRedeem", axum::routing::post(check_redeem))
-        .route("/tweetId", axum::routing::get(get_tweet_id))
-        .route("/", axum::routing::get(hello_world))
-        .layer(CorsLayer::permissive())
-        .with_state(shared_state)
 }

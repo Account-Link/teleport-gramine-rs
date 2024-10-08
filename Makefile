@@ -57,6 +57,12 @@ start-gramine-server: all
 	$(eval export $(shell sed 's/=.*//' private.env))
 	$(GRAMINE) exex
 
+.PHONY: start-dev-server
+start-dev-server:
+	$(eval include private.env)
+	$(eval export $(shell sed 's/=.*//' private.env))
+	cargo run --features dev
+
 .PHONY: clean
 clean:
 	$(RM) -rf *.token *.sig *.manifest.sgx *.manifest result-* OUTPUT

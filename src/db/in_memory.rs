@@ -6,11 +6,17 @@ use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
+    // x_id to EVM address
     pub x_id_to_address: BTreeMap<String, String>,
+    // EVM address to user struct
     pub users: BTreeMap<String, User>,
+    // pending NFTs tx hashes to PendingNFT structs
     pub pending_nfts: BTreeMap<String, PendingNFT>,
+    // successfully minted NFTs token IDs to NFT structs
     pub nfts: BTreeMap<String, NFT>,
+    // token IDs to tweet IDs
     pub tweets: BTreeMap<String, String>,
+    // session IDs to session structs
     pub sessions: BTreeMap<String, Session>,
 }
 
@@ -85,6 +91,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn add_session(&mut self, session: Session) -> eyre::Result<String> {
+        // TODO: improve the session ID generation to use UUIDs
         let session_id: i128 = rand::random();
         self.sessions.insert(session_id.to_string(), session);
         Ok(session_id.to_string())

@@ -7,7 +7,7 @@ use strum_macros::{Display, EnumString};
 #[derive(Debug, Deserialize)]
 pub struct Config {
     pub tee: TEEConfig,
-    pub environment: Environment,
+    pub env: Environment,
 
     // TODO: add proper nested config structure for env vars
     pub ws_rpc_url: String,
@@ -40,8 +40,10 @@ pub enum Environment {
 
 impl Config {
     pub fn new() -> Result<Self, config::ConfigError> {
+        dotenv::from_filename("private.env").ok();
         dotenv::dotenv().ok();
-        let env = std::env::var("RUN_MODE")
+
+        let env = std::env::var("APP_ENV")
             .unwrap_or_else(|_| "development".into())
             .parse::<Environment>()
             .unwrap_or(Environment::Development);
@@ -53,7 +55,7 @@ impl Config {
 
         let config = builder.build()?;
 
-        log::info!("Loaded configuration: {:?}", config);
+        log::info!("Loaded configuration: {:#?}", config);
 
         config.try_deserialize()
     }

@@ -61,7 +61,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let app = router::create_router(shared_state);
 
-    match config.environment {
+    match config.env {
         config::Environment::Production | config::Environment::Staging => {
             server_setup::setup_production_server(
                 app,

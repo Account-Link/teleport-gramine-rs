@@ -1,6 +1,3 @@
-# choose environment to be either "Development", "Staging", or "Production"
-environment = "Development"
-
 # APP_URL: The URL where the Teleport service is hosted. This varies depending on the environment:
 APP_URL = "localhost:8000"
 # TEE_URL: The URL where the Trusted Execution Environment (TEE) is hosted.

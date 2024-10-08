@@ -15,7 +15,7 @@ pub async fn setup_production_server(
     certificate_path: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let private_key = cert::load_or_create_private_key(private_key_path).await;
-    let csr = cert::create_and_save_csr(csr_path, &tee_url, &private_key).await;
+    let csr = cert::create_and_save_csr(csr_path, tee_url, &private_key).await;
     sgx_attest::handle_sgx_attestation(quote_path, &private_key, &csr).await;
 
     log::info!("Waiting for certificate... Use `scripts/fetch-certs.py` to fetch the certificate");

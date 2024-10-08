@@ -83,7 +83,7 @@ pub trait TeleportDB: Send + Sync + 'static {
     /// Returns the NFT struct if found, or an error if the NFT doesn't exist in the minted NFT
     /// collection.
     // TODO: Replace the token ID type with a stronger typed token ID type (typically u256)
-    fn get_nft(&self, token_id: String) -> eyre::Result<NFT>;
+    fn get_nft(&self, token_id: String) -> eyre::Result<Nft>;
 
     /// Associates a tweet with an NFT token ID.
     ///

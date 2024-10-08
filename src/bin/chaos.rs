@@ -55,7 +55,7 @@ async fn main() {
         //         log::error!("Error sending tweet: {:?}", e);
         //     }
         // });
-        let mut tweet = Tweet::new(format!("libmev takeover :o"));
+        let mut tweet = Tweet::new("libmev takeover :o".to_string());
         tweet.set_media_ids(vec![media_id.clone()]);
         let res = runtime.block_on(client.raw_tweet(tweet));
         if let Err(e) = res {

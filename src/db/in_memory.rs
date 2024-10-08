@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{PendingNFT, Session, TeleportDB, User, NFT};
+use super::{Nft, PendingNFT, Session, TeleportDB, User};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
@@ -13,7 +13,7 @@ pub struct InMemoryDB {
     // pending NFTs tx hashes to PendingNFT structs
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     // successfully minted NFTs token IDs to NFT structs
-    pub nfts: BTreeMap<String, NFT>,
+    pub nfts: BTreeMap<String, Nft>,
     // token IDs to tweet IDs
     pub tweets: BTreeMap<String, String>,
     // session IDs to session structs
@@ -68,14 +68,14 @@ impl TeleportDB for InMemoryDB {
             .pending_nfts
             .remove(&tx_hash)
             .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT { address: pending_nft.address, token_id: token_id.clone() };
+        let nft = Nft { address: pending_nft.address, token_id: token_id.clone() };
         let nft_id_clone = pending_nft.nft_id.clone();
         self.nfts.insert(pending_nft.nft_id, nft);
 
         Ok(nft_id_clone)
     }
 
-    fn get_nft(&self, nft_id: String) -> eyre::Result<NFT> {
+    fn get_nft(&self, nft_id: String) -> eyre::Result<Nft> {
         let nft = self.nfts.get(&nft_id).ok_or_else(|| eyre::eyre!("NFT not found"))?;
         Ok(nft.clone())
     }

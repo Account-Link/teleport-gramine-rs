@@ -29,7 +29,7 @@ pub struct User {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
-pub struct NFT {
+pub struct Nft {
     pub address: String,
     pub token_id: String,
 }

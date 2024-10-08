@@ -45,6 +45,7 @@ pub struct PendingNFT {
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
 pub struct Session {
+    pub address: String,
     pub x_id: String,
 }
 
@@ -53,7 +54,8 @@ pub trait TeleportDB: Send + Sync + 'static {
     // async fn open_from_file(file_path: &str) -> eyre::Result<Self>;
     fn add_oauth(&mut self, token: String, secret: String) -> eyre::Result<()>;
     fn get_oauth(&mut self, token: String) -> eyre::Result<String>;
-    fn add_user(&mut self, user: User) -> eyre::Result<()>;
+    fn add_user(&mut self, address: String, user: User) -> eyre::Result<()>;
+    fn get_user_by_address(&self, address: String) -> eyre::Result<User>;
     fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User>;
     fn add_pending_nft(&mut self, tx_hash: String, pending_nft: PendingNFT) -> eyre::Result<()>;
     fn promote_pending_nft(&mut self, tx_hash: String, token_id: String) -> eyre::Result<String>;

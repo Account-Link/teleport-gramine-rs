@@ -4207,6 +4207,7 @@ dependencies = [
  "futures",
  "futures-util",
  "getrandom 0.2.15",
+ "hex",
  "http 1.1.0",
  "log",
  "oauth1-request",

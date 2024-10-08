@@ -8,8 +8,9 @@ use super::{PendingNFT, Session, TeleportDB, User, NFT};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
+    pub x_id_to_address: BTreeMap<String, String>,
     pub oauths: BTreeMap<String, String>,
-    pub users: BTreeMap<String, User>,
+    //pub users: BTreeMap<String, User>,
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
@@ -37,8 +38,8 @@ impl TeleportDB for InMemoryDB {
 	Ok(secret.to_string())
     }
 
-    fn add_user(&mut self, user: User) -> eyre::Result<()> {
-	let file_path = Path::new("/root/save/users").join(format!("{}.user", user.x_id.clone().unwrap()));
+    fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
+	let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
 	log::info!("Saving user to file: {:?}", file_path.clone());
 	let mut file = File::create(file_path)?;
 	let contents = serde_json::to_string(&user)?;
@@ -47,11 +48,20 @@ impl TeleportDB for InMemoryDB {
         Ok(())
     }
 
-    fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
-        //let user = self.users.get(&x_id).ok_or_else(|| eyre::eyre!("User not found"))?;
-	let file_path = Path::new("/root/save/users").join(format!("{}.user", x_id));
+
+    fn get_user_by_address(&self, address: String) -> eyre::Result<User> {
+	let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
         let contents = read_to_string(file_path)?;
         let user : User = serde_json::from_str(&contents)?;
+        Ok(user.clone())
+    }
+
+    fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
+        let address = self
+            .x_id_to_address
+            .get(&x_id)
+            .ok_or_else(|| eyre::eyre!("User address not found for x_id"))?;
+        let user = self.get_user_by_address(address.to_string())?;
         Ok(user.clone())
     }
 

@@ -57,11 +57,9 @@ async fn main() {
 
     // Private API values
     let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
-    let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
-    let bobu_address = std::env::var("BOBU_ADDRESS").expect("BOBU_ADDRESS not set");
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
@@ -122,7 +120,6 @@ async fn main() {
         app_url,
         tee_url,
         signer,
-	bobu_address,
         twitter_builder: twitter_builder.clone(),
         nft_action_sender: sender,
     };

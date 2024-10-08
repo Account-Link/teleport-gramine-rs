@@ -3,7 +3,7 @@ version: '3.9'
 services:
 
   teleport:
-    image: bobu
+    image: teleport
     build:
       context: ./
       dockerfile: Dockerfile

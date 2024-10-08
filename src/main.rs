@@ -1,4 +1,4 @@
-use std::{path::Path, sync::Arc};
+use std::sync::Arc;
 
 use alloy::{
     providers::ProviderBuilder,
@@ -6,11 +6,6 @@ use alloy::{
 };
 use endpoints::SharedState;
 use tokio::sync::Mutex;
-// Production-specific imports
-#[cfg(feature = "production")]
-use {
-    crate::cert::create_csr, acme_lib::create_rsa_key, openssl::pkey::PKey, openssl::x509::X509Req,
-};
 
 use crate::{actions::nft::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
 
@@ -31,7 +26,6 @@ mod cert;
 #[cfg(feature = "production")]
 mod sgx_attest;
 
-
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
@@ -45,9 +39,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let rpc_url = format!("{}{}", config.rpc_url, config.rpc_key);
 
     #[cfg(feature = "production")]
-    let private_key = load_or_create_private_key(&config.paths.private_key).await;
+    let private_key = cert::load_or_create_private_key(&config.paths.private_key).await;
     #[cfg(feature = "production")]
-    let csr = create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
+    let csr = cert::create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
     #[cfg(feature = "production")]
     sgx_attest::handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
 
@@ -96,29 +90,4 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     log::info!("Shutting down gracefully");
 
     Ok(())
-}
-
-#[cfg(feature = "production")]
-async fn load_or_create_private_key(private_key_path: &Path) -> PKey<openssl::pkey::Private> {
-    if private_key_path.exists() {
-        let pk_bytes = tokio::fs::read(private_key_path).await.expect("Failed to read pk file");
-        PKey::private_key_from_pem(pk_bytes.as_slice()).unwrap()
-    } else {
-        let pk = create_rsa_key(2048);
-        let pk_bytes = pk.private_key_to_pem_pkcs8().unwrap();
-        tokio::fs::write(private_key_path, pk_bytes).await.expect("Failed to write pk to file");
-        pk
-    }
-}
-
-#[cfg(feature = "production")]
-async fn create_and_save_csr(
-    csr_path: &Path,
-    tee_url: &str,
-    private_key: &PKey<openssl::pkey::Private>,
-) -> X509Req {
-    let csr = create_csr(tee_url, private_key).unwrap();
-    let csr_pem_bytes = csr.to_pem().unwrap();
-    tokio::fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
-    csr
 }

@@ -20,6 +20,7 @@ mod config;
 mod db;
 mod endpoints;
 mod oai;
+mod router;
 mod server_setup;
 mod templates;
 pub mod twitter;
@@ -30,7 +31,6 @@ mod cert;
 #[cfg(feature = "production")]
 mod sgx_attest;
 
-mod router;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

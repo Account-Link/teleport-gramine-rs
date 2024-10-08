@@ -1,7 +1,7 @@
 pub mod client_db;
 pub mod in_memory;
-pub mod utils;
 pub mod models;
+pub mod utils;
 // pub mod sqlite;
 
 pub use models::*;

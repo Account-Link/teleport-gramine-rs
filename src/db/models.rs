@@ -1,5 +1,6 @@
 use rusqlite_from_row::FromRow;
 use serde::{Deserialize, Serialize};
+
 use crate::twitter::auth::TwitterTokenPair;
 
 #[derive(Debug, Serialize, Deserialize, Clone, PartialEq, Eq, Default)]

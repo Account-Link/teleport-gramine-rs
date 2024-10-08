@@ -1,7 +1,7 @@
-use axum::Router;
 use std::net::SocketAddr;
-use tokio::time::Duration;
 
+use axum::Router;
+use tokio::time::Duration;
 #[cfg(feature = "production")]
 use {
     axum_server::tls_rustls::RustlsConfig,
@@ -15,7 +15,6 @@ pub async fn setup_server(
     #[cfg(feature = "production")] private_key: PKey<Private>,
     #[cfg(feature = "production")] certificate_path: PathBuf,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    
     #[cfg(feature = "production")]
     {
         log::info!("Waiting for certificate...");
@@ -29,9 +28,7 @@ pub async fn setup_server(
         let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
 
         log::info!("Production server starting on https://{}", addr);
-        axum_server::bind_rustls(addr, config)
-            .serve(app.into_make_service())
-            .await?;
+        axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await?;
     }
 
     #[cfg(not(feature = "production"))]

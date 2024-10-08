@@ -1,10 +1,12 @@
 use axum::Router;
 use tower_http::cors::CorsLayer;
 
-use crate::db::in_memory::InMemoryDB;
-use crate::endpoints::{
-    approve_mint, callback, check_redeem, cookietest, get_tweet_id, hello_world, mint, redeem,
-    register_or_login, SharedState,
+use crate::{
+    db::in_memory::InMemoryDB,
+    endpoints::{
+        approve_mint, callback, check_redeem, cookietest, get_tweet_id, hello_world, mint, redeem,
+        register_or_login, SharedState,
+    },
 };
 
 pub fn create_router(shared_state: SharedState<InMemoryDB>) -> Router {

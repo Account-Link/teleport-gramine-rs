@@ -44,7 +44,6 @@ pub async fn handle_sgx_attestation(
     private_key: &PKey<openssl::pkey::Private>,
     csr: &X509Req,
 ) {
-
     let mut pk_bytes = private_key.public_key_to_pem().unwrap();
     let mut csr_pem_bytes = csr.to_pem().unwrap();
     pk_bytes.append(&mut csr_pem_bytes);

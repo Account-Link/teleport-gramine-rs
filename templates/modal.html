@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Join Bobu's Magic Show</title>
+    <title>Authorize Teleport by Account.link</title>
     <style>
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -120,8 +120,7 @@
         }
     </style>
     <script>
-      function postPolicy() {
-            const x_id = "{{ x_id }}";
+        function postPolicy() {
             const policy = "{{ policy }}";
             const address = "{{ address }}";
             const nft_id = "{{ nft_id }}";
@@ -130,13 +129,12 @@
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ policy, address, nft_id, x_id })
+                body: JSON.stringify({ policy, address, nft_id })
             })
             .then(response => response.json())
 	    .then(data => {
 		if (window.opener && !window.opener.closed) {
-		    const d = Object.assign({}, data, {policy, address, nft_id, x_id});
-		    window.opener.postMessage(d, "*");
+		    window.opener.postMessage(data, "*");
 		    window.close();
 		}
             })
@@ -148,16 +146,18 @@
 </head>
 <body>
     <div class="container">
-        <h1>Authorize Flashbots and Bobu to create an account link?</h1>
+        <h1>Authorize Teleport to create an account link?</h1>
+        <!-- <div class="app-info">
+            <div class="app-logo"></div>
+            <div class="app-details">
+                <div class="app-name">Teleport</div>
+                <div class="app-url">teleport.best</div>
+            </div>
+        </div> -->
         <div class="main-text-container">
             <p class="main-text">
-	      By authorizing Flashbots and Bobu to create an account link:
-	      <ul>
-<li>You're giving Bobu permission to hold your hand during his magic show.
-<li>Bobu may or may not recruit you to go on a space mission
-<li>You will be expected to perform basic math, and will be mocked if you can't follow directions.
-<li>You will never speak of his failed influencer arc again. 
-	      </ul>
+                You are creating an account link on Teleport that allows anybody with the link to <strong class="orange-post">post once</strong> from your X account if their post passes the following LLM-enforced safeguard:
+                <span class="orange-quote">{{ policy }}</span>
             </p>
         </div>
         <div class="buttons">
@@ -165,12 +165,14 @@
             <button class="btn btn-primary" onclick="postPolicy()">Continue</button>
         </div>
         <div class="permissions">
-You are creating an account link that allows one post from your X account.
-<ul>
-  <li>This page is served from a backend running in a trusted execution environment (TEE). The code for this backend is available at <a href="https://github.com/Account-Link/teleport-gramine-rs/tree/bobu">github</a>.
-  <li>You can revoke access at any time prior to the show through <a href="https://x.com/settings/connected_apps">https://x.com/settings/connected_apps.</a>
-  <li>Your X username will be included in a transcript of the show on the Arbitrum blockchain. 
-</ul>
+            <h2>You are getting the following security guarantees:</h2>
+            <ul>
+                <li>This page is served from the backend running in a trusted execution environment (TEE).</li>
+                <li>Even if the frontend you are using is compromised, this page still gives you the following guarantee: If an account link is created, then the you approved the LLM safeguard and clicked "continue" once. For example, if you only click "continue" 5 times, at most 5 posts will be made.</li>
+                <!-- <li>If an account link is created, then the you approved the LLM safeguard and clicked "continue" once. For example, if you only click "continue" 5 times, at most 5 posts will be made.</li> -->
+                <li>We will not try to protect the one-time-tokens themselves - they are shared with the frontend website for convenience.</li>
+                <li>The account link owner is restricted to only be able to post subject to LLM filter, they cannot follow/unfollow/like/post/repost/DM/update yor account settings.</li>
+            </ul>
         </div>
     </div>
 </body>

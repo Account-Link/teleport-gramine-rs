@@ -45,6 +45,9 @@ impl TeleportDB for InMemoryDB {
         let mut file = File::create(file_path)?;
         let contents = serde_json::to_string(&user)?;
         file.write_all(contents.as_bytes())?;
+	if let Some(x_id) = user.x_id {
+            self.x_id_to_address.insert(x_id, address);
+        }
         //self.users.insert(user.x_id.clone().expect("no x_id"), user.clone());
         Ok(())
     }

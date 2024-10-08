@@ -99,9 +99,8 @@ impl TeleportDB for InMemoryDB {
 
 #[cfg(test)]
 mod tests {
-    use crate::db::AccessTokens;
-
     use super::*;
+    use crate::db::AccessTokens;
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {

@@ -5,28 +5,24 @@ use alloy::{
     signers::local::{coins_bip39::English, MnemonicBuilder},
 };
 use db::in_memory::InMemoryDB;
-use tokio::time::Duration;
-
+use endpoints::{
+    approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
+    SharedState,
+};
+use tokio::{fs, sync::Mutex, time::Duration};
+use tower_http::cors::CorsLayer;
 #[cfg(feature = "production")]
 use {
     acme_lib::create_rsa_key, axum_server::tls_rustls::RustlsConfig, openssl::pkey::PKey,
     openssl::x509::X509Req,
 };
 
-use endpoints::{
-    approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
-    SharedState,
-};
-use tokio::{fs, sync::Mutex};
-use tower_http::cors::CorsLayer;
-
+#[cfg(feature = "production")]
+use crate::cert::create_csr;
 use crate::{
     actions::nft::subscribe_to_nft_events, db::TeleportDB, endpoints::check_redeem,
     twitter::builder::TwitterBuilder,
 };
-
-#[cfg(feature = "production")]
-use crate::cert::create_csr;
 
 mod actions;
 #[cfg(feature = "production")]

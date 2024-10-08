@@ -15,7 +15,6 @@ use tokio::sync::Mutex;
 use NFT::NFTEvents;
 
 use self::NFT::{NewTokenData, RedeemTweet, Transfer};
-
 use super::wallet::WalletProvider;
 use crate::{
     db::{client_db::ClientDB, TeleportDB},

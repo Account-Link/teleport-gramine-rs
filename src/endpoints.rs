@@ -1,16 +1,17 @@
-use alloy::{
-    primitives::Address,
-    signers::{k256::ecdsa::SigningKey, local::LocalSigner},
-};
-use http::HeaderMap;
 use std::{str::FromStr, sync::Arc};
 
+use alloy::{
+    primitives::Address,
+    signers::{k256::ecdsa::SigningKey, local::LocalSigner, Signer},
+};
 use axum::{
     extract::{Query, State},
     http::StatusCode,
     response::{IntoResponse, Redirect},
     Json,
 };
+use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
+use http::HeaderMap;
 use rustls::ClientConfig;
 use serde::{Deserialize, Serialize};
 use tokio::sync::Mutex;
@@ -26,10 +27,6 @@ use crate::{
     templates::{HtmlTemplate, PolicyTemplate},
     twitter::{builder::TwitterBuilder, get_callback_url},
 };
-
-use alloy::signers::Signer;
-
-use axum_extra::extract::cookie::{Cookie, CookieJar, SameSite};
 
 pub const SESSION_ID_COOKIE_NAME: &str = "teleport_session_id";
 

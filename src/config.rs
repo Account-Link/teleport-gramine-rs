@@ -1,6 +1,10 @@
-use figment::{Figment, providers::{Env, Format, Toml}};
-use serde::Deserialize;
 use std::path::PathBuf;
+
+use figment::{
+    providers::{Env, Format, Toml},
+    Figment,
+};
+use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -32,9 +36,6 @@ impl Config {
         dotenv::dotenv().ok();
         dotenv::from_filename("/teleport.env").ok();
 
-        Figment::new()
-            .merge(Toml::file("config/default.toml").nested())
-            .merge(Env::raw())
-            .extract()
+        Figment::new().merge(Toml::file("config/default.toml").nested()).merge(Env::raw()).extract()
     }
 }

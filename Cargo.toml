@@ -53,5 +53,6 @@ oauth1-request = "0.3.3"
 rayon = "1.10.0"
 
 [features]
-default = ["https"]
-https = []
+default = ["production"]
+production = []
+dev = []

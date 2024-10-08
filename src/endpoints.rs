@@ -104,8 +104,8 @@ pub struct SharedState<A: TeleportDB> {
 }
 
 pub async fn cookietest<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
-    Query(query): Query<()>,
+    State(_shared_state): State<SharedState<A>>,
+    Query(_query): Query<()>,
     jar: CookieJar,
 ) -> (CookieJar, Redirect) {
     (jar.add(Cookie::new(SESSION_ID_COOKIE_NAME, "cookieasdf")), Redirect::temporary("localhost"))

@@ -49,13 +49,13 @@ async fn main() {
     let rpc_url = format!("{}{}", config.rpc_url, config.rpc_key);
 
     #[cfg(feature = "production")]
-    let pkey = load_or_create_private_key(&config.paths.private_key).await;
+    let private_key = load_or_create_private_key(&config.paths.private_key).await;
 
     #[cfg(feature = "production")]
-    let csr = create_and_save_csr(&config.paths.csr, &config.tee_url, &pkey).await;
+    let csr = create_and_save_csr(&config.paths.csr, &config.tee_url, &private_key).await;
 
     #[cfg(feature = "production")]
-    handle_sgx_attestation(&config.paths.quote, &pkey, &csr).await;
+    handle_sgx_attestation(&config.paths.quote, &private_key, &csr).await;
 
     let signer = MnemonicBuilder::<English>::default()
         .phrase(config.nft_minter_mnemonic)
@@ -83,7 +83,7 @@ async fn main() {
     let app = create_app(shared_state);
 
     #[cfg(feature = "production")]
-    setup_production_server(app, &pkey, &config.paths.certificate).await;
+    setup_production_server(app, &private_key, &config.paths.certificate).await;
 
     #[cfg(feature = "dev")]
     setup_dev_server(app).await;
@@ -163,7 +163,7 @@ fn create_app(shared_state: SharedState<InMemoryDB>) -> axum::Router {
 #[cfg(feature = "production")]
 async fn setup_production_server(
     app: axum::Router,
-    pkey: &PKey<openssl::pkey::Private>,
+    private_key: &PKey<openssl::pkey::Private>,
     certificate_path: &Path,
 ) {
     log::info!("Waiting for cert ...");
@@ -173,7 +173,7 @@ async fn setup_production_server(
     log::info!("Cert found");
     let cert = fs::read(certificate_path).await.expect("cert not found");
     let config =
-        RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
+        RustlsConfig::from_pem(cert, private_key.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
     let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
     tokio::spawn(async move {
         axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
@@ -183,9 +183,10 @@ async fn setup_production_server(
 #[cfg(feature = "dev")]
 async fn setup_dev_server(app: axum::Router) {
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
-    println!("Dev server running on http://{}", addr);
+    log::info!("Dev server running on http://{}", addr);
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
     tokio::spawn(async move {
-        axum::Server::bind(&addr).serve(app.into_make_service()).await.unwrap();
+        axum::serve(listener, app).await.unwrap();
     });
 }
 

@@ -9,7 +9,7 @@ Each account link is represented as an NFT that's minted to your on-chain addres
 
 Those of you with web2 instincts will readily spot the potential to "sell ads" on your twitter, but we encourage more innovative and/or wholesome uses: let your friends roast you on your own X account if you lose a bet, tweet spicy takes without having to prepend "OH", or simply "lend" your established social media voice to those without a following who need the boost.
 
-### Key Features
+## Key Features
 
 - *Programmable Access:* you can easily define AI-driven "social contracts" in the form of LLM safeguards on top of your one-time posting account links. Because those links are represented as NFTs, they can be easily composed with permissionless on-chain infra: auctions, exchanges.
 - Auditable Security: users can verify the system's integrity through certificate transparency and trusted-execution-environments (TEE) remote attestation. One post is one post, and there is no skipping of the LLM safeguard.
@@ -19,6 +19,44 @@ The backend repo is open source at: https://github.com/Account-Link/teleport-gra
 The measurement for the backend enclave is:  `167b9f8b19388d7e52cc9a249ba5a5aac964324cbd7298c66c866278df4889c5`
 
 The smart contract address is: [0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8](https://basescan.org/address/0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8)
+
+## Quickstart
+
+To set up the development environment for Teleport, follow these steps:
+
+1. **Prerequisites**
+   - Docker
+   - Make sure you have access to SGX-enabled x86_64 hardware running Linux
+
+2. **Clone the Repository**
+
+   ```bash
+   git clone https://github.com/Account-Link/teleport-gramine-rs.git
+   cd teleport-gramine-rs
+   ```
+
+3. **Environment Configuration**
+   - Copy `private.env.example` to `private.env`
+   - Fill in the necessary environment variables in `private.env`
+
+4. **Build and Run**
+   - To build the Docker image:
+
+     ```bash
+     docker compose build
+     ```
+
+   - To start the server:
+
+     ```bash
+     docker compose run --rm teleport "gramine-sgx exex"
+     ```
+
+5. **Development Workflow**
+   - Make changes to the code on your host machine
+   - Repeat step 4 to restart the server with the updated code
+
+For more detailed information about the project structure, available commands, and contribution guidelines, please refer to our [Development Guide](./docs/DEVELOPMENT.md).
 
 ## How does Teleport work?
 

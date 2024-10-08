@@ -2,9 +2,9 @@
 ENV = "development"
 
 # APP_URL: The URL where the Teleport service is hosted. This varies depending on the environment:
-APP_URL = "http://localhost:8000"
+APP_URL = "localhost:8000"
 # TEE_URL: The URL where the Trusted Execution Environment (TEE) is hosted.
-TEE_URL = "http://localhost:3000"
+TEE_URL = "localhost:3000"
 # WS_RPC_URL: WebSocket URL for the blockchain node provider
 WS_RPC_URL = "wss://base-sepolia.g.alchemy.com/v2/"
 # RPC_URL: HTTP URL for the blockchain node provider

@@ -12,15 +12,33 @@ This guide provides essential information for developers working on the Teleport
 
 ### Environment Variables
 
-To set up your environment, create a private `.env` file by copying the variables from [private.env.example](../private.env.example) and filling in the necessary values for each variable. This file will contain the following key variables:
+#### private.env
 
-- `APP_URL`: The URL where the application is hosted. This should point to the domain or IP address where users can access the Teleport service. Note that this URL may differ between local development, staging, and production environments. For local development, it might be `http://localhost:8000`, while in staging and production, it should reflect the actual deployed domain.
-- `DATABASE_URL`: The connection string used to connect to the database. This typically includes the database type, username, password, host, and database name. For example, a PostgreSQL connection string might look like: `postgres://username:password@localhost:5432/mydatabase`.
-- `RPC_KEY`: An API key used for blockchain RPC to interact with the blockchain.
-- `NFT_MINTER_MNEMONIC`: A mnemonic phrase used to derive the private key for the NFT minting account. The first derived account from the mnemonic is used.
-- `OPENAI_API_KEY`: The API key required to access OpenAI services, which is used for the safety assessment of tweets through the GPT-4o model.
-- `TWITTER_API_KEY`: The API key for authenticating with the Twitter API. This is required to interact with Twitter on behalf of the user.
-- `TWITTER_API_SECRET`: The API secret associated with the Twitter API credentials. This is used alongside the API key for secure authentication.
+Create a `private.env` file by copying the variables from [private.env.example](../private.env.example) and filling in the necessary values. This file contains sensitive information and should never be committed to version control. The key variables include:
+
+- `APP_URL`: The URL where the Teleport service is hosted. This varies depending on the environment:
+  - Local development: typically `http://localhost:8000`
+  - Staging/Production: the actual deployed domain
+- `DATABASE_URL`: The connection string for the Vercel PostgreSQL database that is also used by the frontend. It might look like: `postgres://username:password@localhost:5432/mydatabase`
+- `RPC_KEY`: API key for blockchain RPC interactions
+- `NFT_MINTER_MNEMONIC`: Mnemonic phrase to derive the private key for the NFT minting account (first derived account is used)
+- `OPENAI_API_KEY`: Required for accessing OpenAI services, specifically for safety assessment of tweets using the GPT-4o model
+- `TWITTER_API_KEY`: Authentication key for the Twitter API
+- `TWITTER_API_SECRET`: Secret associated with the Twitter API credentials, used alongside the API key for secure authentication
+
+#### teleport.env
+
+Similarly, create a `teleport.env` file using [teleport.env.example](../teleport.env.example) as a template. This file contains less sensitive configuration:
+
+- `TEE_URL`: The URL where the Trusted Execution Environment (TEE) is hosted. Like `APP_URL`, this varies by environment:
+  - Local development: typically `http://localhost:3000`
+  - Staging/Production: the actual deployed TEE domain
+- `WS_RPC_URL`: WebSocket URL for the blockchain node provider
+- `RPC_URL`: HTTP URL for the blockchain node provider
+- `NFT_ADDRESS`: On-chain address of the deployed NFT contract used for minting and managing NFTs
+- `DB_PATH`: Path to the in memory SQLite database file for application state of Axum server
+
+Ensure both files are properly configured before running the application. These environment variables are crucial for the proper functioning of various components, including database connections, blockchain interactions, API integrations, and service configurations across different deployment environments.
 
 ## Docker Configuration
 
@@ -31,7 +49,7 @@ Our project uses Docker for containerization. The main configuration files are:
 
 Refer to these files directly for the most up-to-date information on our Docker setup.
 
-## Building and Running
+## Building and Running TEE server
 
 ```bash
 # Build the Docker image
@@ -41,7 +59,7 @@ docker compose build
 docker compose run --rm teleport "make start-gramine-server"
 ```
 
-## Debugging
+## Debugging TEE server
 
 Note on SGX settings:
 

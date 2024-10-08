@@ -34,6 +34,18 @@ Our project uses Docker for containerization. The main configuration files are:
 
 Refer to these files directly for the most up-to-date information on our Docker setup.
 
+## Development Mode
+
+To facilitate easier iteration on the non-TEE components of the application, we provide a development mode that allows you to run the server without TEE, Gramine, TLS, or Docker.
+
+To start the server in development mode, simply execute `cargo run` from the root of the repository. This command will launch the server on `http://localhost:3000`.
+
+It is highly recommended to enable logging during development by running:
+
+```bash
+RUST_LOG=info cargo run
+```
+
 ## Building and Running TEE server
 
 ```bash

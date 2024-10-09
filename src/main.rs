@@ -4,6 +4,7 @@ use acme_lib::create_rsa_key;
 use alloy::signers::local::PrivateKeySigner;
 use tokio::{sync::{mpsc,oneshot}, time::Duration};
 
+use rand::Rng;
 use axum::extract::{State};
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
@@ -78,11 +79,11 @@ async fn wait_for_cert() -> Vec<u8> {
     fs::read(CERTIFICATE_PATH).await.expect("cert not found")
 }
 
-async fn _handle_shared_key(axum::extract::Path(key): axum::extract::Path<String>,
-			    State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>)
+async fn _handle_shared_key(State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>,
+			    body: String)
 			    -> String {
     if let Some(sender) = s.lock().await.take() {
-        let _ = sender.send(key);
+        let _ = sender.send(body);
     }
     "ok".to_string()
 }
@@ -102,7 +103,7 @@ async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
 
     // Define the route that handles the shared key
     let receive_app = axum::Router::new()
-	.route("/shared_key/:hex", axum::routing::get(_handle_shared_key))
+	.route("/shared_key/:hex", axum::routing::post(_handle_shared_key))
 	.with_state(shutdown_signal);
 
     // Set up the Rustls config
@@ -144,6 +145,7 @@ async fn main() {
 
     // Private API values
     let do_bootstrap = std::env::var("BOOTSTRAP").is_ok();
+    let do_onboard = std::env::var("ONBOARD").is_ok();
     let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
@@ -164,22 +166,41 @@ async fn main() {
     // We need to wait for the certificate before we can receive the key
     let cert = wait_for_cert().await;
 
+    // Get the shared key
     let shared_key = if do_bootstrap {
-	// If we are bootstrapping, then generate shared secret	
-	todo!();
+	// If we are bootstrapping, then generate shared secret
+	let mut rng = rand::thread_rng();
+	let mut shared_key = [0u8; 16];
+	rng.fill(&mut shared_key);
+	fs::write(SHARED_KEY_PATH, &shared_key)
+            .await
+            .expect("Failed to write shared key to file");
+	shared_key.to_vec()
     } else {
+	// Otherwise start a server and wait to receive it
 	get_shared_key(cert, pkey.clone()).await
     };
 
-    // Write the attestation key
+
+    // Onboard others?
+    if do_onboard {
+	log::info!("sending the key to https://{}/shared_key/", tee_url);
+	let url = format!("https://{}/shared_key", tee_url);
+	let c = reqwest::Client::new().post(url).body(hex::encode(shared_key)).send().await.unwrap();
+	log::info!("got: {}", c.text().await.unwrap());
+	return;
+    }
+
+    // Unlock the encrypted files using the shared key
     log::info!("{} bytes", shared_key.len());
     fs::write("/dev/attestation/keys/shared", shared_key).await.expect("couldn't write to custom key");
 
-    // Generate a random wallet (24 word phrase) at custom derivation path.
+    // Read or generate the signing key
     let signer = if std::path::Path::new(WALLET_PATH).exists() {
         let p_bytes = fs::read(WALLET_PATH).await.expect("failed to read wallet");
         PrivateKeySigner::from_slice(&p_bytes).unwrap()
     } else {
+	// Generate a random wallet (24 word phrase)
         let signer = PrivateKeySigner::random();
         fs::write(WALLET_PATH, signer.to_bytes()).await.expect("failed to write wallet");
         signer
@@ -244,14 +265,5 @@ async fn main() {
     tokio::spawn(async move {
         subscribe_to_nft_events(db_clone, twitter_builder, ws_rpc_url, database_url).await.unwrap();
     });
-    tokio::spawn(async move {
-        nft_action_consumer(receiver, provider).await;
-    });
-    tokio::signal::ctrl_c().await.expect("failed to listen for event");
-    let db = db.lock().await;
-    let serialized = db.serialize().unwrap();
-    let serialized_bytes = serialized.to_vec();
-    fs::write(&db_path, serialized_bytes).await.expect("Failed to save serialized data to file");
-    log::info!("Saved db to file: {}", db_path);
-    log::info!("Shutting down gracefully");
+    nft_action_consumer(receiver, provider).await
 }

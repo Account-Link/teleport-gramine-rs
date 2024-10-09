@@ -89,8 +89,8 @@ impl ClientDB {
         self.client()
             .await?
             .execute(
-                "INSERT INTO \"NftIndex\" (\"id\", \"userId\", \"tokenId\", \"twitterUserName\", \"twitterName\", \"twitterPfpUrl\", \"safeguard\", \"updatedAt\") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())",
-                &[&nft_id,&address,&token_id_int,&username,&x_id,&pfp,&policy],
+                "INSERT INTO \"NftIndex\" (\"id\", \"userId\", \"tokenId\", \"twitterName\", \"twitterUserName\", \"twitterPfpUrl\", \"safeguard\", \"updatedAt\") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())",
+                &[&nft_id,&address,&token_id_int,&username,&username,&pfp,&policy],
             )
             .await?;
         Ok(())

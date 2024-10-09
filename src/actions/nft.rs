@@ -190,7 +190,7 @@ async fn handle_new_token_data<A: TeleportDB>(
     let username = new_token_data.username.to_string();
     let pfp = new_token_data.pfp.to_string();
     let policy = new_token_data.policy.to_string();    
-    client_db.create_nft(nft_id, address, token_id.clone(), x_id.to_string(), username.to_string(), pfp.to_string(), policy).await?;
+    client_db.create_nft(nft_id, address, token_id.clone(), username.to_string(), x_id.to_string(), pfp.to_string(), policy).await?;
     log::info!(
         "NFT minted with id {} to address {}",
         new_token_data.tokenId.to_string(),

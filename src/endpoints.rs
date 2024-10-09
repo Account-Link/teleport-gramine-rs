@@ -22,6 +22,7 @@ use crate::{
         nft::{mint_nft, redeem_nft},
         wallet::WalletProvider,
     },
+    config::Config,
     db::{in_memory::InMemoryDB, PendingNFT, Session, TeleportDB},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
@@ -93,20 +94,16 @@ pub struct CheckRedeemResponse {
     pub safe: bool,
 }
 
-#[derive(Clone)]
 pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
     pub signer: LocalSigner<SigningKey>,
-    pub frontend_url: String,
-    pub backend_url: String,
     pub twitter_builder: TwitterBuilder,
-    pub nft_address: String,
-    pub openai_api_key: String,
+    pub config: Arc<Config>,
 }
 
 pub async fn cookietest<A: TeleportDB>(
-    State(_shared_state): State<SharedState<A>>,
+    State(_shared_state): State<Arc<SharedState<A>>>,
     Query(_query): Query<()>,
     jar: CookieJar,
 ) -> (CookieJar, Redirect) {
@@ -114,14 +111,17 @@ pub async fn cookietest<A: TeleportDB>(
 }
 
 pub async fn register_or_login<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
     let address = query.address;
     let frontend_nonce = query.frontend_nonce;
 
-    let callback_url =
-        get_callback_url(shared_state.backend_url.clone(), address.clone(), frontend_nonce);
+    let callback_url = get_callback_url(
+        shared_state.config.app.backend_url.clone(),
+        address.clone(),
+        frontend_nonce,
+    );
 
     let oauth_tokens = shared_state
         .twitter_builder
@@ -141,7 +141,7 @@ pub async fn register_or_login<A: TeleportDB>(
 }
 
 pub async fn callback<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Query(query): Query<CallbackQuery>,
     jar: CookieJar,
 ) -> (CookieJar, Redirect) {
@@ -187,7 +187,7 @@ pub async fn callback<A: TeleportDB>(
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
     let url_with_params = format!(
         "{}/create?sig={:?}&success=true&{}",
-        shared_state.frontend_url, sig, encoded_x_info
+        shared_state.config.app.frontend_url, sig, encoded_x_info
     );
     (
         jar.add(
@@ -203,12 +203,13 @@ pub async fn callback<A: TeleportDB>(
 pub async fn mint(
     jar: CookieJar,
     headers: HeaderMap,
-    State(shared_state): State<SharedState<InMemoryDB>>,
+    State(shared_state): State<Arc<SharedState<InMemoryDB>>>,
     Json(query): Json<MintQuery>,
 ) -> Result<Json<TxHashResponse>, StatusCode> {
     if let Some(referer) = headers.get("Referer") {
         let referer = referer.to_str().unwrap_or("");
-        if !referer.starts_with(&format!("https://{}/approve", shared_state.backend_url)) {
+        if !referer.starts_with(&format!("https://{}/approve", shared_state.config.app.backend_url))
+        {
             return Err(StatusCode::FORBIDDEN);
         }
     } else {
@@ -230,11 +231,11 @@ pub async fn mint(
     drop(db);
 
     let tx_hash = mint_nft(
-        shared_state.provider,
+        shared_state.provider.clone(),
         Address::from_str(&query.address).expect("Failed to parse user address"),
         user.x_id.expect("User x_id not set"),
         query.policy,
-        &shared_state.openai_api_key,
+        &shared_state.config.secrets.openai_api_key,
     )
     .await
     .expect("Failed to mint NFT");
@@ -251,7 +252,7 @@ pub async fn mint(
 }
 
 pub async fn redeem<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
     let db = shared_state.db.lock().await;
@@ -261,10 +262,10 @@ pub async fn redeem<A: TeleportDB>(
     drop(db);
 
     let tx_hash = redeem_nft(
-        shared_state.provider,
+        shared_state.provider.clone(),
         nft.token_id.clone(),
         query.content,
-        &shared_state.nft_address,
+        &shared_state.config.app.nft_address,
     )
     .await
     .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
@@ -272,16 +273,20 @@ pub async fn redeem<A: TeleportDB>(
 }
 
 pub async fn check_redeem<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Json(query): Json<CheckRedeemQuery>,
 ) -> Json<CheckRedeemResponse> {
-    let safe =
-        oai::is_tweet_safe(&query.content, &query.policy, &shared_state.openai_api_key).await;
+    let safe = oai::is_tweet_safe(
+        &query.content,
+        &query.policy,
+        &shared_state.config.secrets.openai_api_key,
+    )
+    .await;
     Json(CheckRedeemResponse { safe })
 }
 
 pub async fn get_tweet_id<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Query(query): Query<TweetIdQuery>,
 ) -> Json<TweetIdResponse> {
     let db = shared_state.db.lock().await;
@@ -311,7 +316,7 @@ pub async fn get_tweet_id<A: TeleportDB>(
 }
 
 pub async fn approve_mint<A: TeleportDB>(
-    State(shared_state): State<SharedState<A>>,
+    State(shared_state): State<Arc<SharedState<A>>>,
     Query(query): Query<MintQuery>,
     jar: CookieJar,
 ) -> impl IntoResponse {

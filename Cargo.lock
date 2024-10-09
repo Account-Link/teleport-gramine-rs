@@ -4291,6 +4291,7 @@ dependencies = [
  "http 1.1.0",
  "log",
  "oauth1-request",
+ "once_cell",
  "openai-rust",
  "openssl",
  "rand 0.8.5",

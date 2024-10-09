@@ -1,9 +1,10 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc};
 
 use figment::{
     providers::{Env, Format, Toml},
     Figment,
 };
+use once_cell::sync::Lazy;
 use serde::Deserialize;
 
 #[derive(Debug, Deserialize)]
@@ -68,3 +69,6 @@ impl Config {
         config.extract()
     }
 }
+
+pub static CONFIG: Lazy<Arc<Config>> =
+    Lazy::new(|| Arc::new(Config::new().expect("Failed to load configuration")));

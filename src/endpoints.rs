@@ -244,7 +244,7 @@ pub async fn mint(
         policy: query.policy,
         nft_id: user.x_id.expect("User x_id not set"),
         username,
-        pfp_url: user_info.profile_image_url,
+        pfp_url: user_info.profile_image_url.replace("_normal", "_400x400"),
     };
 
     let (sender, tx_hash) = oneshot::channel();

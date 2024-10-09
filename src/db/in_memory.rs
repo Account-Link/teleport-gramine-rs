@@ -12,7 +12,6 @@ use super::{PendingNFT, Session, TeleportDB, User, NFT};
 pub struct InMemoryDB {
     pub x_id_to_address: BTreeMap<String, String>,
     pub oauths: BTreeMap<String, String>,
-    //pub users: BTreeMap<String, User>,
     pub pending_nfts: BTreeMap<String, PendingNFT>,
     pub nfts: BTreeMap<String, NFT>,
     pub tweets: BTreeMap<String, String>,
@@ -40,7 +39,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
-        let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
+        let file_path = Path::new("/root/shared/users").join(format!("{}.user", address));
         log::info!("Saving user to file: {:?}", file_path.clone());
         let mut file = File::create(file_path)?;
         let contents = serde_json::to_string(&user)?;
@@ -53,7 +52,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn get_user_by_address(&self, address: String) -> eyre::Result<User> {
-        let file_path = Path::new("/root/save/users").join(format!("{}.user", address));
+        let file_path = Path::new("/root/shared/users").join(format!("{}.user", address));
         let contents = read_to_string(file_path)?;
         let user: User = serde_json::from_str(&contents)?;
         Ok(user.clone())

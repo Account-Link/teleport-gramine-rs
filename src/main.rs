@@ -2,15 +2,17 @@ use std::{net::SocketAddr, path::Path, sync::Arc};
 
 use acme_lib::create_rsa_key;
 use alloy::signers::local::PrivateKeySigner;
-use tokio::{sync::mpsc, time::Duration};
+use tokio::{sync::{mpsc,oneshot}, time::Duration};
 
+use axum::extract::{State};
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
     approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
     SharedState,
 };
-use openssl::pkey::PKey;
+use openssl::pkey::{PKey,Private};
 use tokio::{fs, sync::Mutex, time::sleep};
+
 use tower_http::cors::CorsLayer;
 
 use crate::{
@@ -33,39 +35,16 @@ mod sgx_attest;
 mod templates;
 pub mod twitter;
 
-const WALLET_PATH: &str = "/root/save/wallet.key";
-//const WALLET_PATH: &str = "untrustedhost/wallet.key";
 const PRIVATE_KEY_PATH: &str = "/root/save/private_key.pem";
-//const PRIVATE_KEY_PATH: &str = "untrustedhost/private_key.pem";
+const SHARED_KEY_PATH: &str = "/root/save/shared_key.pem";
 const CERTIFICATE_PATH: &str = "untrustedhost/certificate.pem";
 const CSR_PATH: &str = "untrustedhost/request.csr";
 const QUOTE_PATH: &str = "untrustedhost/quote.dat";
 
-#[tokio::main]
-async fn main() {
-    env_logger::init();
-    dotenv::dotenv().ok();
-    dotenv::from_filename("/teleport.env").ok();
+const WALLET_PATH: &str = "/root/shared/wallet.key";
 
-    // Published values
-    let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
-    let rpc_url = std::env::var("RPC_URL").expect("RPC_URL not set");
+async fn generate_or_read_privkey() -> PKey<Private> {
     let tee_url = std::env::var("TEE_URL").expect("TEE_URL not set");
-
-    // Private API values
-    let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
-    let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
-    let app_url = std::env::var("APP_URL").expect("APP_URL not set");
-    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
-    let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
-    let app_secret =
-        std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
-
-    let twitter_builder = TwitterBuilder::new(app_key, app_secret);
-
-    let ws_rpc_url = ws_rpc_url + &rpc_key;
-    let rpc_url = rpc_url + &rpc_key;
-
     let pkey = if std::path::Path::new(PRIVATE_KEY_PATH).exists() {
         let pk_bytes = fs::read(PRIVATE_KEY_PATH).await.expect("Failed to read pk file");
         PKey::private_key_from_pem(pk_bytes.as_slice()).unwrap()
@@ -84,10 +63,117 @@ async fn main() {
     let mut csr_pem_bytes = csr.to_pem().unwrap();
     pk_bytes.append(&mut csr_pem_bytes);
     if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {
-        // handle quote
         log::info!("Writing quote to file: {}", QUOTE_PATH);
         fs::write(QUOTE_PATH, quote).await.expect("Failed to write quote to file");
     }
+    pkey
+}
+
+async fn wait_for_cert() -> Vec<u8> {
+    log::info!("Waiting for cert ...");
+    while !Path::new(CERTIFICATE_PATH).exists() {
+        sleep(Duration::from_secs(1)).await;
+        }
+    log::info!("Cert found");
+    fs::read(CERTIFICATE_PATH).await.expect("cert not found")
+}
+
+async fn _handle_shared_key(axum::extract::Path(key): axum::extract::Path<String>,
+			    State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>)
+			    -> String {
+    if let Some(sender) = s.lock().await.take() {
+        let _ = sender.send(key);
+    }
+    "ok".to_string()
+}
+
+async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
+    // Return the key if we already have it sealed
+    if std::path::Path::new(SHARED_KEY_PATH).exists() {
+	log::info!("reading from shared key file");
+        let s = fs::read(SHARED_KEY_PATH).await.expect("couldn't read shared key");
+        return s;
+    }
+
+    // Set up the oneshot channel
+    let (tx, rx) = oneshot::channel();
+
+    let shutdown_signal = Arc::new(Mutex::new(Some(tx)));
+
+    // Define the route that handles the shared key
+    let receive_app = axum::Router::new()
+	.route("/shared_key/:hex", axum::routing::get(_handle_shared_key))
+	.with_state(shutdown_signal);
+
+    // Set up the Rustls config
+    let config = RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap())
+        .await
+        .unwrap();
+
+    // Start the server
+    let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
+    let server = axum_server::bind_rustls(addr, config)
+        .serve(receive_app.into_make_service());
+
+    // Spawn the server and stop it as soon as a key is received
+    log::info!("waiting to receive shared key");
+    let key_hex = tokio::select! {
+        _ = server => todo!(),
+        key_hex = rx => key_hex
+    }.unwrap();
+    
+    // store the key
+    log::info!("writing shared key");
+    let key_bytes = hex::decode(key_hex).unwrap();
+    fs::write(SHARED_KEY_PATH, &key_bytes)
+        .await
+        .expect("Failed to write shared key to file");
+    key_bytes
+}
+
+#[tokio::main]
+async fn main() {
+    env_logger::init();
+    dotenv::dotenv().ok();
+    dotenv::from_filename("/teleport.env").ok();
+
+    // Published values
+    let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
+    let rpc_url = std::env::var("RPC_URL").expect("RPC_URL not set");
+    let tee_url = std::env::var("TEE_URL").expect("TEE_URL not set");
+
+    // Private API values
+    let do_bootstrap = std::env::var("BOOTSTRAP").is_ok();
+    let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
+    let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
+    let app_url = std::env::var("APP_URL").expect("APP_URL not set");
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
+    let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
+    let app_secret =
+        std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
+
+    let twitter_builder = TwitterBuilder::new(app_key, app_secret);
+
+    let ws_rpc_url = ws_rpc_url + &rpc_key;
+    let rpc_url = rpc_url + &rpc_key;
+
+    // TLS registration
+    // Generate a private key and a fresh CSR
+    let pkey = generate_or_read_privkey().await;
+
+    // We need to wait for the certificate before we can receive the key
+    let cert = wait_for_cert().await;
+
+    let shared_key = if do_bootstrap {
+	// If we are bootstrapping, then generate shared secret	
+	todo!();
+    } else {
+	get_shared_key(cert, pkey.clone()).await
+    };
+
+    // Write the attestation key
+    log::info!("{} bytes", shared_key.len());
+    fs::write("/dev/attestation/keys/shared", shared_key).await.expect("couldn't write to custom key");
 
     // Generate a random wallet (24 word phrase) at custom derivation path.
     let signer = if std::path::Path::new(WALLET_PATH).exists() {
@@ -100,7 +186,7 @@ async fn main() {
     };
     log::info!("Signer address:{}", signer.address());
 
-    let provider = get_provider(rpc_url, signer.clone().into());
+    let provider = get_provider(rpc_url.clone(), signer.clone().into());
 
     let db = if std::path::Path::new(&db_path).exists() {
         let serialized_bytes = fs::read(&db_path).await.expect("Failed to read db file");
@@ -119,6 +205,7 @@ async fn main() {
         signer,
         twitter_builder: twitter_builder.clone(),
         nft_action_sender: sender,
+	rpc_url: rpc_url,
     };
 
     let app = axum::Router::new()
@@ -136,11 +223,6 @@ async fn main() {
 
     #[cfg(feature = "https")]
     {
-        log::info!("Waiting for cert ...");
-        while !Path::new(CERTIFICATE_PATH).exists() {
-            sleep(Duration::from_secs(1)).await;
-        }
-        log::info!("Cert found");
         let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
         let config =
             RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();

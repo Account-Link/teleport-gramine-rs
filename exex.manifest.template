@@ -13,7 +13,6 @@ loader.env.MALLOC_ARENA_MAX = "1"
 loader.env.RUST_BACKTRACE = "full"
 loader.env.RUST_LOG = "info"
 
-
 loader.env.RPC_KEY = { passthrough = true }
 loader.env.NFT_MINTER_MNEMONIC = { passthrough = true }
 loader.env.APP_URL = { passthrough = true }
@@ -21,7 +20,6 @@ loader.env.TWITTER_CONSUMER_KEY = { passthrough = true }
 loader.env.TWITTER_CONSUMER_SECRET = { passthrough = true }
 loader.env.OPENAI_API_KEY = { passthrough = true }
 loader.env.DATABASE_URL = { passthrough = true }
-loader.env.BOBU_ADDRESS = { passthrough = true }
 
 loader.argv = ["target/release/teleport"]
 
@@ -31,7 +29,8 @@ loader.uid = 65534
 loader.gid = 65534
 
 fs.mounts = [
-    { type = "encrypted", path = "/root/save/", uri = "file:save_dir/", key_name = "debug_sgx_mrenclave" },
+    { type = "encrypted", path = "/root/save", uri = "file:save_dir/sealed", key_name = "debug_sgx_mrenclave" },
+    { type = "encrypted", path = "/root/shared", uri = "file:save_dir/shared", key_name = "shared" },
     { path = "/teleport.env", uri = "file:teleport.env" },
     { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
     { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
@@ -70,4 +69,4 @@ sgx.trusted_files = [
 # - any threads and threadpools you might be starting
 # - helper threads internal to Gramine — see:
 #   https://gramine.readthedocs.io/en/stable/manifest-syntax.html#number-of-threads
-sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '48' }}
+sgx.max_threads = {{ '1' if env.get('EDMM', '0') == '1' else '36' }}

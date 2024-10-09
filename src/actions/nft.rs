@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
-    primitives::{Address, FixedBytes, Uint},
+    primitives::{Address, FixedBytes, Uint, keccak256},
     providers::{Provider, ProviderBuilder, WsConnect},
     rpc::types::{BlockNumberOrTag, Filter},
     sol,
@@ -38,6 +38,15 @@ struct TweetContent {
 pub fn get_nft_address() -> eyre::Result<Address> {
     let nft_address = std::env::var("NFT_ADDRESS")?;
     Ok(Address::from_str(&nft_address)?)
+}
+
+pub async fn get_token_id(rpc_url: String, nft_id: String) -> eyre::Result<String> {
+    let provider = ProviderBuilder::new().on_http(rpc_url.parse()?);
+    let nft_address = get_nft_address()?;
+    let nft = NFT::new(nft_address, provider);
+    let nftid_hash = keccak256(nft_id.as_bytes());
+    let token_id = nft.nftIdMap(nftid_hash).call().await?._0.clone();
+    Ok(token_id.to_string())
 }
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
@@ -209,10 +218,12 @@ pub async fn mint_nft(
     policy: String,
     username: String,
     pfp_url: String,
+    nft_id: String,
 ) -> eyre::Result<String> {
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
-    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, username, pfp_url);
+    let nftid_hash = keccak256(nft_id.as_bytes());
+    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, username, pfp_url, nftid_hash);
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -242,7 +253,7 @@ pub async fn redeem_nft(
 #[derive(Debug, Serialize)]
 pub enum NFTAction {
     Redeem { token_id: String, content: String },
-    Mint { recipient: Address, policy: String, nft_id: String, username: String, pfp_url: String },
+    Mint { recipient: Address, policy: String, x_id: String, username: String, pfp_url: String, nft_id: String },
 }
 
 pub async fn nft_action_consumer(
@@ -255,8 +266,8 @@ pub async fn nft_action_consumer(
             NFTAction::Redeem { token_id, content } => {
                 redeem_nft(provider.clone(), token_id, content).await
             }
-            NFTAction::Mint { recipient, policy, nft_id, username, pfp_url } => {
-                mint_nft(provider.clone(), recipient, nft_id, policy, username, pfp_url).await
+            NFTAction::Mint { recipient, policy, x_id, username, pfp_url, nft_id } => {
+                mint_nft(provider.clone(), recipient, x_id, policy, username, pfp_url, nft_id).await
             }
         };
 

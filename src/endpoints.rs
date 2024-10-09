@@ -17,7 +17,7 @@ use tokio::sync::{mpsc, oneshot, Mutex};
 use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
-    actions::nft::NFTAction,
+    actions::nft::{NFTAction,get_token_id},
     db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
@@ -53,7 +53,6 @@ pub struct CallbackQuery {
 pub struct MintQuery {
     address: String,
     policy: String,
-    nft_id: String,
 }
 
 #[derive(Deserialize)]
@@ -101,6 +100,7 @@ pub struct SharedState<A: TeleportDB> {
     pub tee_url: String,
     pub twitter_builder: TwitterBuilder,
     pub nft_action_sender: mpsc::Sender<(NFTAction, oneshot::Sender<String>)>,
+    pub rpc_url: String,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -239,12 +239,16 @@ pub async fn mint(
         format!("@{}", user_info.username)
     };
 
+
+    let nft_id = format!("{:032x}", rand::random::<u128>());
+
     let nft_action = NFTAction::Mint {
         recipient: Address::from_str(&query.address).expect("Failed to parse user address"),
         policy: query.policy,
-        nft_id: user.x_id.expect("User x_id not set"),
+        x_id: user.x_id.expect("User x_id not set"),
         username,
         pfp_url: user_info.profile_image_url.replace("_normal", "_400x400"),
+	nft_id: nft_id.clone(),
     };
 
     let (sender, tx_hash) = oneshot::channel();
@@ -255,7 +259,7 @@ pub async fn mint(
     let mut db = shared_state.db.lock().await;
     db.add_pending_nft(
         tx_hash.clone(),
-        PendingNFT { address: query.address, nft_id: query.nft_id.clone() },
+        PendingNFT { address: query.address, nft_id: nft_id },
     )
     .expect("Failed to add pending NFT");
     drop(db);
@@ -267,13 +271,12 @@ pub async fn redeem<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
     Json(query): Json<RedeemQuery>,
 ) -> Json<TxHashResponse> {
-    let db = shared_state.db.lock().await;
-    let nft = db
-        .get_nft(query.nft_id.clone())
+    let token_id = get_token_id(shared_state.rpc_url, query.nft_id.clone())
+	.await
         .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
-    drop(db);
+    log::info!("redeem token_id: {}", token_id);
 
-    let nft_action = NFTAction::Redeem { token_id: nft.token_id.clone(), content: query.content };
+    let nft_action = NFTAction::Redeem { token_id: token_id, content: query.content };
 
     let (sender, tx_hash) = oneshot::channel();
 
@@ -341,7 +344,6 @@ pub async fn approve_mint<A: TeleportDB>(
     let template = PolicyTemplate {
         policy: query.policy,
         address: query.address,
-        nft_id: query.nft_id,
         x_id: "".to_string(),
     };
     Ok(HtmlTemplate(template))

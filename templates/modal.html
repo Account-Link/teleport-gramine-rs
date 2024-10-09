@@ -123,13 +123,12 @@
         function postPolicy() {
             const policy = "{{ policy }}";
             const address = "{{ address }}";
-            const nft_id = "{{ nft_id }}";
             fetch(`/mint`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ policy, address, nft_id })
+                body: JSON.stringify({ policy, address })
             })
             .then(response => response.json())
 	    .then(data => {

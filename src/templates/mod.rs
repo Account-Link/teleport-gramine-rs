@@ -7,7 +7,6 @@ use http::StatusCode;
 pub struct PolicyTemplate {
     pub policy: String,
     pub address: String,
-    pub nft_id: String,
     pub x_id: String,
 }
 

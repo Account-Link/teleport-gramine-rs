@@ -123,7 +123,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
     if safe {
         let db_lock = db.lock().await;
-        let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).ok();
+        let user = db_lock.get_user_by_address(redeem.addr.to_string()).ok();
         drop(db_lock);
         let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
 
@@ -184,8 +184,13 @@ async fn handle_new_token_data<A: TeleportDB>(
     )?;
     drop(db);
 
+    let x_id = new_token_data.x_id.to_string();
+    let address = new_token_data.to.to_string();
     let token_id = new_token_data.tokenId.to_string();
-    client_db.set_token_id(token_id.clone(), nft_id).await?;
+    let username = new_token_data.username.to_string();
+    let pfp = new_token_data.pfp.to_string();
+    let policy = new_token_data.policy.to_string();    
+    client_db.create_nft(nft_id, address, token_id.clone(), x_id.to_string(), username.to_string(), pfp.to_string(), policy).await?;
     log::info!(
         "NFT minted with id {} to address {}",
         new_token_data.tokenId.to_string(),

@@ -2,7 +2,7 @@ use std::{str::FromStr, sync::Arc};
 
 use alloy::{
     hex::ToHexExt,
-    primitives::{Address, FixedBytes, Uint, keccak256},
+    primitives::{keccak256, Address, FixedBytes, Uint},
     providers::{Provider, ProviderBuilder, WsConnect},
     rpc::types::{BlockNumberOrTag, Filter},
     sol,
@@ -189,8 +189,20 @@ async fn handle_new_token_data<A: TeleportDB>(
     let token_id = new_token_data.tokenId.to_string();
     let username = new_token_data.username.to_string();
     let pfp = new_token_data.pfp.to_string();
-    let policy = new_token_data.policy.to_string();    
-    client_db.create_nft(nft_id, address, token_id.clone(), username.to_string(), x_id.to_string(), pfp.to_string(), policy).await?;
+    let policy = new_token_data.policy.to_string();
+    let name = new_token_data.name.to_string();
+    client_db
+        .create_nft(
+            nft_id,
+            address,
+            token_id.clone(),
+            name.to_string(),
+            username.to_string(),
+            x_id.to_string(),
+            pfp.to_string(),
+            policy,
+        )
+        .await?;
     log::info!(
         "NFT minted with id {} to address {}",
         new_token_data.tokenId.to_string(),
@@ -221,6 +233,7 @@ pub async fn mint_nft(
     recipient: Address,
     x_id: String,
     policy: String,
+    name: String,
     username: String,
     pfp_url: String,
     nft_id: String,
@@ -228,7 +241,8 @@ pub async fn mint_nft(
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
     let nftid_hash = keccak256(nft_id.as_bytes());
-    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, username, pfp_url, nftid_hash);
+    let mint =
+        nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, name, username, pfp_url, nftid_hash);
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -257,8 +271,19 @@ pub async fn redeem_nft(
 
 #[derive(Debug, Serialize)]
 pub enum NFTAction {
-    Redeem { token_id: String, content: String },
-    Mint { recipient: Address, policy: String, x_id: String, username: String, pfp_url: String, nft_id: String },
+    Redeem {
+        token_id: String,
+        content: String,
+    },
+    Mint {
+        recipient: Address,
+        policy: String,
+        x_id: String,
+        name: String,
+        username: String,
+        pfp_url: String,
+        nft_id: String,
+    },
 }
 
 pub async fn nft_action_consumer(
@@ -271,8 +296,9 @@ pub async fn nft_action_consumer(
             NFTAction::Redeem { token_id, content } => {
                 redeem_nft(provider.clone(), token_id, content).await
             }
-            NFTAction::Mint { recipient, policy, x_id, username, pfp_url, nft_id } => {
-                mint_nft(provider.clone(), recipient, x_id, policy, username, pfp_url, nft_id).await
+            NFTAction::Mint { recipient, policy, x_id, name, username, pfp_url, nft_id } => {
+                mint_nft(provider.clone(), recipient, x_id, policy, name, username, pfp_url, nft_id)
+                    .await
             }
         };
 
@@ -331,8 +357,10 @@ mod tests {
             recipient_address,
             1.to_string(),
             "policy".to_string(),
+            "name".to_string(),
             "username".to_string(),
             "pfp_url".to_string(),
+            "nft_id".to_string(),
         )
         .await
         .unwrap();

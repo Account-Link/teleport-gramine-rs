@@ -84,18 +84,28 @@ impl ClientDB {
         Ok(())
     }
 
-    pub async fn create_nft(&self, nft_id: String, address: String, token_id: String, username: String, x_id: String, pfp: String, policy: String) -> eyre::Result<()> {
+    pub async fn create_nft(
+        &self,
+        nft_id: String,
+        address: String,
+        token_id: String,
+        twitter_name: String,
+        username: String,
+        x_id: String,
+        pfp: String,
+        policy: String,
+    ) -> eyre::Result<()> {
         let token_id_int: i32 = token_id.parse()?;
         self.client()
             .await?
             .execute(
                 "INSERT INTO \"NftIndex\" (\"id\", \"userId\", \"tokenId\", \"twitterName\", \"twitterUserName\", \"twitterPfpUrl\", \"safeguard\", \"updatedAt\") VALUES ($1,$2,$3,$4,$5,$6,$7,NOW())",
-                &[&nft_id,&address,&token_id_int,&username,&username,&pfp,&policy],
+                &[&nft_id,&address,&token_id_int,&twitter_name,&username,&pfp,&policy],
             )
             .await?;
         Ok(())
     }
-    
+
     pub async fn delete_token(&self, token_id: String) -> eyre::Result<()> {
         let token_id_int: i32 = token_id.parse()?;
         self.client()

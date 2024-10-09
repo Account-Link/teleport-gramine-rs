@@ -51,6 +51,7 @@ askama = "0.12.1"
 serde_with = "3.9.0"
 oauth1-request = "0.3.3"
 rayon = "1.10.0"
+hkdf = "0.12.4"
 
 [features]
 default = ["https"]

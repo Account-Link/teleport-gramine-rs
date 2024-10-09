@@ -60,13 +60,6 @@ async fn generate_or_read_privkey() -> PKey<Private> {
     let csr_pem_bytes = csr.to_pem().unwrap();
     fs::write(CSR_PATH, csr_pem_bytes).await.expect("Failed to write csr to file");
 
-    let mut pk_bytes = pkey.public_key_to_pem().unwrap();
-    let mut csr_pem_bytes = csr.to_pem().unwrap();
-    pk_bytes.append(&mut csr_pem_bytes);
-    if let Ok(quote) = sgx_attest::sgx_attest(pk_bytes) {
-        log::info!("Writing quote to file: {}", QUOTE_PATH);
-        fs::write(QUOTE_PATH, quote).await.expect("Failed to write quote to file");
-    }
     pkey
 }
 
@@ -77,6 +70,19 @@ async fn wait_for_cert() -> Vec<u8> {
         }
     log::info!("Cert found");
     fs::read(CERTIFICATE_PATH).await.expect("cert not found")
+}
+
+async fn prepare_quote(pkey: &PKey<Private>, address: String) {
+
+    // The quote consists of:
+    //   - the public key from the cert,
+    //   - the signer addres
+    let pk_bytes = pkey.public_key_to_pem().unwrap();
+    let appdata = [pk_bytes, address.into_bytes()].concat();
+    if let Ok(quote) = sgx_attest::sgx_attest(appdata) {
+        log::info!("Writing quote to file: {}", QUOTE_PATH);
+        fs::write(QUOTE_PATH, quote).await.expect("Failed to write quote to file");
+    }
 }
 
 async fn _handle_shared_key(State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>,
@@ -181,7 +187,6 @@ async fn main() {
 	get_shared_key(cert, pkey.clone()).await
     };
 
-
     // Onboard others?
     if do_onboard {
 	log::info!("sending the key to https://{}/shared_key/", tee_url);
@@ -191,32 +196,26 @@ async fn main() {
 	return;
     }
 
-    // Unlock the encrypted files using the shared key
-    log::info!("{} bytes", shared_key.len());
-    fs::write("/dev/attestation/keys/shared", shared_key).await.expect("couldn't write to custom key");
+    // Derive keys from the shared secret
+    let hkdf = hkdf::Hkdf::<sha2::Sha256>::new(None, shared_key.as_slice());
+    let mut seal_key = [0u8; 16];
+    hkdf.expand(b"seal_key", &mut seal_key).unwrap();
+    let mut wallet_key = [0u8; 32];
+    hkdf.expand(b"wallet", &mut wallet_key).unwrap();
 
-    // Read or generate the signing key
-    let signer = if std::path::Path::new(WALLET_PATH).exists() {
-        let p_bytes = fs::read(WALLET_PATH).await.expect("failed to read wallet");
-        PrivateKeySigner::from_slice(&p_bytes).unwrap()
-    } else {
-	// Generate a random wallet (24 word phrase)
-        let signer = PrivateKeySigner::random();
-        fs::write(WALLET_PATH, signer.to_bytes()).await.expect("failed to write wallet");
-        signer
-    };
+    // Unlock the encrypted files using the shared key
+    fs::write("/dev/attestation/keys/shared", seal_key).await.expect("couldn't write to seal key");
+
+    // Derive the signing key
+    let signer = PrivateKeySigner::from_slice(&wallet_key).unwrap();
     log::info!("Signer address:{}", signer.address());
+
+    // Now we're loaded up, write the quote
+    prepare_quote(&pkey, signer.address().to_string()).await;
 
     let provider = get_provider(rpc_url.clone(), signer.clone().into());
 
-    let db = if std::path::Path::new(&db_path).exists() {
-        let serialized_bytes = fs::read(&db_path).await.expect("Failed to read db file");
-        let db = db::in_memory::InMemoryDB::deserialize(&serialized_bytes);
-        log::info!("Loaded db from file: {}", db_path);
-        db
-    } else {
-        db::in_memory::InMemoryDB::new()
-    };
+    let db = db::in_memory::InMemoryDB::new();
     let db = Arc::new(Mutex::new(db));
     let (sender, receiver) = mpsc::channel(100);
     let shared_state = SharedState {

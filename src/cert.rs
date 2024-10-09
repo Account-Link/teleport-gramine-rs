@@ -1,3 +1,6 @@
+use std::path::Path;
+
+use acme_lib::create_rsa_key;
 use openssl::{
     hash::MessageDigest,
     pkey::{self, PKey},
@@ -5,7 +8,29 @@ use openssl::{
     x509::{extension::SubjectAlternativeName, X509Req, X509ReqBuilder},
 };
 
-// from https://github.com/flashbots/gramine-andromeda-revm/blob/amiller-frame/src/main.rs
+pub async fn load_or_create_private_key(private_key_path: &Path) -> PKey<openssl::pkey::Private> {
+    if private_key_path.exists() {
+        let pk_bytes = tokio::fs::read(private_key_path).await.expect("Failed to read pk file");
+        PKey::private_key_from_pem(pk_bytes.as_slice()).unwrap()
+    } else {
+        let pk = create_rsa_key(2048);
+        let pk_bytes = pk.private_key_to_pem_pkcs8().unwrap();
+        tokio::fs::write(private_key_path, pk_bytes).await.expect("Failed to write pk to file");
+        pk
+    }
+}
+
+pub async fn create_and_save_csr(
+    csr_path: &Path,
+    tee_url: &str,
+    private_key: &PKey<openssl::pkey::Private>,
+) -> X509Req {
+    let csr = create_csr(tee_url, private_key).unwrap();
+    let csr_pem_bytes = csr.to_pem().unwrap();
+    tokio::fs::write(csr_path, csr_pem_bytes).await.expect("Failed to write csr to file");
+    csr
+}
+
 pub fn create_csr(domain: &str, pkey: &PKey<pkey::Private>) -> eyre::Result<X509Req> {
     //
     // the csr builder

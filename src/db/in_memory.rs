@@ -2,15 +2,21 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 
-use super::{PendingNFT, Session, TeleportDB, User, NFT};
+use super::{Nft, PendingNFT, Session, TeleportDB, User};
 
 #[derive(Debug, Serialize, Deserialize, Default, Clone)]
 pub struct InMemoryDB {
+    // x_id to EVM address
     pub x_id_to_address: BTreeMap<String, String>,
+    // EVM address to user struct
     pub users: BTreeMap<String, User>,
+    // pending NFTs tx hashes to PendingNFT structs
     pub pending_nfts: BTreeMap<String, PendingNFT>,
-    pub nfts: BTreeMap<String, NFT>,
+    // successfully minted NFTs token IDs to NFT structs
+    pub nfts: BTreeMap<String, Nft>,
+    // token IDs to tweet IDs
     pub tweets: BTreeMap<String, String>,
+    // session IDs to session structs
     pub sessions: BTreeMap<String, Session>,
 }
 
@@ -62,14 +68,14 @@ impl TeleportDB for InMemoryDB {
             .pending_nfts
             .remove(&tx_hash)
             .ok_or_else(|| eyre::eyre!("Pending NFT not found"))?;
-        let nft = NFT { address: pending_nft.address, token_id: token_id.clone() };
+        let nft = Nft { address: pending_nft.address, token_id: token_id.clone() };
         let nft_id_clone = pending_nft.nft_id.clone();
         self.nfts.insert(pending_nft.nft_id, nft);
 
         Ok(nft_id_clone)
     }
 
-    fn get_nft(&self, nft_id: String) -> eyre::Result<NFT> {
+    fn get_nft(&self, nft_id: String) -> eyre::Result<Nft> {
         let nft = self.nfts.get(&nft_id).ok_or_else(|| eyre::eyre!("NFT not found"))?;
         Ok(nft.clone())
     }
@@ -85,6 +91,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn add_session(&mut self, session: Session) -> eyre::Result<String> {
+        // TODO: improve the session ID generation to use UUIDs
         let session_id: i128 = rand::random();
         self.sessions.insert(session_id.to_string(), session);
         Ok(session_id.to_string())
@@ -99,9 +106,8 @@ impl TeleportDB for InMemoryDB {
 
 #[cfg(test)]
 mod tests {
-    use crate::db::AccessTokens;
-
     use super::*;
+    use crate::db::AccessTokens;
 
     #[tokio::test]
     async fn db_test_write() -> eyre::Result<()> {

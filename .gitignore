@@ -1,8 +1,6 @@
 Cargo.lock
 target
-.env
 *.db
-teleport.env
 exex.manifest.sgx
 exex.manifest
 exex.sig
@@ -11,3 +9,6 @@ exex.sig
 *.tmp
 certbot
 tokens.json
+
+*.env
+!*.env.example

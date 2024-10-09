@@ -1,9 +1,8 @@
 const TASK: &str = "Task: Check if the tweet adheres to the provided policy.";
 const OUTPUT: &str = "Provide your safety assessment for the above tweet as one word: either \"safe\" or \"unsafe\".";
 
-pub async fn is_tweet_safe(tweet: &String, policy: &String) -> bool {
-    let client =
-        openai_rust::Client::new(&std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY not set"));
+pub async fn is_tweet_safe(tweet: &str, policy: &str, openai_api_key: &str) -> bool {
+    let client = openai_rust::Client::new(openai_api_key);
 
     let inputs = format!(
         "{}\n<BEGIN POLICY>\n{}\n<END POLICY>\n<BEGIN TWEET>\n{}\n<END TWEET>\n{}\n",
@@ -26,7 +25,8 @@ mod tests {
 
     async fn test_is_tweet_safe(tweet: &str, policy: &str, expected: bool) {
         dotenv::dotenv().ok();
-        let is_safe = is_tweet_safe(&tweet.to_string(), &policy.to_string()).await;
+        let openai_api_key = std::env::var("OPENAI_API_KEY").expect("OPENAI_API_KEY not set");
+        let is_safe = is_tweet_safe(tweet, policy, &openai_api_key).await;
         assert_eq!(is_safe, expected);
     }
 

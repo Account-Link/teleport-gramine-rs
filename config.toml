@@ -1,0 +1,32 @@
+# Base configuration
+[default]
+env = "development"
+
+[default.tee]
+private_key_path = "/root/save/private_key.pem"
+certificate_path = "untrustedhost/certificate.pem"
+csr_save_path = "untrustedhost/request.csr"
+quote_path = "untrustedhost/quote.dat"
+
+[default.app]
+ws_rpc_url = "wss://base-sepolia.g.alchemy.com/v2/"
+rpc_url = "https://base-sepolia.g.alchemy.com/v2/"
+nft_address = "0xB92414bA565D8d49E4aaaB45b78b354516006AF1"
+frontend_url = "localhost:8000"
+backend_url = "localhost:3000"
+db_path = "db-dev.sqlite"
+
+# Environment-specific configurations
+# Specify what you want to override in default here for the environment
+[staging.app]
+frontend_url = "stage.teleport.computer"
+backend_url = "tee.teleport.best"
+db_path = "db-staging.sqlite"
+
+[production.app]
+ws_rpc_url = "wss://base-mainnet.g.alchemy.com/v2/"
+rpc_url = "https://base-mainnet.g.alchemy.com/v2/"
+nft_address = "0xe1c4c77c45081dab2eba1d8af9eb468ea6c5cdd8"
+frontend_url = "teleport.best"
+backend_url = "tee.teleport.best"
+db_path = "db.sqlite"

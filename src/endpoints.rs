@@ -98,9 +98,11 @@ pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
     pub signer: LocalSigner<SigningKey>,
-    pub app_url: String,
-    pub tee_url: String,
+    pub frontend_url: String,
+    pub backend_url: String,
     pub twitter_builder: TwitterBuilder,
+    pub nft_address: String,
+    pub openai_api_key: String,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -119,7 +121,7 @@ pub async fn register_or_login<A: TeleportDB>(
     let frontend_nonce = query.frontend_nonce;
 
     let callback_url =
-        get_callback_url(shared_state.tee_url.clone(), address.clone(), frontend_nonce);
+        get_callback_url(shared_state.backend_url.clone(), address.clone(), frontend_nonce);
 
     let oauth_tokens = shared_state
         .twitter_builder
@@ -183,8 +185,10 @@ pub async fn callback<A: TeleportDB>(
 
     let encoded_x_info =
         serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-    let url_with_params =
-        format!("{}/create?sig={:?}&success=true&{}", shared_state.app_url, sig, encoded_x_info);
+    let url_with_params = format!(
+        "{}/create?sig={:?}&success=true&{}",
+        shared_state.frontend_url, sig, encoded_x_info
+    );
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
@@ -204,7 +208,7 @@ pub async fn mint(
 ) -> Result<Json<TxHashResponse>, StatusCode> {
     if let Some(referer) = headers.get("Referer") {
         let referer = referer.to_str().unwrap_or("");
-        if !referer.starts_with(&format!("https://{}/approve", shared_state.tee_url)) {
+        if !referer.starts_with(&format!("https://{}/approve", shared_state.backend_url)) {
             return Err(StatusCode::FORBIDDEN);
         }
     } else {
@@ -230,6 +234,7 @@ pub async fn mint(
         Address::from_str(&query.address).expect("Failed to parse user address"),
         user.x_id.expect("User x_id not set"),
         query.policy,
+        &shared_state.openai_api_key,
     )
     .await
     .expect("Failed to mint NFT");
@@ -255,17 +260,23 @@ pub async fn redeem<A: TeleportDB>(
         .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
     drop(db);
 
-    let tx_hash = redeem_nft(shared_state.provider, nft.token_id.clone(), query.content)
-        .await
-        .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
+    let tx_hash = redeem_nft(
+        shared_state.provider,
+        nft.token_id.clone(),
+        query.content,
+        &shared_state.nft_address,
+    )
+    .await
+    .unwrap_or_else(|_| panic!("Failed to redeem NFT with id {}", nft.token_id));
     Json(TxHashResponse { hash: tx_hash })
 }
 
 pub async fn check_redeem<A: TeleportDB>(
-    State(_): State<SharedState<A>>,
+    State(shared_state): State<SharedState<A>>,
     Json(query): Json<CheckRedeemQuery>,
 ) -> Json<CheckRedeemResponse> {
-    let safe = oai::is_tweet_safe(&query.content, &query.policy).await;
+    let safe =
+        oai::is_tweet_safe(&query.content, &query.policy, &shared_state.openai_api_key).await;
     Json(CheckRedeemResponse { safe })
 }
 

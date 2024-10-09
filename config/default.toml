@@ -1,5 +1,0 @@
-[tee]
-private_key_path = "/root/save/private_key.pem"
-certificate_path = "untrustedhost/certificate.pem"
-csr_save_path = "untrustedhost/request.csr"
-quote_path = "untrustedhost/quote.dat"

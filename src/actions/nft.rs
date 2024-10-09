@@ -34,9 +34,8 @@ struct TweetContent {
     media_url: Option<String>,
 }
 
-pub fn get_nft_address() -> eyre::Result<Address> {
-    let nft_address = std::env::var("NFT_ADDRESS")?;
-    Ok(Address::from_str(&nft_address)?)
+pub fn get_nft_address(nft_address: &str) -> eyre::Result<Address> {
+    Ok(Address::from_str(nft_address)?)
 }
 
 pub async fn subscribe_to_nft_events<A: TeleportDB>(
@@ -44,10 +43,12 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
     twitter_builder: TwitterBuilder,
     ws_rpc_url: String,
     database_url: String,
+    openai_api_key: String,
+    nft_address: String,
 ) -> eyre::Result<()> {
     let ws = WsConnect::new(ws_rpc_url);
     let provider = ProviderBuilder::new().on_ws(ws).await?;
-    let nft_address = get_nft_address()?;
+    let nft_address = get_nft_address(&nft_address)?;
 
     let filter = Filter::new().address(nft_address).from_block(BlockNumberOrTag::Latest);
 
@@ -63,9 +64,17 @@ pub async fn subscribe_to_nft_events<A: TeleportDB>(
             let db = db.clone();
             let twitter_builder = twitter_builder.clone();
             let client_db = client_db.clone();
+            let openai_api_key = openai_api_key.to_string(); // Clone once before the loop
             tokio::spawn(async move {
-                if let Err(e) =
-                    handle_event(db, client_db, twitter_builder, log.transaction_hash, event).await
+                if let Err(e) = handle_event(
+                    db,
+                    client_db,
+                    twitter_builder,
+                    log.transaction_hash,
+                    event,
+                    openai_api_key.clone(),
+                )
+                .await
                 {
                     log::error!("Error handling event: {:?}", e);
                 }
@@ -82,10 +91,13 @@ async fn handle_event<A: TeleportDB>(
     twitter_builder: TwitterBuilder,
     tx_hash: Option<FixedBytes<32>>,
     event: NFTEvents,
+    openai_api_key: String,
 ) -> eyre::Result<()> {
     match event {
         NFTEvents::RedeemTweet(redeem) => {
-            if let Err(e) = handle_redeem_tweet(db, client_db, twitter_builder, redeem).await {
+            if let Err(e) =
+                handle_redeem_tweet(db, client_db, twitter_builder, redeem, &openai_api_key).await
+            {
                 log::error!("Error handling RedeemTweet event: {:?}", e);
             }
         }
@@ -109,8 +121,9 @@ async fn handle_redeem_tweet<A: TeleportDB>(
     client_db: ClientDB,
     twitter_builder: TwitterBuilder,
     redeem: RedeemTweet,
+    openai_api_key: &str,
 ) -> eyre::Result<()> {
-    let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
+    let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy, openai_api_key).await;
     if safe {
         let db_lock = db.lock().await;
         let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).ok();
@@ -206,8 +219,9 @@ pub async fn mint_nft(
     recipient: Address,
     x_id: String,
     policy: String,
+    nft_address: &str,
 ) -> eyre::Result<String> {
-    let nft_address = get_nft_address()?;
+    let nft_address = get_nft_address(nft_address)?;
     let nft = NFT::new(nft_address, provider);
     let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
     let tx = mint.send().await?;
@@ -223,8 +237,9 @@ pub async fn redeem_nft(
     provider: WalletProvider,
     token_id: String,
     content: String,
+    nft_address: &str,
 ) -> eyre::Result<String> {
-    let nft_address = get_nft_address()?;
+    let nft_address = get_nft_address(nft_address)?;
     let nft = NFT::new(nft_address, provider);
     let token_id = Uint::from_str(&token_id)?;
     let redeem = nft.redeem(token_id, content, 0u8);
@@ -249,6 +264,7 @@ pub async fn redeem_nft(
 // }
 
 #[cfg(test)]
+// TODO: properly fix the test setup after fixing using env vars as global vars
 mod tests {
     use alloy::{
         network::EthereumWallet,
@@ -277,6 +293,14 @@ mod tests {
             .with_recommended_fillers()
             .wallet(wallet)
             .on_http(rpc_url.parse().unwrap());
-        mint_nft(provider, recipient_address, 1.to_string(), "policy".to_string()).await.unwrap();
+        mint_nft(
+            provider,
+            recipient_address,
+            1.to_string(),
+            "policy".to_string(),
+            "0x4200000000000000000000000000000000000006",
+        )
+        .await
+        .unwrap();
     }
 }

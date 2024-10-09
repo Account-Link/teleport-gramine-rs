@@ -9,13 +9,13 @@ use crate::{cert, sgx_attest};
 pub async fn setup_production_server(
     app: Router,
     private_key_path: &Path,
-    csr_path: &Path,
+    csr_save_path: &Path,
     quote_path: &Path,
-    tee_url: &str,
+    backend_url: &str,
     certificate_path: &Path,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let private_key = cert::load_or_create_private_key(private_key_path).await;
-    let csr = cert::create_and_save_csr(csr_path, tee_url, &private_key).await;
+    let csr = cert::create_and_save_csr(csr_save_path, backend_url, &private_key).await;
     sgx_attest::handle_sgx_attestation(quote_path, &private_key, &csr).await;
 
     log::info!("Waiting for certificate... Use `scripts/fetch-certs.py` to fetch the certificate");

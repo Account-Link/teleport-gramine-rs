@@ -103,7 +103,7 @@ async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
 
     // Define the route that handles the shared key
     let receive_app = axum::Router::new()
-	.route("/shared_key/:hex", axum::routing::post(_handle_shared_key))
+	.route("/shared_key", axum::routing::post(_handle_shared_key))
 	.with_state(shutdown_signal);
 
     // Set up the Rustls config

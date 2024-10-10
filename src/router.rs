@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use axum::Router;
 use tower_http::cors::CorsLayer;
 
@@ -9,7 +11,7 @@ use crate::{
     },
 };
 
-pub fn create_router(shared_state: SharedState<InMemoryDB>) -> Router {
+pub fn create_router(shared_state: Arc<SharedState<InMemoryDB>>) -> Router {
     Router::new()
         .route("/new", axum::routing::get(register_or_login))
         .route("/approve", axum::routing::get(approve_mint))

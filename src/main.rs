@@ -8,14 +8,14 @@ use config::{AppEnvironment, CONFIG};
 use endpoints::SharedState;
 use tokio::sync::Mutex;
 
-use crate::{nft_events::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
+use crate::{nft::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
 
 // Common modules
 mod actions;
 mod config;
 mod db;
 mod endpoints;
-mod nft_events;
+mod nft;
 mod oai;
 mod router;
 mod server_setup;

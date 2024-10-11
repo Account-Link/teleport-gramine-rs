@@ -21,7 +21,7 @@ use crate::{
     actions::wallet::WalletProvider,
     config::Config,
     db::{in_memory::InMemoryDB, PendingNFT, Session, TeleportDB},
-    nft_events::services::{mint_nft, redeem_nft},
+    nft::services::{mint_nft, redeem_nft},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
     twitter::{builder::TwitterBuilder, get_callback_url},

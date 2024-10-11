@@ -34,7 +34,7 @@ Error Handling and Safety
 
 - Embrace Rust's Result and Option types for error handling.
 - Use `?` operator to propagate errors in async functions.
-- Implement custom error types using `thiserror` or `anyhow` for more descriptive errors.
+- Implement custom error types using `thiserror` and `eyre` for more descriptive errors.
 - Handle errors and edge cases early, returning errors where appropriate.
 - Use `.await` responsibly, ensuring safe points for context switching.
 
@@ -64,7 +64,7 @@ Async Ecosystem
 - Use `tokio` for async runtime and task management.
 - Leverage `hyper` or `reqwest` for async HTTP requests.
 - Use `serde` for serialization/deserialization.
-- Use `sqlx` or `tokio-postgres` for async database interactions.
+- Use `sqlx` for async database interactions. If you decide to use `tokio-postgres`, use it properly with `deadpool-postgres`.
 - Utilize `tonic` for gRPC with async support.
 
 Git Commit Messages

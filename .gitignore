@@ -16,5 +16,4 @@ account.txt
 auth2fa.csv
 redeem.json
 user_infos.json
-save_dir/users/
-save_dir/oauths/
+save_dir/shared/users/*.user

@@ -10,6 +10,7 @@ use alloy::{
     transports::http::{Client, Http},
 };
 
+// TODO: This feels too much like copy pasted from the inferred type. Try to find a better type
 pub type WalletProvider = FillProvider<
     JoinFill<
         JoinFill<

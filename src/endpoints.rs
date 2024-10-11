@@ -18,12 +18,10 @@ use tokio::sync::Mutex;
 use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
-    actions::{
-        nft::{mint_nft, redeem_nft},
-        wallet::WalletProvider,
-    },
+    actions::wallet::WalletProvider,
     config::Config,
     db::{in_memory::InMemoryDB, PendingNFT, Session, TeleportDB},
+    nft_events::services::{mint_nft, redeem_nft},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
     twitter::{builder::TwitterBuilder, get_callback_url},
@@ -98,7 +96,7 @@ pub struct SharedState<A: TeleportDB> {
     pub db: Arc<Mutex<A>>,
     pub provider: WalletProvider,
     pub signer: LocalSigner<SigningKey>,
-    pub twitter_builder: TwitterBuilder,
+    pub twitter_builder: Arc<TwitterBuilder>,
     pub openai_client: Arc<oai::OpenAIClient>,
     pub config: Arc<Config>,
 }

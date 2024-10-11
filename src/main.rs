@@ -8,13 +8,14 @@ use config::{AppEnvironment, CONFIG};
 use endpoints::SharedState;
 use tokio::sync::Mutex;
 
-use crate::{actions::nft::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
+use crate::{nft_events::subscribe_to_nft_events, twitter::builder::TwitterBuilder};
 
 // Common modules
 mod actions;
 mod config;
 mod db;
 mod endpoints;
+mod nft_events;
 mod oai;
 mod router;
 mod server_setup;
@@ -28,11 +29,6 @@ mod sgx_attest;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
-
-    let twitter_builder = TwitterBuilder::new(
-        &CONFIG.secrets.twitter_consumer_key,
-        &CONFIG.secrets.twitter_consumer_secret,
-    );
 
     let ws_rpc_url = format!("{}{}", CONFIG.app.ws_rpc_url, CONFIG.secrets.rpc_key);
     let rpc_url = format!("{}{}", CONFIG.app.rpc_url, CONFIG.secrets.rpc_key);
@@ -52,6 +48,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let db = db::utils::load_or_create_db(&CONFIG.app.db_path).await;
     let db = Arc::new(Mutex::new(db));
     let openai_client = Arc::new(oai::OpenAIClient::new(&CONFIG.secrets.openai_api_key));
+    let twitter_builder = Arc::new(TwitterBuilder::new(
+        &CONFIG.secrets.twitter_consumer_key,
+        &CONFIG.secrets.twitter_consumer_secret,
+    ));
+
     let shared_state = Arc::new(SharedState {
         db: db.clone(),
         provider,

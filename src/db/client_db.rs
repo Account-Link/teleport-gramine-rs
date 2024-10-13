@@ -52,7 +52,9 @@ impl ClientDB {
         safeguard: String,
     ) -> eyre::Result<()> {
         let token_id_int: i32 = token_id.parse()?;
-        let id = cuid::cuid2();
+        // TODO: replace cuid with UUID as UUID has better support in PostgresDB. Most likely need
+        // to change the schema as well.
+        let id = cuid2::create_id();
 
         self.client().await?.execute(
             "INSERT INTO \"RedeemedIndex\" (\"id\", \"creatorUserId\", \"tokenId\", \"tweetId\", \"twitterUserName\", \"safeguard\", \"content\") VALUES ($1, $2, $3, $4, $5, $6, $7)",

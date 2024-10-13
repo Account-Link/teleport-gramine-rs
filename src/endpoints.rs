@@ -33,14 +33,14 @@ fn default_str() -> String {
     "none".to_string()
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct NewUserQuery {
     address: String,
     #[serde(default = "default_str")]
     frontend_nonce: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
@@ -48,14 +48,14 @@ pub struct CallbackQuery {
     frontend_nonce: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct MintQuery {
     address: String,
     policy: String,
     nft_id: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct TweetIdQuery {
     token_id: String,
 }
@@ -70,7 +70,7 @@ pub struct AttestationResponse {
     cert: String,
 }
 
-#[derive(Deserialize)]
+#[derive(Deserialize, Debug)]
 pub struct RedeemQuery {
     nft_id: String,
     content: String,
@@ -122,6 +122,7 @@ pub async fn register_or_login<A: TeleportDB>(
         shared_state.config.app.backend_url.clone(),
         address.clone(),
         frontend_nonce,
+        &shared_state.config.app.scheme,
     );
 
     let oauth_tokens = shared_state
@@ -146,17 +147,38 @@ pub async fn callback<A: TeleportDB>(
     Query(query): Query<CallbackQuery>,
     jar: CookieJar,
 ) -> (CookieJar, Redirect) {
+    log::info!("Entering callback function with query: {:?}", query);
+
     let oauth_token = query.oauth_token;
     let oauth_verifier = query.oauth_verifier;
     let address = query.address;
     let frontend_nonce = query.frontend_nonce;
 
     let mut db = shared_state.db.lock().await;
-    let mut oauth_user =
-        db.get_user_by_address(address.clone()).expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
+    log::debug!("Acquired database lock");
 
-    let token_pair = shared_state
+    let mut oauth_user = match db.get_user_by_address(address.clone()) {
+        Ok(user) => {
+            log::info!("Found user for address: {}", address);
+            user
+        }
+        Err(e) => {
+            log::error!("Failed to get oauth tokens for address {}: {:?}", address, e);
+            return (jar, Redirect::temporary("/error")); // Add an error redirect
+        }
+    };
+
+    if oauth_token != oauth_user.oauth_tokens.token {
+        log::error!(
+            "OAuth token mismatch. Expected: {}, Got: {}",
+            oauth_user.oauth_tokens.token,
+            oauth_token
+        );
+        return (jar, Redirect::temporary("/error"));
+    }
+
+    log::debug!("Authorizing token");
+    let token_pair = match shared_state
         .twitter_builder
         .authorize_token(
             oauth_user.oauth_tokens.token.clone(),
@@ -164,32 +186,73 @@ pub async fn callback<A: TeleportDB>(
             oauth_verifier,
         )
         .await
-        .unwrap();
+    {
+        Ok(pair) => pair,
+        Err(e) => {
+            log::error!("Failed to authorize token: {:?}", e);
+            return (jar, Redirect::temporary("/error"));
+        }
+    };
 
     let access_tokens = token_pair.clone().into();
     let twitter_client = shared_state.twitter_builder.with_auth(token_pair);
-    let x_info = twitter_client.get_user_info().await.expect("Failed to get user info");
 
-    let session_id = db
-        .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
-        .expect("Failed to add session to database");
+    log::debug!("Getting user info from Twitter");
+    let x_info = match twitter_client.get_user_info().await {
+        Ok(info) => info,
+        Err(e) => {
+            log::error!("Failed to get user info: {:?}", e);
+            return (jar, Redirect::temporary("/error"));
+        }
+    };
+
+    log::debug!("Adding session to database");
+    let session_id =
+        match db.add_session(Session { x_id: x_info.id.clone(), address: address.clone() }) {
+            Ok(id) => id,
+            Err(e) => {
+                log::error!("Failed to add session to database: {:?}", e);
+                return (jar, Redirect::temporary("/error"));
+            }
+        };
 
     if oauth_user.x_id.is_none() {
+        log::info!("Updating user information");
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens);
-        db.add_user(address, oauth_user.clone()).expect("Failed to add user to database");
-        drop(db);
+        if let Err(e) = db.add_user(address.clone(), oauth_user.clone()) {
+            log::error!("Failed to add user to database: {:?}", e);
+            return (jar, Redirect::temporary("/error"));
+        }
     }
 
-    let msg = format!("nonce={}&x_id={}", frontend_nonce, x_info.id);
-    let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
+    drop(db);
+    log::debug!("Released database lock");
 
-    let encoded_x_info =
-        serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
+    let msg = format!("nonce={}&x_id={}", frontend_nonce, x_info.id);
+    log::debug!("Signing message: {}", msg);
+    let sig = match shared_state.signer.sign_message(msg.as_bytes()).await {
+        Ok(s) => s,
+        Err(e) => {
+            log::error!("Failed to sign message: {:?}", e);
+            return (jar, Redirect::temporary("/error"));
+        }
+    };
+
+    let encoded_x_info = match serde_urlencoded::to_string(&x_info) {
+        Ok(encoded) => encoded,
+        Err(e) => {
+            log::error!("Failed to encode x_info as query params: {:?}", e);
+            return (jar, Redirect::temporary("/error"));
+        }
+    };
+
     let url_with_params = format!(
-        "{}/create?sig={:?}&success=true&{}",
-        shared_state.config.app.frontend_url, sig, encoded_x_info
+        "{}://{}/create?sig={:?}&success=true&{}",
+        shared_state.config.app.scheme, shared_state.config.app.frontend_url, sig, encoded_x_info
     );
+    log::info!("Redirecting to: {}", url_with_params);
+
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))

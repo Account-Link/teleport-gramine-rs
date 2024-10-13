@@ -6,6 +6,7 @@ use figment::{
 };
 use once_cell::sync::Lazy;
 use serde::Deserialize;
+use strum_macros::{Display, EnumString};
 
 #[derive(Debug, Deserialize)]
 pub struct Config {
@@ -32,6 +33,7 @@ pub struct AppConfig {
     pub frontend_url: String,
     pub db_path: String,
     pub nft_address: String,
+    pub scheme: Scheme,
 }
 
 #[derive(Debug, Deserialize)]
@@ -50,6 +52,14 @@ pub enum AppEnvironment {
     Development,
     Staging,
     Production,
+}
+
+#[derive(Debug, PartialEq, Deserialize, Display, EnumString)]
+#[serde(rename_all = "lowercase")]
+#[strum(serialize_all = "lowercase")]
+pub enum Scheme {
+    Http,
+    Https,
 }
 
 impl Config {

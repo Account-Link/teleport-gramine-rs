@@ -1,3 +1,5 @@
+use crate::config::Scheme;
+
 pub mod auth;
 pub mod builder;
 pub mod info;
@@ -9,10 +11,11 @@ pub fn get_callback_url(
     callback_base_url: String,
     address: String,
     frontend_nonce: String,
+    scheme: &Scheme,
 ) -> String {
     format!(
-        "https://{}/callback?address={}&frontend_nonce={}",
-        callback_base_url, address, frontend_nonce
+        "{}://{}/callback?address={}&frontend_nonce={}",
+        scheme, callback_base_url, address, frontend_nonce
     )
 }
 

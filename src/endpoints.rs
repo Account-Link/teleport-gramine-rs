@@ -6,10 +6,9 @@ use http::HeaderMap;
 use std::{str::FromStr, sync::Arc};
 
 use axum::{
-    extract::{Query, State, TypedHeader},
+    extract::{Query, State},
     http::StatusCode,
     response::{IntoResponse, Redirect},
-    headers::{UserAgent},
     Json,
 };
 use rustls::ClientConfig;
@@ -113,7 +112,7 @@ pub async fn cookietest<A: TeleportDB>(
 }
 
 pub async fn register_or_login<A: TeleportDB>(
-    TypedHeader(user_agent): TypedHeader<UserAgent>,
+    headers: HeaderMap,
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
@@ -137,7 +136,7 @@ pub async fn register_or_login<A: TeleportDB>(
     existing_user.oauth_tokens = oauth_tokens.clone().into();
     db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
 
-    let user_agent_str = user_agent.to_string();
+    let user_agent_str = headers.get("User-Agent").unwrap().to_str().unwrap();
     let is_mobile = user_agent_str.contains("Mobile")
         || user_agent_str.contains("Android")
         || user_agent_str.contains("iPhone")

@@ -6,9 +6,10 @@ use http::HeaderMap;
 use std::{str::FromStr, sync::Arc};
 
 use axum::{
-    extract::{Query, State},
+    extract::{Query, State, TypedHeader},
     http::StatusCode,
     response::{IntoResponse, Redirect},
+    headers::{UserAgent},
     Json,
 };
 use rustls::ClientConfig;
@@ -112,6 +113,7 @@ pub async fn cookietest<A: TeleportDB>(
 }
 
 pub async fn register_or_login<A: TeleportDB>(
+    TypedHeader(user_agent): TypedHeader<UserAgent>,
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
@@ -135,8 +137,18 @@ pub async fn register_or_login<A: TeleportDB>(
     existing_user.oauth_tokens = oauth_tokens.clone().into();
     db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
 
-    let url =
-        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
+    let user_agent_str = user_agent.to_string();
+    let is_mobile = user_agent_str.contains("Mobile")
+        || user_agent_str.contains("Android")
+        || user_agent_str.contains("iPhone")
+        || user_agent_str.contains("iPad")
+        || user_agent_str.contains("wv"); // 'wv' indicates a webview
+
+    let url = if is_mobile {
+        format!("twitter://oauth2/authorize?oauth_token={}", oauth_tokens.token)
+    } else {
+        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token)
+    };
 
     Redirect::temporary(&url)
 }

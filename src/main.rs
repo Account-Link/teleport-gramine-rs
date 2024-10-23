@@ -57,7 +57,7 @@ async fn main() {
 
     // Private API values
     let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
-    let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
+    //let mnemonic = std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");

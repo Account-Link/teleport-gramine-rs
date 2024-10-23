@@ -2,8 +2,8 @@ version: '3.9'
 
 services:
 
-  teleport:
-    image: bobu
+  ethglobal:
+    image: ethglobal
     build:
       context: ./
       dockerfile: Dockerfile

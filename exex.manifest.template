@@ -31,7 +31,7 @@ loader.uid = 65534
 loader.gid = 65534
 
 fs.mounts = [
-    { type = "encrypted", path = "/root/save/", uri = "file:save_dir/", key_name = "_sgx_mrenclave" },
+    { type = "encrypted", path = "/root/save/", uri = "file:save_dir/", key_name = "debug_sgx_mrenclave" },
     { path = "/teleport.env", uri = "file:teleport.env" },
     { path = "/lib", uri = "file:{{ gramine.runtimedir() }}" },
     { path = "{{ arch_libdir }}", uri = "file:{{ arch_libdir }}" },
@@ -40,7 +40,7 @@ fs.mounts = [
     { path = "/etc/ssl/certs/", uri = "file:/etc/ssl/certs/" },  # add this line
     { path = "/untrustedhost", uri = "file:untrustedhost/" },
 ]
-# fs.insecure__keys.debug_sgx_mrenclave = "ffeeddccbbaa99887766554433221100"
+fs.insecure__keys.debug_sgx_mrenclave = "ffeeddccbbaa99887766554433221100"
 
 sys.enable_extra_runtime_domain_names_conf = true
 

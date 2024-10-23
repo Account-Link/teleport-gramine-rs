@@ -1,8 +1,8 @@
 use std::{str::FromStr, sync::Arc};
-
+use rand::{Rng, rngs::OsRng};
 use alloy::{
     hex::ToHexExt,
-    primitives::{Address, FixedBytes, Uint},
+    primitives::{Address, FixedBytes, Uint, keccak256},
     providers::{Provider, ProviderBuilder, WsConnect},
     rpc::types::{BlockNumberOrTag, Filter},
     sol,
@@ -210,9 +210,12 @@ pub async fn mint_nft(
 ) -> eyre::Result<String> {
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
-    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy);
+    let random_bytes: [u8; 32] = OsRng.gen();
+    let mut random_bytes = [0u8; 32];
+    OsRng.fill(&mut random_bytes);
+    let nft_id = FixedBytes::<32>::from_slice(&random_bytes);
+    let mint = nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, "".to_string(), "".to_string(), "".to_string(), nft_id);
     let tx = mint.send().await?;
-
     let tx_hash = tx.tx_hash();
 
     log::info!("Minted NFT with tx hash: {}", tx_hash);

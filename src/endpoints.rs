@@ -137,11 +137,8 @@ pub async fn register_or_login<A: TeleportDB>(
     db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
 
     let user_agent_str = headers.get("User-Agent").unwrap().to_str().unwrap();
-    let is_mobile = user_agent_str.contains("Mobile")
-        || user_agent_str.contains("Android")
-        || user_agent_str.contains("iPhone")
-        || user_agent_str.contains("iPad")
-        || user_agent_str.contains("wv"); // 'wv' indicates a webview
+    //Redirect only works on Android with latest version of the X app
+    let is_mobile = user_agent_str.contains("Mobile") || user_agent_str.contains("Android");
 
     let url = if is_mobile {
         format!("twitter://oauth2/authorize?oauth_token={}", oauth_tokens.token)

@@ -6,7 +6,6 @@ log_level = "error"
 argv = [
     "target/release/teleport",
 ]
-entrypoint = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so"
 uid = 65534
 gid = 65534
 
@@ -37,11 +36,27 @@ passthrough = true
 [loader.env.DATABASE_URL]
 passthrough = true
 
+[loader.env.BOOTSTRAP]
+passthrough = true
+
+[loader.env.ONBOARD]
+passthrough = true
+
+[loader.entrypoint]
+uri = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so"
+sha256 = "8fb2d369e5d67d4d34100464e1b052d18a421860409f3aeef87a0ed9655a85ac"
+
 [[fs.mounts]]
 type = "encrypted"
-path = "/root/save/"
-uri = "file:save_dir/"
+path = "/root/save"
+uri = "file:save_dir/sealed"
 key_name = "_sgx_mrenclave"
+
+[[fs.mounts]]
+type = "encrypted"
+path = "/root/shared"
+uri = "file:save_dir/shared"
+key_name = "shared"
 
 [[fs.mounts]]
 path = "/teleport.env"
@@ -81,7 +96,7 @@ remote_attestation = "dcap"
 allowed_files = [
     "file:untrustedhost",
 ]
-max_threads = 32
+max_threads = 48
 isvprodid = 0
 isvsvn = 0
 enable_stats = false
@@ -2638,15 +2653,15 @@ sha256 = "54ef601588ffd6747497ebf2d8abc97329dcc89ffd995c7b6ef82cdae4b4dd0a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/direct/libpal.so"
-sha256 = "8edccb9883e04363034ea837d6aa7f38ebffde59c30508666cc8fdf8d23bf291"
+sha256 = "ea140cc8d9caad6ba736b892ddc580444a091a37063d3db501caea4541af8025"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/direct/loader"
-sha256 = "8edccb9883e04363034ea837d6aa7f38ebffde59c30508666cc8fdf8d23bf291"
+sha256 = "ea140cc8d9caad6ba736b892ddc580444a091a37063d3db501caea4541af8025"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-sha256 = "a9274eba09232700a62b8d604624024c9acea52cca4dc8350fa78ed6fb1e575a"
+sha256 = "8fb2d369e5d67d4d34100464e1b052d18a421860409f3aeef87a0ed9655a85ac"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/crt1.o"
@@ -2662,11 +2677,11 @@ sha256 = "df37c23206d280925216df48eb2d114b283fb28c116e952afe907250e0b89faa"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/ld-linux-x86-64.so.2"
-sha256 = "878d4bd8df7c99e46b5655f176862a1efe97f807256ab44a0f23c05cd2e316d9"
+sha256 = "c5abc02506c12caae024d2fc27af3a1da44934e7f4f8241350f7a476caba25f3"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/ld.so"
-sha256 = "878d4bd8df7c99e46b5655f176862a1efe97f807256ab44a0f23c05cd2e316d9"
+sha256 = "c5abc02506c12caae024d2fc27af3a1da44934e7f4f8241350f7a476caba25f3"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libanl.so"
@@ -2678,11 +2693,11 @@ sha256 = "857e6fac284a297b573489d34e4d6ab2380da96a9df89611cfa7e05a243cc11c"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libc.so"
-sha256 = "b0060a43c7754d56bb91807cd62f724d77883c1009c0d18830071ec2ea074785"
+sha256 = "e282928e943bbde9b4dbabff2d27b332c27a3762f1925d2dc703c17594397b80"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libc.so.6"
-sha256 = "b0060a43c7754d56bb91807cd62f724d77883c1009c0d18830071ec2ea074785"
+sha256 = "e282928e943bbde9b4dbabff2d27b332c27a3762f1925d2dc703c17594397b80"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so"
@@ -2694,47 +2709,47 @@ sha256 = "b9717d7c65be7e92f9353a2daae1dd89a417a7907398aefd024c77e94920e6c8"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libm.so"
-sha256 = "27abaefc5a51076014908e0ebc131a196577200210254614777bd8d1836f2b71"
+sha256 = "5713649f9c67811bc7a9bb33b6fc545b6b48ac3af023bdbd4a5ef73c38cad2aa"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libm.so.6"
-sha256 = "27abaefc5a51076014908e0ebc131a196577200210254614777bd8d1836f2b71"
+sha256 = "5713649f9c67811bc7a9bb33b6fc545b6b48ac3af023bdbd4a5ef73c38cad2aa"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.a"
-sha256 = "31d510cb178921a4c95ac7fc46aa03a34bed145cd6e04998e0c6bb5abad3d5bc"
+sha256 = "598d1f16c625011ea2e0c262865ec0c895c17fc8718615b0fa4d21998cae9233"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so.15"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so.16"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.a"
-sha256 = "65f0b15b8b6746eff2d6744d31002e920175c671b37556b2f63f8ff0649e58a8"
+sha256 = "350f641c4939e56c5ad69627bc7e2ad59bd1efb74a7006a25af6e56037e7fa42"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so.20"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so.21"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.a"
-sha256 = "8b7703995327a6bce30a64c801d47fe53e98c1c20f8888bfacc676c2b624eec6"
+sha256 = "00c1bc2f982f3fa7ed5b14d2c1fe4738097f9bb15dd714d01636de94ffbb116a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so.6"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so.7"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmvec.so"
@@ -2794,23 +2809,23 @@ sha256 = "2c6d8df993f8b2a55746d6809785e844d93f16f3d869f7947ae56e1ef964d04f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_attest.so"
-sha256 = "3a135e397013e5e24a06c705456046847ec332c725dceb520bd1d93f96c750a7"
+sha256 = "7b864fbaa987250fb5d33e9268e4d741c4909d8429f91d3f5ad8f274b92e56fc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_verify.a"
-sha256 = "5e86266c1d872fcf4ab338eb5d92873c75f5844676f5656df53885601d4c8ffd"
+sha256 = "422ecf91654513a40e2f6542fe216e08e972c1c803f2da99d4735367ef478a2b"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_verify_epid.so"
-sha256 = "025df48f36af5450f5808ab63f62c11afba8f4678b260a952b31a992315ef5ec"
+sha256 = "d0869607eb3fbff26e61efa07c2470a9d3bf90455c998aba498af4a4a27e4292"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libresolv.so"
-sha256 = "a8b4fd502b4999d574a836092f317e3e3ade777c2da885391789266253ea88b7"
+sha256 = "4500da5de30e2a280b9d64f9c4f4e4d6a8822a00f31d747335df538d8d2b4ad1"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libresolv.so.2"
-sha256 = "a8b4fd502b4999d574a836092f317e3e3ade777c2da885391789266253ea88b7"
+sha256 = "4500da5de30e2a280b9d64f9c4f4e4d6a8822a00f31d747335df538d8d2b4ad1"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/librt.so"
@@ -2822,23 +2837,23 @@ sha256 = "92b54ac171256f077fd2ca462cf1a9f56d5644556af09bf11d429dc42dbe59be"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_attest.so"
-sha256 = "14dd01113b69317643929d4d6474c465bc55c17f8319fdb59714d0540bb37913"
+sha256 = "ba35e227b9c05fcba8724e821e638ce07304caaf774657ae085c5c315d4f156f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_verify.a"
-sha256 = "73a39f6f4b6318d51d4cd722cef3e7506e4ddc86a60b36aee1f17a339c2270b2"
+sha256 = "2f65b772de1a0a8546ec6233cacd612a8b28a0028b77b7e151756d9653f960cf"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_verify_epid.so"
-sha256 = "0e0637c32ece95a53ea933721de7ec511992ae468bbaca4e08b522f5521b374c"
+sha256 = "ad762a6e942aad4535b7f1c2807852d9419873467828f7353ed809e7619f4da8"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libthread_db.so"
-sha256 = "1c0e738795610156e5ede4ae96ef21f437f4e8122520e65a03ffb75135ceca5a"
+sha256 = "98b4e5748274a5a15017dbeb0433a2ce0417612792a691d4b54f67b8a44606dc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libthread_db.so.1"
-sha256 = "1c0e738795610156e5ede4ae96ef21f437f4e8122520e65a03ffb75135ceca5a"
+sha256 = "98b4e5748274a5a15017dbeb0433a2ce0417612792a691d4b54f67b8a44606dc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/runtime/glibc/libutil.so"
@@ -2850,11 +2865,11 @@ sha256 = "3583ff82a675adb99acce899a18ec75508478103b436f28cf94a407d7d80e409"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/sgx/libpal.so"
-sha256 = "21971999dac6e1f4b2a334c602aafe8d2882d21705f908edf3f72647dd8362e1"
+sha256 = "262517e81bfc03d95a2f759e6b53ad0201bfed45e3cfecdffd172d52cc9e8f52"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/gramine/sgx/loader"
-sha256 = "ca42fb04902b5966d6a6570da10d54da48b6ddc36f49582bf03d964c911262b5"
+sha256 = "e018bc32831fce9f0d41f2f6b010a4182729048ba4d822f2adee883e83a637cc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/grcrt1.o"
@@ -4126,11 +4141,11 @@ sha256 = "1d6fe4ba2cd5c69908a5d8b30821964ee1d4fadb3f5563e6c3ce01e4c82b2390"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapparmor.so.1"
-sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
+sha256 = "38b0a49583fb87e09825e0d8b43c5a18eb7d51684a23a41b23c109d53cbe314b"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapparmor.so.1.8.2"
-sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
+sha256 = "38b0a49583fb87e09825e0d8b43c5a18eb7d51684a23a41b23c109d53cbe314b"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libappstream.so.0.15.2"
@@ -4142,11 +4157,11 @@ sha256 = "84e2cbe56d2849db023800066c032cb7de68f938bcd43ad772084578e9bb6cb1"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapr-1.so.0"
-sha256 = "89cc9b80eed594fa595aa13ac1047ea1998dbb68a2921154a7be2a032442f6e4"
+sha256 = "44793195003b31b8d3f6493eb3e4f61e8c827171ce8e84cd55fa6db0857bc9d0"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libapr-1.so.0.7.0"
-sha256 = "89cc9b80eed594fa595aa13ac1047ea1998dbb68a2921154a7be2a032442f6e4"
+sha256 = "44793195003b31b8d3f6493eb3e4f61e8c827171ce8e84cd55fa6db0857bc9d0"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libaprutil-1.so.0"
@@ -4657,6 +4672,10 @@ uri = "file:/usr/lib/x86_64-linux-gnu/libcares.so.2.5.1"
 sha256 = "1a7c8e926288be693425b64e0105eb8b069d8c8665483a132a1a35de067d932b"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/x86_64-linux-gnu/libcbor.a"
+sha256 = "e088297c64c68f3efd06012845aed59f1d75d70543585683cf3e19a275b322d1"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcbor.so.0.8"
 sha256 = "9a8f9884ac1aca7898b40c60a6cf5708139dffda6554ee88267c6cef84151a83"
 
@@ -4814,27 +4833,27 @@ sha256 = "121fd2908008174acc56cf7e140e85500e525622483a2a1f5ec41f5460ef2f8c"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcups.so.2"
-sha256 = "3394c265595e99047795aaa9a9fdcf42b123d73a5a7e96c633cd69686a44fc14"
+sha256 = "fa0c54a448840348d398d295b22f1c5d8dbceb09c8a4b1bd3453268cf02e6512"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.3"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.7.0"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurl.so.4"
-sha256 = "40794b2ad2271049f6ce0a33bc82ccf4532de55a2aef9bfca21f1dc50a518799"
+sha256 = "75a2bf806a39018e5bb7f0dc8636047850c08f75af90d51a78b957468ea59b86"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurl.so.4.7.0"
-sha256 = "40794b2ad2271049f6ce0a33bc82ccf4532de55a2aef9bfca21f1dc50a518799"
+sha256 = "75a2bf806a39018e5bb7f0dc8636047850c08f75af90d51a78b957468ea59b86"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libcurses.a"
@@ -5158,35 +5177,35 @@ sha256 = "447dfcfa8891070f4fd0d039578ed56fb57cf8e2b234831e9ad3beec82880a87"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpat.a"
-sha256 = "4a2b3751f43fba7b10612db1d4429c210d6a81c7a336823e9af9d992d475c847"
+sha256 = "ba4af48916ef27ba58f2d8e52b810bb8499562d6a624d49e2f0d3bb116973390"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpat.so"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpat.so.1"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpat.so.1.8.7"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpatw.a"
-sha256 = "3e1fd7719fd0397dd6284206c023211746b2f67d224bec9f276be91751ef29d7"
+sha256 = "b7ebcc63fb61ed31f06ecdc6eae11833eb94c3739870a80271d87256b846ff87"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpatw.so"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpatw.so.1"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexpatw.so.1.8.7"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libexslt.so.0"
@@ -6482,39 +6501,39 @@ sha256 = "2804f1ae9fd2ed9871788d674b02671caa089efccab2e5aa677a998f216f6e21"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedcrypto_gramine.a"
-sha256 = "31d510cb178921a4c95ac7fc46aa03a34bed145cd6e04998e0c6bb5abad3d5bc"
+sha256 = "598d1f16c625011ea2e0c262865ec0c895c17fc8718615b0fa4d21998cae9233"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so.15"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+uri = "file:/usr/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so.16"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedtls_gramine.a"
-sha256 = "65f0b15b8b6746eff2d6744d31002e920175c671b37556b2f63f8ff0649e58a8"
+sha256 = "350f641c4939e56c5ad69627bc7e2ad59bd1efb74a7006a25af6e56037e7fa42"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedtls_gramine.so"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/libmbedtls_gramine.so.20"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+uri = "file:/usr/lib/x86_64-linux-gnu/libmbedtls_gramine.so.21"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedx509_gramine.a"
-sha256 = "8b7703995327a6bce30a64c801d47fe53e98c1c20f8888bfacc676c2b624eec6"
+sha256 = "00c1bc2f982f3fa7ed5b14d2c1fe4738097f9bb15dd714d01636de94ffbb116a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbedx509_gramine.so"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/libmbedx509_gramine.so.6"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+uri = "file:/usr/lib/x86_64-linux-gnu/libmbedx509_gramine.so.7"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmbim-glib.so.4"
@@ -6598,11 +6617,11 @@ sha256 = "f53223a1267e5c36bf41f5fadeb4ffd10f5a6eda342aba544c2f0547fc98d0d5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmm-glib.so.0"
-sha256 = "e81f86e282f180c394a6898320bc54aecb75673a38d6a9f4fc2a0eeeefbeb080"
+sha256 = "7b3525ce98761adb08f1e865dd5eeaf534ae7dbf961964e669255a0bacbc263f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmm-glib.so.0.9.0"
-sha256 = "e81f86e282f180c394a6898320bc54aecb75673a38d6a9f4fc2a0eeeefbeb080"
+sha256 = "7b3525ce98761adb08f1e865dd5eeaf534ae7dbf961964e669255a0bacbc263f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libmms.so.0"
@@ -7038,19 +7057,19 @@ sha256 = "c39c76d29ee2b6ef63e81028aba576e255ef24ab41f496141727dc4bb4c14344"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libopenjp2.a"
-sha256 = "9d118b782c4ea364c34d4b49401a1c379b306f4d039c4573e604cd49e9236699"
+sha256 = "232a018921b64d1f314a809d5d3cb791295565ae146bb88abf3e3ff4f6d1566f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libopenjp2.so"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libopenjp2.so.2.4.0"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libopenjp2.so.7"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libopenjpip_server.a"
@@ -7186,11 +7205,11 @@ sha256 = "55f17cab50b69b608ccb3c377e2a61381175396028c8681d389ca4abe7212b14"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpcap.so.0.8"
-sha256 = "6b5b06f957140a3c736bd47c6f372f9c18e8282a500aa5d6a232252bbab76099"
+sha256 = "ebce8e76672d672abc462e6bc9affc12a05d29d55514fedc1e50ad7186ea6268"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpcap.so.1.10.1"
-sha256 = "6b5b06f957140a3c736bd47c6f372f9c18e8282a500aa5d6a232252bbab76099"
+sha256 = "ebce8e76672d672abc462e6bc9affc12a05d29d55514fedc1e50ad7186ea6268"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpci.so.3"
@@ -7502,19 +7521,19 @@ sha256 = "2eb708fd91b8bcfcfc38807fe6015abb4e37e5e11605a524b2dbd1abe10d07ec"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpq.a"
-sha256 = "202d0804a39e0d994771ea52d400381455513be5d69df99c9902a3d0ce422f46"
+sha256 = "d723ac851a8e127f4c30797d97100f469f0d7671816dab3f49bc783fc6d2f030"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpq.so"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpq.so.5"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/x86_64-linux-gnu/libpq.so.5.16"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+uri = "file:/usr/lib/x86_64-linux-gnu/libpq.so.5.17"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libprocps.so.8"
@@ -7574,19 +7593,19 @@ sha256 = "fdfd7d83a335ba12bd73e857f95a798dae0355f37935231966fd088647978e23"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpython3.10.a"
-sha256 = "bbffc7cc43ada2359b7090a9d74942c409961861720fcd47cb26e7bb5aedf4f2"
+sha256 = "46cb07cbba10ee28feb943358dac70dc9921fdddf3f01764d9d3fa87946bbdaa"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpython3.10.so"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpython3.10.so.1"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libpython3.10.so.1.0"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libqmi-glib.so.5"
@@ -7606,15 +7625,15 @@ sha256 = "1c3f8ec46dccfc4c99d3984ba787bd6d965e2c890089ff885448cb4efc5b1f14"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libra_tls_attest.so"
-sha256 = "3a135e397013e5e24a06c705456046847ec332c725dceb520bd1d93f96c750a7"
+sha256 = "7b864fbaa987250fb5d33e9268e4d741c4909d8429f91d3f5ad8f274b92e56fc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libra_tls_verify.a"
-sha256 = "5e86266c1d872fcf4ab338eb5d92873c75f5844676f5656df53885601d4c8ffd"
+sha256 = "422ecf91654513a40e2f6542fe216e08e972c1c803f2da99d4735367ef478a2b"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libra_tls_verify_epid.so"
-sha256 = "025df48f36af5450f5808ab63f62c11afba8f4678b260a952b31a992315ef5ec"
+sha256 = "d0869607eb3fbff26e61efa07c2470a9d3bf90455c998aba498af4a4a27e4292"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/librabbitmq.so.4"
@@ -7774,15 +7793,15 @@ sha256 = "596a51073e24172166c26ee459b2794c6506c20f4b5a0fbd806adb228dd3f2ae"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libsecret_prov_attest.so"
-sha256 = "14dd01113b69317643929d4d6474c465bc55c17f8319fdb59714d0540bb37913"
+sha256 = "ba35e227b9c05fcba8724e821e638ce07304caaf774657ae085c5c315d4f156f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libsecret_prov_verify.a"
-sha256 = "73a39f6f4b6318d51d4cd722cef3e7506e4ddc86a60b36aee1f17a339c2270b2"
+sha256 = "2f65b772de1a0a8546ec6233cacd612a8b28a0028b77b7e151756d9653f960cf"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libsecret_prov_verify_epid.so"
-sha256 = "0e0637c32ece95a53ea933721de7ec511992ae468bbaca4e08b522f5521b374c"
+sha256 = "ad762a6e942aad4535b7f1c2807852d9419873467828f7353ed809e7619f4da8"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libselinux.a"
@@ -7838,7 +7857,7 @@ sha256 = "cb6c0b0d51668d01953cb9742c5bf1d4767bdebdb3e432adc37794abc445dba5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libsgx_util.a"
-sha256 = "142a8fe1e438ff8d689891904708a8210d0e059afe8b3dd282af33e09924aa88"
+sha256 = "663895d5fb916b18b8afc3a8acebd12f007d865e35a878827ceeb4b0b580dadc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/libsigsegv.so.2"
@@ -13834,7 +13853,7 @@ sha256 = "d7a389bf7332026f59880157c162116280c4c7506e48a2f4c529886330aebd91"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/libpq.pc"
-sha256 = "86c5b75cf2d1ec085e561172edc01c85977b895867a8ed54eb080a6fcce67533"
+sha256 = "a6bf469db0ca103fe464c31de58ebbe2bb262cda8d3d24879f0ca2dd667f09da"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/librsvg-2.0.pc"
@@ -13890,7 +13909,7 @@ sha256 = "07b2deac43966bcde199684131d962bfb40301303f6a6b0eff96df0ffc005448"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/mbedtls_gramine.pc"
-sha256 = "729d892eb28db52374c180a031f34313cb6295fa20b1e2a8b469c4fb6115f87d"
+sha256 = "21d19b88d5d0890af4d4cdf8c61f7366b2003efe3f442f0dd975dca91fbf97e3"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/menu.pc"
@@ -13974,7 +13993,7 @@ sha256 = "d8e24143de5d56ff3ee549641a1dfa8816c2280998d0c4154d677f7aaa2d9bba"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/ra_tls_gramine.pc"
-sha256 = "7f2e3c0dfec3129276302a2f10ca5ca1d5c11c9cb13ed03de671879efa3cfd51"
+sha256 = "36ab04e3e228f007a110e2fc5299087f3ce81ae749fc65c5e82600a5c0520910"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/readline.pc"
@@ -13990,7 +14009,7 @@ sha256 = "319706f1b4797cd15ad03bd9c276cb79b2619be9d76f3635a908bf665be423ea"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/secret_prov_gramine.pc"
-sha256 = "b88bec3de8f655e0eb5590508d83d793df6d218b0cc9fe878a511b8dfedc2bf7"
+sha256 = "9bc7f3e4383f796fc81efb2265e8d71c1d81be07deaa619f614c5a5038313ef5"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/x86_64-linux-gnu/pkgconfig/sm.pc"
@@ -15502,7 +15521,7 @@ sha256 = "eddd24c66083d89b1e5bcd4bf3b1930751bf087b0f3e1bde59afd10923892576"
 
 [[sgx.trusted_files]]
 uri = "file:target/release/teleport"
-sha256 = "1ff3fe99fcf191e24fc128a58673ded69e9887be2a194f4bd307f5b0d4bd35c0"
+sha256 = "5a0a150d5683cc28b61ba631509aab6eadabfb8970050b9149932ed572ed3a74"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/ImageMagick-6.9.11/bin-q16/Magick-config"
@@ -18054,15 +18073,15 @@ sha256 = "54ef601588ffd6747497ebf2d8abc97329dcc89ffd995c7b6ef82cdae4b4dd0a"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/direct/libpal.so"
-sha256 = "8edccb9883e04363034ea837d6aa7f38ebffde59c30508666cc8fdf8d23bf291"
+sha256 = "ea140cc8d9caad6ba736b892ddc580444a091a37063d3db501caea4541af8025"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/direct/loader"
-sha256 = "8edccb9883e04363034ea837d6aa7f38ebffde59c30508666cc8fdf8d23bf291"
+sha256 = "ea140cc8d9caad6ba736b892ddc580444a091a37063d3db501caea4541af8025"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/libsysdb.so"
-sha256 = "a9274eba09232700a62b8d604624024c9acea52cca4dc8350fa78ed6fb1e575a"
+sha256 = "8fb2d369e5d67d4d34100464e1b052d18a421860409f3aeef87a0ed9655a85ac"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/crt1.o"
@@ -18078,11 +18097,11 @@ sha256 = "df37c23206d280925216df48eb2d114b283fb28c116e952afe907250e0b89faa"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/ld-linux-x86-64.so.2"
-sha256 = "878d4bd8df7c99e46b5655f176862a1efe97f807256ab44a0f23c05cd2e316d9"
+sha256 = "c5abc02506c12caae024d2fc27af3a1da44934e7f4f8241350f7a476caba25f3"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/ld.so"
-sha256 = "878d4bd8df7c99e46b5655f176862a1efe97f807256ab44a0f23c05cd2e316d9"
+sha256 = "c5abc02506c12caae024d2fc27af3a1da44934e7f4f8241350f7a476caba25f3"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libanl.so"
@@ -18094,11 +18113,11 @@ sha256 = "857e6fac284a297b573489d34e4d6ab2380da96a9df89611cfa7e05a243cc11c"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libc.so"
-sha256 = "b0060a43c7754d56bb91807cd62f724d77883c1009c0d18830071ec2ea074785"
+sha256 = "e282928e943bbde9b4dbabff2d27b332c27a3762f1925d2dc703c17594397b80"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libc.so.6"
-sha256 = "b0060a43c7754d56bb91807cd62f724d77883c1009c0d18830071ec2ea074785"
+sha256 = "e282928e943bbde9b4dbabff2d27b332c27a3762f1925d2dc703c17594397b80"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libdl.so"
@@ -18110,47 +18129,47 @@ sha256 = "b9717d7c65be7e92f9353a2daae1dd89a417a7907398aefd024c77e94920e6c8"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libm.so"
-sha256 = "27abaefc5a51076014908e0ebc131a196577200210254614777bd8d1836f2b71"
+sha256 = "5713649f9c67811bc7a9bb33b6fc545b6b48ac3af023bdbd4a5ef73c38cad2aa"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libm.so.6"
-sha256 = "27abaefc5a51076014908e0ebc131a196577200210254614777bd8d1836f2b71"
+sha256 = "5713649f9c67811bc7a9bb33b6fc545b6b48ac3af023bdbd4a5ef73c38cad2aa"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.a"
-sha256 = "31d510cb178921a4c95ac7fc46aa03a34bed145cd6e04998e0c6bb5abad3d5bc"
+sha256 = "598d1f16c625011ea2e0c262865ec0c895c17fc8718615b0fa4d21998cae9233"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so.15"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedcrypto_gramine.so.16"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.a"
-sha256 = "65f0b15b8b6746eff2d6744d31002e920175c671b37556b2f63f8ff0649e58a8"
+sha256 = "350f641c4939e56c5ad69627bc7e2ad59bd1efb74a7006a25af6e56037e7fa42"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so.20"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedtls_gramine.so.21"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.a"
-sha256 = "8b7703995327a6bce30a64c801d47fe53e98c1c20f8888bfacc676c2b624eec6"
+sha256 = "00c1bc2f982f3fa7ed5b14d2c1fe4738097f9bb15dd714d01636de94ffbb116a"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so.6"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmbedx509_gramine.so.7"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libmvec.so"
@@ -18210,23 +18229,23 @@ sha256 = "2c6d8df993f8b2a55746d6809785e844d93f16f3d869f7947ae56e1ef964d04f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_attest.so"
-sha256 = "3a135e397013e5e24a06c705456046847ec332c725dceb520bd1d93f96c750a7"
+sha256 = "7b864fbaa987250fb5d33e9268e4d741c4909d8429f91d3f5ad8f274b92e56fc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_verify.a"
-sha256 = "5e86266c1d872fcf4ab338eb5d92873c75f5844676f5656df53885601d4c8ffd"
+sha256 = "422ecf91654513a40e2f6542fe216e08e972c1c803f2da99d4735367ef478a2b"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libra_tls_verify_epid.so"
-sha256 = "025df48f36af5450f5808ab63f62c11afba8f4678b260a952b31a992315ef5ec"
+sha256 = "d0869607eb3fbff26e61efa07c2470a9d3bf90455c998aba498af4a4a27e4292"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libresolv.so"
-sha256 = "a8b4fd502b4999d574a836092f317e3e3ade777c2da885391789266253ea88b7"
+sha256 = "4500da5de30e2a280b9d64f9c4f4e4d6a8822a00f31d747335df538d8d2b4ad1"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libresolv.so.2"
-sha256 = "a8b4fd502b4999d574a836092f317e3e3ade777c2da885391789266253ea88b7"
+sha256 = "4500da5de30e2a280b9d64f9c4f4e4d6a8822a00f31d747335df538d8d2b4ad1"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/librt.so"
@@ -18238,23 +18257,23 @@ sha256 = "92b54ac171256f077fd2ca462cf1a9f56d5644556af09bf11d429dc42dbe59be"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_attest.so"
-sha256 = "14dd01113b69317643929d4d6474c465bc55c17f8319fdb59714d0540bb37913"
+sha256 = "ba35e227b9c05fcba8724e821e638ce07304caaf774657ae085c5c315d4f156f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_verify.a"
-sha256 = "73a39f6f4b6318d51d4cd722cef3e7506e4ddc86a60b36aee1f17a339c2270b2"
+sha256 = "2f65b772de1a0a8546ec6233cacd612a8b28a0028b77b7e151756d9653f960cf"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libsecret_prov_verify_epid.so"
-sha256 = "0e0637c32ece95a53ea933721de7ec511992ae468bbaca4e08b522f5521b374c"
+sha256 = "ad762a6e942aad4535b7f1c2807852d9419873467828f7353ed809e7619f4da8"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libthread_db.so"
-sha256 = "1c0e738795610156e5ede4ae96ef21f437f4e8122520e65a03ffb75135ceca5a"
+sha256 = "98b4e5748274a5a15017dbeb0433a2ce0417612792a691d4b54f67b8a44606dc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libthread_db.so.1"
-sha256 = "1c0e738795610156e5ede4ae96ef21f437f4e8122520e65a03ffb75135ceca5a"
+sha256 = "98b4e5748274a5a15017dbeb0433a2ce0417612792a691d4b54f67b8a44606dc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/runtime/glibc/libutil.so"
@@ -18266,11 +18285,11 @@ sha256 = "3583ff82a675adb99acce899a18ec75508478103b436f28cf94a407d7d80e409"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/sgx/libpal.so"
-sha256 = "21971999dac6e1f4b2a334c602aafe8d2882d21705f908edf3f72647dd8362e1"
+sha256 = "262517e81bfc03d95a2f759e6b53ad0201bfed45e3cfecdffd172d52cc9e8f52"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/gramine/sgx/loader"
-sha256 = "ca42fb04902b5966d6a6570da10d54da48b6ddc36f49582bf03d964c911262b5"
+sha256 = "e018bc32831fce9f0d41f2f6b010a4182729048ba4d822f2adee883e83a637cc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/grcrt1.o"
@@ -19542,11 +19561,11 @@ sha256 = "1d6fe4ba2cd5c69908a5d8b30821964ee1d4fadb3f5563e6c3ce01e4c82b2390"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapparmor.so.1"
-sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
+sha256 = "38b0a49583fb87e09825e0d8b43c5a18eb7d51684a23a41b23c109d53cbe314b"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapparmor.so.1.8.2"
-sha256 = "a2907e43b49b031eacfa5c3b895bc0bed3a9c59c52ab2645062762192a913880"
+sha256 = "38b0a49583fb87e09825e0d8b43c5a18eb7d51684a23a41b23c109d53cbe314b"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libappstream.so.0.15.2"
@@ -19558,11 +19577,11 @@ sha256 = "84e2cbe56d2849db023800066c032cb7de68f938bcd43ad772084578e9bb6cb1"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapr-1.so.0"
-sha256 = "89cc9b80eed594fa595aa13ac1047ea1998dbb68a2921154a7be2a032442f6e4"
+sha256 = "44793195003b31b8d3f6493eb3e4f61e8c827171ce8e84cd55fa6db0857bc9d0"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libapr-1.so.0.7.0"
-sha256 = "89cc9b80eed594fa595aa13ac1047ea1998dbb68a2921154a7be2a032442f6e4"
+sha256 = "44793195003b31b8d3f6493eb3e4f61e8c827171ce8e84cd55fa6db0857bc9d0"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libaprutil-1.so.0"
@@ -20073,6 +20092,10 @@ uri = "file:/lib/x86_64-linux-gnu/libcares.so.2.5.1"
 sha256 = "1a7c8e926288be693425b64e0105eb8b069d8c8665483a132a1a35de067d932b"
 
 [[sgx.trusted_files]]
+uri = "file:/lib/x86_64-linux-gnu/libcbor.a"
+sha256 = "e088297c64c68f3efd06012845aed59f1d75d70543585683cf3e19a275b322d1"
+
+[[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcbor.so.0.8"
 sha256 = "9a8f9884ac1aca7898b40c60a6cf5708139dffda6554ee88267c6cef84151a83"
 
@@ -20230,27 +20253,27 @@ sha256 = "121fd2908008174acc56cf7e140e85500e525622483a2a1f5ec41f5460ef2f8c"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcups.so.2"
-sha256 = "3394c265595e99047795aaa9a9fdcf42b123d73a5a7e96c633cd69686a44fc14"
+sha256 = "fa0c54a448840348d398d295b22f1c5d8dbceb09c8a4b1bd3453268cf02e6512"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurl-gnutls.so.3"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurl-gnutls.so.4"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurl-gnutls.so.4.7.0"
-sha256 = "034acfdaf05b589aa0dec7072c7e1bf081da6a15178c33896c6e8bd6a4166fc4"
+sha256 = "e133a29c0972cdfe4588102641be3b6d4ec92ca734b558866c815b77ef897ffc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurl.so.4"
-sha256 = "40794b2ad2271049f6ce0a33bc82ccf4532de55a2aef9bfca21f1dc50a518799"
+sha256 = "75a2bf806a39018e5bb7f0dc8636047850c08f75af90d51a78b957468ea59b86"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurl.so.4.7.0"
-sha256 = "40794b2ad2271049f6ce0a33bc82ccf4532de55a2aef9bfca21f1dc50a518799"
+sha256 = "75a2bf806a39018e5bb7f0dc8636047850c08f75af90d51a78b957468ea59b86"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libcurses.a"
@@ -20574,35 +20597,35 @@ sha256 = "447dfcfa8891070f4fd0d039578ed56fb57cf8e2b234831e9ad3beec82880a87"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpat.a"
-sha256 = "4a2b3751f43fba7b10612db1d4429c210d6a81c7a336823e9af9d992d475c847"
+sha256 = "ba4af48916ef27ba58f2d8e52b810bb8499562d6a624d49e2f0d3bb116973390"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpat.so"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpat.so.1"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpat.so.1.8.7"
-sha256 = "61635c7c58fe0cdae1abfdd67e6ef1f54d5d162c3a5e45465bede64ef3858e1f"
+sha256 = "5a9bfa7f02613a439b574933a65b28ba5e249c2c1c2349bbbc945edc0021862d"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpatw.a"
-sha256 = "3e1fd7719fd0397dd6284206c023211746b2f67d224bec9f276be91751ef29d7"
+sha256 = "b7ebcc63fb61ed31f06ecdc6eae11833eb94c3739870a80271d87256b846ff87"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpatw.so"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpatw.so.1"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexpatw.so.1.8.7"
-sha256 = "9426a4839f51cd9ba9816c05401054f1ff5e7c7641b2bbf0ade6ec4cb46c085b"
+sha256 = "ee534f887e1d936a5a0f8e0a774188ffdf31c6447cb36d588996a83730f44802"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libexslt.so.0"
@@ -21898,39 +21921,39 @@ sha256 = "2804f1ae9fd2ed9871788d674b02671caa089efccab2e5aa677a998f216f6e21"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedcrypto_gramine.a"
-sha256 = "31d510cb178921a4c95ac7fc46aa03a34bed145cd6e04998e0c6bb5abad3d5bc"
+sha256 = "598d1f16c625011ea2e0c262865ec0c895c17fc8718615b0fa4d21998cae9233"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so.15"
-sha256 = "ab5121fe816d488acb2cd562687785b6108bf381d663c3ccda09ad1128376a53"
+uri = "file:/lib/x86_64-linux-gnu/libmbedcrypto_gramine.so.16"
+sha256 = "752698bbeec2242538cab4722e503af6adc877338338493eb3bbf3992475de96"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedtls_gramine.a"
-sha256 = "65f0b15b8b6746eff2d6744d31002e920175c671b37556b2f63f8ff0649e58a8"
+sha256 = "350f641c4939e56c5ad69627bc7e2ad59bd1efb74a7006a25af6e56037e7fa42"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedtls_gramine.so"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/libmbedtls_gramine.so.20"
-sha256 = "4117f196176c05097ac3091c81ef64b44e5c01ec494c5ce88713ec4c94c459b8"
+uri = "file:/lib/x86_64-linux-gnu/libmbedtls_gramine.so.21"
+sha256 = "00aa2b10123dbc05d955448c404a0f013cfc9de06fb02751048c4b6cf32af290"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedx509_gramine.a"
-sha256 = "8b7703995327a6bce30a64c801d47fe53e98c1c20f8888bfacc676c2b624eec6"
+sha256 = "00c1bc2f982f3fa7ed5b14d2c1fe4738097f9bb15dd714d01636de94ffbb116a"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbedx509_gramine.so"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/libmbedx509_gramine.so.6"
-sha256 = "edd891d4fa3ea03e941877b52476e2570cf010eda81ca5f3b5e283205e39aeee"
+uri = "file:/lib/x86_64-linux-gnu/libmbedx509_gramine.so.7"
+sha256 = "c2c15bc12b8d14783555dafcb8bd7b2f2cedef96bbccf657c92cf6abbc9ca9c9"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmbim-glib.so.4"
@@ -22014,11 +22037,11 @@ sha256 = "f53223a1267e5c36bf41f5fadeb4ffd10f5a6eda342aba544c2f0547fc98d0d5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmm-glib.so.0"
-sha256 = "e81f86e282f180c394a6898320bc54aecb75673a38d6a9f4fc2a0eeeefbeb080"
+sha256 = "7b3525ce98761adb08f1e865dd5eeaf534ae7dbf961964e669255a0bacbc263f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmm-glib.so.0.9.0"
-sha256 = "e81f86e282f180c394a6898320bc54aecb75673a38d6a9f4fc2a0eeeefbeb080"
+sha256 = "7b3525ce98761adb08f1e865dd5eeaf534ae7dbf961964e669255a0bacbc263f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libmms.so.0"
@@ -22454,19 +22477,19 @@ sha256 = "c39c76d29ee2b6ef63e81028aba576e255ef24ab41f496141727dc4bb4c14344"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libopenjp2.a"
-sha256 = "9d118b782c4ea364c34d4b49401a1c379b306f4d039c4573e604cd49e9236699"
+sha256 = "232a018921b64d1f314a809d5d3cb791295565ae146bb88abf3e3ff4f6d1566f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libopenjp2.so"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libopenjp2.so.2.4.0"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libopenjp2.so.7"
-sha256 = "2ca9ae0bd8df790b6bb840ca6ad7cd67fdf935b63c53e23aa4ea42546247d505"
+sha256 = "f4978d2700c6b981cae0558e3276b4eca142e2e771fba4df9beb5d2ce3fa08c5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libopenjpip_server.a"
@@ -22602,11 +22625,11 @@ sha256 = "55f17cab50b69b608ccb3c377e2a61381175396028c8681d389ca4abe7212b14"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpcap.so.0.8"
-sha256 = "6b5b06f957140a3c736bd47c6f372f9c18e8282a500aa5d6a232252bbab76099"
+sha256 = "ebce8e76672d672abc462e6bc9affc12a05d29d55514fedc1e50ad7186ea6268"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpcap.so.1.10.1"
-sha256 = "6b5b06f957140a3c736bd47c6f372f9c18e8282a500aa5d6a232252bbab76099"
+sha256 = "ebce8e76672d672abc462e6bc9affc12a05d29d55514fedc1e50ad7186ea6268"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpci.so.3"
@@ -22918,19 +22941,19 @@ sha256 = "2eb708fd91b8bcfcfc38807fe6015abb4e37e5e11605a524b2dbd1abe10d07ec"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpq.a"
-sha256 = "202d0804a39e0d994771ea52d400381455513be5d69df99c9902a3d0ce422f46"
+sha256 = "d723ac851a8e127f4c30797d97100f469f0d7671816dab3f49bc783fc6d2f030"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpq.so"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpq.so.5"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
-uri = "file:/lib/x86_64-linux-gnu/libpq.so.5.16"
-sha256 = "02a57b2cc7d71c1fa42faf5f8595b49ecf0e21d3942c7aa94e1e3e923fe8afad"
+uri = "file:/lib/x86_64-linux-gnu/libpq.so.5.17"
+sha256 = "50be47e5a689c3af8ded93e04c6eb1e80fb050ad30debc7c85e23487839e3e5a"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libprocps.so.8"
@@ -22990,19 +23013,19 @@ sha256 = "fdfd7d83a335ba12bd73e857f95a798dae0355f37935231966fd088647978e23"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpython3.10.a"
-sha256 = "bbffc7cc43ada2359b7090a9d74942c409961861720fcd47cb26e7bb5aedf4f2"
+sha256 = "46cb07cbba10ee28feb943358dac70dc9921fdddf3f01764d9d3fa87946bbdaa"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpython3.10.so"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpython3.10.so.1"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libpython3.10.so.1.0"
-sha256 = "90dbac5c2df831d486b8af7a32fffd0b424fe8cdb869d94b7e3b4781f87aa691"
+sha256 = "961ae7c95f982e4307cce6a4bfd6a61ca5100124e157daf90dcdb1f12a0a3ff4"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libqmi-glib.so.5"
@@ -23022,15 +23045,15 @@ sha256 = "1c3f8ec46dccfc4c99d3984ba787bd6d965e2c890089ff885448cb4efc5b1f14"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libra_tls_attest.so"
-sha256 = "3a135e397013e5e24a06c705456046847ec332c725dceb520bd1d93f96c750a7"
+sha256 = "7b864fbaa987250fb5d33e9268e4d741c4909d8429f91d3f5ad8f274b92e56fc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libra_tls_verify.a"
-sha256 = "5e86266c1d872fcf4ab338eb5d92873c75f5844676f5656df53885601d4c8ffd"
+sha256 = "422ecf91654513a40e2f6542fe216e08e972c1c803f2da99d4735367ef478a2b"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libra_tls_verify_epid.so"
-sha256 = "025df48f36af5450f5808ab63f62c11afba8f4678b260a952b31a992315ef5ec"
+sha256 = "d0869607eb3fbff26e61efa07c2470a9d3bf90455c998aba498af4a4a27e4292"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/librabbitmq.so.4"
@@ -23190,15 +23213,15 @@ sha256 = "596a51073e24172166c26ee459b2794c6506c20f4b5a0fbd806adb228dd3f2ae"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libsecret_prov_attest.so"
-sha256 = "14dd01113b69317643929d4d6474c465bc55c17f8319fdb59714d0540bb37913"
+sha256 = "ba35e227b9c05fcba8724e821e638ce07304caaf774657ae085c5c315d4f156f"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libsecret_prov_verify.a"
-sha256 = "73a39f6f4b6318d51d4cd722cef3e7506e4ddc86a60b36aee1f17a339c2270b2"
+sha256 = "2f65b772de1a0a8546ec6233cacd612a8b28a0028b77b7e151756d9653f960cf"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libsecret_prov_verify_epid.so"
-sha256 = "0e0637c32ece95a53ea933721de7ec511992ae468bbaca4e08b522f5521b374c"
+sha256 = "ad762a6e942aad4535b7f1c2807852d9419873467828f7353ed809e7619f4da8"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libselinux.a"
@@ -23254,7 +23277,7 @@ sha256 = "cb6c0b0d51668d01953cb9742c5bf1d4767bdebdb3e432adc37794abc445dba5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libsgx_util.a"
-sha256 = "142a8fe1e438ff8d689891904708a8210d0e059afe8b3dd282af33e09924aa88"
+sha256 = "663895d5fb916b18b8afc3a8acebd12f007d865e35a878827ceeb4b0b580dadc"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/libsigsegv.so.2"
@@ -29250,7 +29273,7 @@ sha256 = "d7a389bf7332026f59880157c162116280c4c7506e48a2f4c529886330aebd91"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/libpq.pc"
-sha256 = "86c5b75cf2d1ec085e561172edc01c85977b895867a8ed54eb080a6fcce67533"
+sha256 = "a6bf469db0ca103fe464c31de58ebbe2bb262cda8d3d24879f0ca2dd667f09da"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/librsvg-2.0.pc"
@@ -29306,7 +29329,7 @@ sha256 = "07b2deac43966bcde199684131d962bfb40301303f6a6b0eff96df0ffc005448"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/mbedtls_gramine.pc"
-sha256 = "729d892eb28db52374c180a031f34313cb6295fa20b1e2a8b469c4fb6115f87d"
+sha256 = "21d19b88d5d0890af4d4cdf8c61f7366b2003efe3f442f0dd975dca91fbf97e3"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/menu.pc"
@@ -29390,7 +29413,7 @@ sha256 = "d8e24143de5d56ff3ee549641a1dfa8816c2280998d0c4154d677f7aaa2d9bba"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/ra_tls_gramine.pc"
-sha256 = "7f2e3c0dfec3129276302a2f10ca5ca1d5c11c9cb13ed03de671879efa3cfd51"
+sha256 = "36ab04e3e228f007a110e2fc5299087f3ce81ae749fc65c5e82600a5c0520910"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/readline.pc"
@@ -29406,7 +29429,7 @@ sha256 = "319706f1b4797cd15ad03bd9c276cb79b2619be9d76f3635a908bf665be423ea"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/secret_prov_gramine.pc"
-sha256 = "b88bec3de8f655e0eb5590508d83d793df6d218b0cc9fe878a511b8dfedc2bf7"
+sha256 = "9bc7f3e4383f796fc81efb2265e8d71c1d81be07deaa619f614c5a5038313ef5"
 
 [[sgx.trusted_files]]
 uri = "file:/lib/x86_64-linux-gnu/pkgconfig/sm.pc"
@@ -30918,11 +30941,15 @@ sha256 = "eddd24c66083d89b1e5bcd4bf3b1930751bf087b0f3e1bde59afd10923892576"
 
 [[sgx.trusted_files]]
 uri = "file:teleport.env"
-sha256 = "582680885b86e2a986e79662c7e38c08c1bd345bdc88dd2069f3440b0f86ef58"
+sha256 = "76c0b917acb36ef5c135ebb3dc79e1ce52968cee7bff83a6c531f2b3fc72cf74"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/002c0b4f.0"
 sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/0179095f.0"
+sha256 = "08e1a8115accf7ce400a3f98fc31dbab522a3ed3644ca48389b4899e2d794f1a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/02265526.0"
@@ -30989,6 +31016,10 @@ uri = "file:/usr/lib/ssl/certs/18856ac4.0"
 sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/1cef98f5.0"
+sha256 = "fc9662ebcadeb2c0a804bdb6503d0c23976c638cf73ff95ffafd33ead680e73d"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/1d3472b9.0"
 sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
 
@@ -30999,6 +31030,10 @@ sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/1e09d511.0"
 sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/228f89db.0"
+sha256 = "a5e66a87e60e17b9aac2d825c9b898ce4bb635dd6e8a137c0dd2ca761b6165ce"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/244b5494.0"
@@ -31026,15 +31061,11 @@ sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/3bde41ac.0"
-sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/3bde41ac.1"
 sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/3e45d192.0"
-sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+uri = "file:/usr/lib/ssl/certs/3e359ba6.0"
+sha256 = "6c58125f88a4ff83d40e6b58c5532ea905be4daf1ec7da7f4542af3d34855340"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/3fb36b73.0"
@@ -31073,8 +31104,8 @@ uri = "file:/usr/lib/ssl/certs/4f316efb.0"
 sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/5273a94c.0"
-sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+uri = "file:/usr/lib/ssl/certs/4fd49c6c.0"
+sha256 = "fed2654034ede8dc7677c5e06d4b583bcb0ae352f03cd16111d34c854bbffbbc"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/5443e9e3.0"
@@ -31095,10 +31126,6 @@ sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/5931b5bc.0"
 sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/5a7722fb.0"
-sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/5ad8a5d6.0"
@@ -31131,10 +31158,6 @@ sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/653b494a.0"
 sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/66445960.0"
-sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/68dd7389.0"
@@ -31193,8 +31216,20 @@ uri = "file:/usr/lib/ssl/certs/8160b96c.0"
 sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/81f2d2b1.0"
+sha256 = "80eda3bc1316bbb2c18df887c7a30a40ace97146471337e06bfdd46337a688c3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/8312c4c1.0"
+sha256 = "ee459c64139faa1fb8d90a9195022aaca51808c62bb374afa2a26b50875346b1"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/8508e720.0"
 sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/865fbdf9.0"
+sha256 = "cf03adad817ae999648c5182ac996fc0682aeda4329c783756aa1c5c3d92eff9"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/8cb5ee0f.0"
@@ -31213,6 +31248,10 @@ uri = "file:/usr/lib/ssl/certs/8f103249.0"
 sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9046744a.0"
+sha256 = "7eaaf8c5047d5dbb4f3d7f173318ee936b09da4f0ceb5f3beb45c277480836eb"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/90c5a3c8.0"
 sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
 
@@ -31223,10 +31262,6 @@ sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/93bc0acc.0"
 sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/93fee43a.0"
-sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/9482e63a.0"
@@ -31241,8 +31276,16 @@ uri = "file:/usr/lib/ssl/certs/988a38cb.0"
 sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9b46e03d.0"
+sha256 = "980dc408dd2def2d7930bec10c48e256d115f636c403b631ffb93558dacf5571"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/9b5697b0.0"
 sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/9bf03295.0"
+sha256 = "d729fda98d8a3bf0d657b93fe0f70e22437359ef0de4ac5b4abcf3ef3667613a"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/9c8dfbd4.0"
@@ -31317,12 +31360,24 @@ uri = "file:/usr/lib/ssl/certs/Atos_TrustedRoot_2011.pem"
 sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
-sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+uri = "file:/usr/lib/ssl/certs/Atos_TrustedRoot_Root_CA_ECC_TLS_2021.pem"
+sha256 = "970d70366b2f8c29ac71c8f71689ddd8fd321208a5ededbb2d784af33799a0f6"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068_2.pem"
+uri = "file:/usr/lib/ssl/certs/Atos_TrustedRoot_Root_CA_RSA_TLS_2021.pem"
+sha256 = "980dc408dd2def2d7930bec10c48e256d115f636c403b631ffb93558dacf5571"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
 sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/BJCA_Global_Root_CA1.pem"
+sha256 = "08e1a8115accf7ce400a3f98fc31dbab522a3ed3644ca48389b4899e2d794f1a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/BJCA_Global_Root_CA2.pem"
+sha256 = "6c58125f88a4ff83d40e6b58c5532ea905be4daf1ec7da7f4542af3d34855340"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/Baltimore_CyberTrust_Root.pem"
@@ -31389,6 +31444,22 @@ uri = "file:/usr/lib/ssl/certs/Certum_Trusted_Root_CA.pem"
 sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CommScope_Public_Trust_ECC_Root-01.pem"
+sha256 = "a5e66a87e60e17b9aac2d825c9b898ce4bb635dd6e8a137c0dd2ca761b6165ce"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CommScope_Public_Trust_ECC_Root-02.pem"
+sha256 = "80eda3bc1316bbb2c18df887c7a30a40ace97146471337e06bfdd46337a688c3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CommScope_Public_Trust_RSA_Root-01.pem"
+sha256 = "ee459c64139faa1fb8d90a9195022aaca51808c62bb374afa2a26b50875346b1"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/CommScope_Public_Trust_RSA_Root-02.pem"
+sha256 = "fed2654034ede8dc7677c5e06d4b583bcb0ae352f03cd16111d34c854bbffbbc"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/Comodo_AAA_Services_root.pem"
 sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
 
@@ -31447,18 +31518,6 @@ sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/DigiCert_Trusted_Root_G4.pem"
 sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/E-Tugra_Certification_Authority.pem"
-sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/E-Tugra_Global_Root_CA_ECC_v3.pem"
-sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
-
-[[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/E-Tugra_Global_Root_CA_RSA_v3.pem"
-sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/Entrust.net_Premium_2048_Secure_Server_CA.pem"
@@ -31561,10 +31620,6 @@ uri = "file:/usr/lib/ssl/certs/HiPKI_Root_CA_-_G1.pem"
 sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
 
 [[sgx.trusted_files]]
-uri = "file:/usr/lib/ssl/certs/Hongkong_Post_Root_CA_1.pem"
-sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
-
-[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/Hongkong_Post_Root_CA_3.pem"
 sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
 
@@ -31653,8 +31708,24 @@ uri = "file:/usr/lib/ssl/certs/SSL.com_Root_Certification_Authority_RSA.pem"
 sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_TLS_ECC_Root_CA_2022.pem"
+sha256 = "cf03adad817ae999648c5182ac996fc0682aeda4329c783756aa1c5c3d92eff9"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/SSL.com_TLS_RSA_Root_CA_2022.pem"
+sha256 = "e1c93696d4de9125e49f6a12b97a1cbcf8ce7331bc8268f1fe7b6ab447cc14cf"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/SZAFIR_ROOT_CA2.pem"
 sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Sectigo_Public_Server_Authentication_Root_E46.pem"
+sha256 = "808130157f570b7640069852c88e256738007811a64c3aa9a4c31038347dc19c"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/Sectigo_Public_Server_Authentication_Root_R46.pem"
+sha256 = "7eaaf8c5047d5dbb4f3d7f173318ee936b09da4f0ceb5f3beb45c277480836eb"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/SecureSign_RootCA11.pem"
@@ -31733,6 +31804,14 @@ uri = "file:/usr/lib/ssl/certs/Telia_Root_CA_v2.pem"
 sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TrustAsia_Global_Root_CA_G3.pem"
+sha256 = "d729fda98d8a3bf0d657b93fe0f70e22437359ef0de4ac5b4abcf3ef3667613a"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/TrustAsia_Global_Root_CA_G4.pem"
+sha256 = "fc9662ebcadeb2c0a804bdb6503d0c23976c638cf73ff95ffafd33ead680e73d"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/Trustwave_Global_Certification_Authority.pem"
 sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
 
@@ -31773,12 +31852,16 @@ uri = "file:/usr/lib/ssl/certs/a3418fda.0"
 sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/a89d74c2.0"
+sha256 = "e1c93696d4de9125e49f6a12b97a1cbcf8ce7331bc8268f1fe7b6ab447cc14cf"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/a94d09e5.0"
 sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/adoptium/cacerts"
-sha256 = "518124a7cf28db85b9f6a51cb1b0e31d61d64e8cd108a8ee3b14bda69fcc6d7d"
+sha256 = "286b44e14b4c51ab6450c8a2351657056a59d399ecb8b9d35b3b2095211926cd"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/aee5f10d.0"
@@ -31817,6 +31900,10 @@ uri = "file:/usr/lib/ssl/certs/bf53fb88.0"
 sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/bff583e5.0"
+sha256 = "0fb15d1a463ebedaa8ea65bf238749231a46dc9cfd2a5f7cbca7484db0bd5d35"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/c01eb047.0"
 sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
 
@@ -31826,7 +31913,7 @@ sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/ca-certificates.crt"
-sha256 = "a05874e84b34854233e5b108db750ebdf06742a000b5f8b30922b101525d3d4e"
+sha256 = "78c6dc58385f66c06265e9d7b155fd02907f51c93c13bdd2b986c641e42a95de"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/ca6e4ad9.0"
@@ -31879,6 +31966,10 @@ sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/d887a5bb.0"
 sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/da0cfd1d.0"
+sha256 = "808130157f570b7640069852c88e256738007811a64c3aa9a4c31038347dc19c"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/dc4d6a89.0"
@@ -32001,6 +32092,10 @@ uri = "file:/usr/lib/ssl/certs/fa5da96b.0"
 sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
 
 [[sgx.trusted_files]]
+uri = "file:/usr/lib/ssl/certs/fb717492.0"
+sha256 = "970d70366b2f8c29ac71c8f71689ddd8fd321208a5ededbb2d784af33799a0f6"
+
+[[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/fc5a8f99.0"
 sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
 
@@ -32022,7 +32117,7 @@ sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/ssl-cert-snakeoil.pem"
-sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
+sha256 = "0fb15d1a463ebedaa8ea65bf238749231a46dc9cfd2a5f7cbca7484db0bd5d35"
 
 [[sgx.trusted_files]]
 uri = "file:/usr/lib/ssl/certs/vTrus_ECC_Root_CA.pem"
@@ -32035,6 +32130,10 @@ sha256 = "8cc726cf62c554561e89e1237495bea3026b1709ba7153fed3401fcd489b5aaf"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/002c0b4f.0"
 sha256 = "dcc1a6246e13880ca5b73ef547e082dd0401e4d8837b6d211be82f7be791ac65"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/0179095f.0"
+sha256 = "08e1a8115accf7ce400a3f98fc31dbab522a3ed3644ca48389b4899e2d794f1a"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/02265526.0"
@@ -32101,6 +32200,10 @@ uri = "file:/etc/ssl/certs/18856ac4.0"
 sha256 = "20828fd7b9795221c10272f9f6ed29638f6dc2614465adab1b93f2bfc484c659"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/1cef98f5.0"
+sha256 = "fc9662ebcadeb2c0a804bdb6503d0c23976c638cf73ff95ffafd33ead680e73d"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/1d3472b9.0"
 sha256 = "80eeafa5039f282345129a81ace7e1c1e1d4fd826f1eb3391a4ea56f38a6e3d8"
 
@@ -32111,6 +32214,10 @@ sha256 = "9b4282f5a402e19016c4874a52df3367eabccf05be851ad03039f777a602d30a"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/1e09d511.0"
 sha256 = "b30989fd9e45c74bf417df74d1da639d1f04d4fd0900be813a2d6a031a56c845"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/228f89db.0"
+sha256 = "a5e66a87e60e17b9aac2d825c9b898ce4bb635dd6e8a137c0dd2ca761b6165ce"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/244b5494.0"
@@ -32138,15 +32245,11 @@ sha256 = "39fdcf28aeffe08d03251fccaf645e3c5de19fa4ebbafc89b4ede2a422148bab"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/3bde41ac.0"
-sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/3bde41ac.1"
 sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
 
 [[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/3e45d192.0"
-sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
+uri = "file:/etc/ssl/certs/3e359ba6.0"
+sha256 = "6c58125f88a4ff83d40e6b58c5532ea905be4daf1ec7da7f4542af3d34855340"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/3fb36b73.0"
@@ -32185,8 +32288,8 @@ uri = "file:/etc/ssl/certs/4f316efb.0"
 sha256 = "0ebb1a5d93b86ad9dcbd294413f272817fe3bb8ba46f4ec8192b3b805f2fa8ae"
 
 [[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/5273a94c.0"
-sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
+uri = "file:/etc/ssl/certs/4fd49c6c.0"
+sha256 = "fed2654034ede8dc7677c5e06d4b583bcb0ae352f03cd16111d34c854bbffbbc"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/5443e9e3.0"
@@ -32207,10 +32310,6 @@ sha256 = "ef94d474067b306c482dfd066130f04855f50faecd461cee2964ce6c7260000e"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/5931b5bc.0"
 sha256 = "0b83e3ece7c33128cc31ac97595ce1bdb524db3f924623093b64e6a96ffb4b9b"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/5a7722fb.0"
-sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/5ad8a5d6.0"
@@ -32243,10 +32342,6 @@ sha256 = "1a49076630e489e4b1056804fb6c768397a9de52b236609aaf6ec5b94ce508ec"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/653b494a.0"
 sha256 = "d1c290ea1e4544dec1934931fbfa1fb2060eb3a0f2239ba191f444ecbce35cbb"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/66445960.0"
-sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/68dd7389.0"
@@ -32305,8 +32400,20 @@ uri = "file:/etc/ssl/certs/8160b96c.0"
 sha256 = "4f670affee7b14140a6d20937db6e991102d5f8bac1d2562ebf20a1afda94d73"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/81f2d2b1.0"
+sha256 = "80eda3bc1316bbb2c18df887c7a30a40ace97146471337e06bfdd46337a688c3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/8312c4c1.0"
+sha256 = "ee459c64139faa1fb8d90a9195022aaca51808c62bb374afa2a26b50875346b1"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/8508e720.0"
 sha256 = "1b28a5568648fef0d3faeb916cb7bdb054724cb3b5a00c6bfd3d8a2fba7a8bba"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/865fbdf9.0"
+sha256 = "cf03adad817ae999648c5182ac996fc0682aeda4329c783756aa1c5c3d92eff9"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/8cb5ee0f.0"
@@ -32325,6 +32432,10 @@ uri = "file:/etc/ssl/certs/8f103249.0"
 sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9046744a.0"
+sha256 = "7eaaf8c5047d5dbb4f3d7f173318ee936b09da4f0ceb5f3beb45c277480836eb"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/90c5a3c8.0"
 sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
 
@@ -32335,10 +32446,6 @@ sha256 = "c6d25347727f267774611677588d76f8a54a6e14d3e99dd69ef2c20612ed87c5"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/93bc0acc.0"
 sha256 = "b68109f50ba0abed3b938afebd2ab42a2f5089062c59e9fc74425e2742d894bc"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/93fee43a.0"
-sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/9482e63a.0"
@@ -32353,8 +32460,16 @@ uri = "file:/etc/ssl/certs/988a38cb.0"
 sha256 = "40f60f2e2f83fb6c63ddefeba7939a7852b2d468183ea939cc4dcac8fe4cc87d"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9b46e03d.0"
+sha256 = "980dc408dd2def2d7930bec10c48e256d115f636c403b631ffb93558dacf5571"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/9b5697b0.0"
 sha256 = "f08c4d2b700f7cd5da4dc1b60f4c57090fdc692cde8a7221f35b70abb4cec363"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/9bf03295.0"
+sha256 = "d729fda98d8a3bf0d657b93fe0f70e22437359ef0de4ac5b4abcf3ef3667613a"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/9c8dfbd4.0"
@@ -32429,12 +32544,24 @@ uri = "file:/etc/ssl/certs/Atos_TrustedRoot_2011.pem"
 sha256 = "79e9f88ab505186e36f440c88bc37e103e1a9369a0ebe382c4a04bd70b91c027"
 
 [[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
-sha256 = "283fd555713ed4ecfcb4935f5ed5d4a9bb776236803e2910eb46e70903a3511f"
+uri = "file:/etc/ssl/certs/Atos_TrustedRoot_Root_CA_ECC_TLS_2021.pem"
+sha256 = "970d70366b2f8c29ac71c8f71689ddd8fd321208a5ededbb2d784af33799a0f6"
 
 [[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068_2.pem"
+uri = "file:/etc/ssl/certs/Atos_TrustedRoot_Root_CA_RSA_TLS_2021.pem"
+sha256 = "980dc408dd2def2d7930bec10c48e256d115f636c403b631ffb93558dacf5571"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Autoridad_de_Certificacion_Firmaprofesional_CIF_A62634068.pem"
 sha256 = "a618213c5dd7cbb59b3154de7241d7255333a0619cf434329becae876ce6e331"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/BJCA_Global_Root_CA1.pem"
+sha256 = "08e1a8115accf7ce400a3f98fc31dbab522a3ed3644ca48389b4899e2d794f1a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/BJCA_Global_Root_CA2.pem"
+sha256 = "6c58125f88a4ff83d40e6b58c5532ea905be4daf1ec7da7f4542af3d34855340"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/Baltimore_CyberTrust_Root.pem"
@@ -32501,6 +32628,22 @@ uri = "file:/etc/ssl/certs/Certum_Trusted_Root_CA.pem"
 sha256 = "e6c62d3f63ba03f4dac458b7dac6c09eb4d71cc3c6621769c3883ed51677c01c"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CommScope_Public_Trust_ECC_Root-01.pem"
+sha256 = "a5e66a87e60e17b9aac2d825c9b898ce4bb635dd6e8a137c0dd2ca761b6165ce"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CommScope_Public_Trust_ECC_Root-02.pem"
+sha256 = "80eda3bc1316bbb2c18df887c7a30a40ace97146471337e06bfdd46337a688c3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CommScope_Public_Trust_RSA_Root-01.pem"
+sha256 = "ee459c64139faa1fb8d90a9195022aaca51808c62bb374afa2a26b50875346b1"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/CommScope_Public_Trust_RSA_Root-02.pem"
+sha256 = "fed2654034ede8dc7677c5e06d4b583bcb0ae352f03cd16111d34c854bbffbbc"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/Comodo_AAA_Services_root.pem"
 sha256 = "a5ddabd1602ae1c66ce11ad078e734cc473dcb8e9f573037832d8536ae3de90b"
 
@@ -32559,18 +32702,6 @@ sha256 = "fe64d4b3ae749db5ec57b04ed9203c748fff446f57b9665fad988435d89c9e43"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/DigiCert_Trusted_Root_G4.pem"
 sha256 = "ce7d6b44f5d510391be98c8d76b18709400a30cd87659bfebe1c6f97ff5181ee"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/E-Tugra_Certification_Authority.pem"
-sha256 = "789655e3b4c0721faa6a3ffc30853450794fecc5830a12b632261545c3a241bb"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/E-Tugra_Global_Root_CA_ECC_v3.pem"
-sha256 = "7aa7e87cb29fb7303d8d2402c98b3855b45859640211773c279f0c046e2071c6"
-
-[[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/E-Tugra_Global_Root_CA_RSA_v3.pem"
-sha256 = "d96bfedd2e72169afa2cc958f122785a00e5cfc4b860eb8419c3196d99aced34"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/Entrust.net_Premium_2048_Secure_Server_CA.pem"
@@ -32673,10 +32804,6 @@ uri = "file:/etc/ssl/certs/HiPKI_Root_CA_-_G1.pem"
 sha256 = "c3f06f635f1939ebeb125e5c1f030e329b63dd808d3ce803b1b1794bc78b253a"
 
 [[sgx.trusted_files]]
-uri = "file:/etc/ssl/certs/Hongkong_Post_Root_CA_1.pem"
-sha256 = "9dd93324ad79de9a6d595611342d38ae6ca937772c65e11da3ebf88c5a248115"
-
-[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/Hongkong_Post_Root_CA_3.pem"
 sha256 = "1fd9801787f30a4ab835b1462afc3f71473a5eacc74c0a22ed392bc3da9362f3"
 
@@ -32765,8 +32892,24 @@ uri = "file:/etc/ssl/certs/SSL.com_Root_Certification_Authority_RSA.pem"
 sha256 = "2e368debd3626ea9c5d94c582d80050a530b505aa77ba231eb13e4d208c36d67"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_TLS_ECC_Root_CA_2022.pem"
+sha256 = "cf03adad817ae999648c5182ac996fc0682aeda4329c783756aa1c5c3d92eff9"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/SSL.com_TLS_RSA_Root_CA_2022.pem"
+sha256 = "e1c93696d4de9125e49f6a12b97a1cbcf8ce7331bc8268f1fe7b6ab447cc14cf"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/SZAFIR_ROOT_CA2.pem"
 sha256 = "cbe8a1eec737c93d1c1cc54e31421f81bf358aa43fbc1ac763d80ce61a17fce0"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Sectigo_Public_Server_Authentication_Root_E46.pem"
+sha256 = "808130157f570b7640069852c88e256738007811a64c3aa9a4c31038347dc19c"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/Sectigo_Public_Server_Authentication_Root_R46.pem"
+sha256 = "7eaaf8c5047d5dbb4f3d7f173318ee936b09da4f0ceb5f3beb45c277480836eb"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/SecureSign_RootCA11.pem"
@@ -32845,6 +32988,14 @@ uri = "file:/etc/ssl/certs/Telia_Root_CA_v2.pem"
 sha256 = "bf3bd189c3dd33bc81635d60284461f0d937c2c1d51cc4d7851c13466419fcb0"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TrustAsia_Global_Root_CA_G3.pem"
+sha256 = "d729fda98d8a3bf0d657b93fe0f70e22437359ef0de4ac5b4abcf3ef3667613a"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/TrustAsia_Global_Root_CA_G4.pem"
+sha256 = "fc9662ebcadeb2c0a804bdb6503d0c23976c638cf73ff95ffafd33ead680e73d"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/Trustwave_Global_Certification_Authority.pem"
 sha256 = "0c7ffc481084cad9ccd3402eba9401b0f5abea0917d985e9ce401c8efbad4b04"
 
@@ -32885,12 +33036,16 @@ uri = "file:/etc/ssl/certs/a3418fda.0"
 sha256 = "7e8b80d078d3dd77d3ed2108dd2b33412c12d7d72cb0965741c70708691776a2"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/a89d74c2.0"
+sha256 = "e1c93696d4de9125e49f6a12b97a1cbcf8ce7331bc8268f1fe7b6ab447cc14cf"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/a94d09e5.0"
 sha256 = "04846f73d9d0421c60076fd02bad7f0a81a3f11a028d653b0de53290e41dcead"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/adoptium/cacerts"
-sha256 = "518124a7cf28db85b9f6a51cb1b0e31d61d64e8cd108a8ee3b14bda69fcc6d7d"
+sha256 = "286b44e14b4c51ab6450c8a2351657056a59d399ecb8b9d35b3b2095211926cd"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/aee5f10d.0"
@@ -32929,6 +33084,10 @@ uri = "file:/etc/ssl/certs/bf53fb88.0"
 sha256 = "626d330f6a8944fa4245f02f9795668e25a40b29b4cc5206bee73337b7dcd4d5"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/bff583e5.0"
+sha256 = "0fb15d1a463ebedaa8ea65bf238749231a46dc9cfd2a5f7cbca7484db0bd5d35"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/c01eb047.0"
 sha256 = "de2e7b1bc7a2aed4e5866d3655d1041206c27caf376ee81bfc4012e8225e0e7c"
 
@@ -32938,7 +33097,7 @@ sha256 = "a00b8aa918457f5e7e58457b5e2f80d640fa77cc290572aaab1ae7b4734a9528"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/ca-certificates.crt"
-sha256 = "a05874e84b34854233e5b108db750ebdf06742a000b5f8b30922b101525d3d4e"
+sha256 = "78c6dc58385f66c06265e9d7b155fd02907f51c93c13bdd2b986c641e42a95de"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/ca6e4ad9.0"
@@ -32991,6 +33150,10 @@ sha256 = "8c4220477ed85355fa380466aa8f559106d8a39fc90d3e0c121749e19444064f"
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/d887a5bb.0"
 sha256 = "a83c5b6097b03509711c9cd8de59def7ecf99ed72b4076dc33f5b2e35545b3b3"
+
+[[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/da0cfd1d.0"
+sha256 = "808130157f570b7640069852c88e256738007811a64c3aa9a4c31038347dc19c"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/dc4d6a89.0"
@@ -33113,6 +33276,10 @@ uri = "file:/etc/ssl/certs/fa5da96b.0"
 sha256 = "b3bcd05e1b177130f6888fcc1cff4e01cff44ef8e6b0d035f04ad6a71dd0879c"
 
 [[sgx.trusted_files]]
+uri = "file:/etc/ssl/certs/fb717492.0"
+sha256 = "970d70366b2f8c29ac71c8f71689ddd8fd321208a5ededbb2d784af33799a0f6"
+
+[[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/fc5a8f99.0"
 sha256 = "8a3dbcb92ab1c6277647fe2ab8536b5c982abbfdb1f1df5728e01b906aba953a"
 
@@ -33134,7 +33301,7 @@ sha256 = "c6904218e180fbfb0ed91d81e892c2dd983c4a3404617cb36aeb3a434c3b9df0"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/ssl-cert-snakeoil.pem"
-sha256 = "b8cca1932ff92d62d673216c2874f10667262b6dfc5646213ec0a0d445395d3f"
+sha256 = "0fb15d1a463ebedaa8ea65bf238749231a46dc9cfd2a5f7cbca7484db0bd5d35"
 
 [[sgx.trusted_files]]
 uri = "file:/etc/ssl/certs/vTrus_ECC_Root_CA.pem"

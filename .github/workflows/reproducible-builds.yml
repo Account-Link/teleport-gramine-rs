@@ -1,0 +1,59 @@
+name: Reproducible Build
+
+on:
+  pull_request:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - nix
+    tags:
+      - v?[0-9]+.[0-9]+.[0-9]+*
+
+#concurrency:
+#  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+#  cancel-in-progress: true
+
+env:
+  TELEPORT_SHA256: a961a7faa428a8535f7d1ed8056ad393537f5dd78b3194f94da4210b1dc5cd22
+
+jobs:
+  nix-teleport:
+    name: Build teleport with nix
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: DeterminateSystems/nix-installer-action@main
+      - name: Build
+        run: nix build .
+      - name: Rebuild
+        run: nix build --rebuild
+      - name: sha256sum output
+        run: sha256sum result/bin/teleport
+      - name: sha256sum check
+        run: |
+          echo "$TELEPORT_SHA256 *result/bin/teleport" | sha256sum --strict --check
+      - run: nix flake check
+      - run: nix flake metadata
+      - run: nix flake show
+      - run: ls -l result
+
+  docker-nix-teleport:
+    name: Build teleport with nix in docker
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          target: nix-build-output
+          allow: security.insecure
+          push: false
+          tags: sbellem/teleport
+          outputs: type=local,dest=bin
+      - name: sha256sum output
+        run: sha256sum bin/teleport
+      - name: sha256sum check
+        run: |
+          echo "$TELEPORT_SHA256 *bin/teleport" | sha256sum --strict --check

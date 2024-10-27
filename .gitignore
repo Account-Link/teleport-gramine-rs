@@ -17,3 +17,6 @@ auth2fa.csv
 redeem.json
 user_infos.json
 save_dir/shared/users/*.user
+result
+bin
+private.env

@@ -1,5 +1,3 @@
-version: '3.9'
-
 services:
 
   teleport:
@@ -7,6 +5,8 @@ services:
     build:
       context: ./
       dockerfile: Dockerfile
+      entitlements:
+        - security.insecure
       # args:
     environment:
       - SGX=1

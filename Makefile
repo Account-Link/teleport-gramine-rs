@@ -3,7 +3,12 @@
 
 ARCH_LIBDIR ?= /lib/$(shell $(CC) -dumpmachine)
 
+ifeq ($(NIX),1)
+SELF_EXE = result/bin/teleport
+else
 SELF_EXE = target/release/teleport
+endif
+
 DB_FILE = target/release/main.db
 
 .PHONY: all
@@ -23,9 +28,11 @@ endif
 # to Make, as compiling in debug mode results in an order of magnitude's difference in
 # performance that makes testing by running a benchmark with ab painful. The primary goal
 # of the DEBUG setting is to control Gramine's loglevel.
+ifeq ($(NIX),)
 -include $(SELF_EXE).d # See also: .cargo/config.toml
 $(SELF_EXE): Cargo.toml
 	cargo build --release
+endif
 
 exex.manifest: exex.manifest.template
 	gramine-manifest \

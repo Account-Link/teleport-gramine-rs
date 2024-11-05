@@ -236,13 +236,22 @@ pub async fn mint_nft(
     name: String,
     username: String,
     pfp_url: String,
+    event_pfp_url: String,
     nft_id: String,
 ) -> eyre::Result<String> {
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
     let nftid_hash = keccak256(nft_id.as_bytes());
-    let mint =
-        nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, name, username, pfp_url, nftid_hash);
+    let mint = nft.mintTo(
+        recipient,
+        Uint::from_str(&x_id)?,
+        policy,
+        name,
+        username,
+        pfp_url,
+        event_pfp_url,
+        nftid_hash,
+    );
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -282,6 +291,7 @@ pub enum NFTAction {
         name: String,
         username: String,
         pfp_url: String,
+        event_pfp_url: String,
         nft_id: String,
     },
 }
@@ -296,10 +306,27 @@ pub async fn nft_action_consumer(
             NFTAction::Redeem { token_id, content } => {
                 redeem_nft(provider.clone(), token_id, content).await
             }
-            NFTAction::Mint { recipient, policy, x_id, name, username, pfp_url, nft_id } => {
-                mint_nft(provider.clone(), recipient, x_id, policy, name, username, pfp_url, nft_id)
-                    .await
-            }
+            NFTAction::Mint {
+                recipient,
+                policy,
+                x_id,
+                name,
+                username,
+                pfp_url,
+                event_pfp_url,
+                nft_id,
+            } => mint_nft(
+                provider.clone(),
+                recipient,
+                policy,
+                x_id,
+                name,
+                username,
+                pfp_url,
+                event_pfp_url,
+                nft_id,
+            )
+            .await,
         };
 
         if let Ok(tx_hash) = tx_hash {

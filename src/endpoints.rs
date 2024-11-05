@@ -101,6 +101,7 @@ pub struct SharedState<A: TeleportDB> {
     pub twitter_builder: TwitterBuilder,
     pub nft_action_sender: mpsc::Sender<(NFTAction, oneshot::Sender<String>)>,
     pub rpc_url: String,
+    pub luma_secret: String,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -231,6 +232,18 @@ pub async fn mint(
         .twitter_builder
         .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens").unwrap().into());
 
+    let luma_event = reqwest::Client::new()
+        .get("https://api.lu.ma/public/v1/event/get")
+        .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret)
+        .send()
+        .await
+        .expect("Failed to get luma event")
+        .json::<serde_json::Value>()
+        .await
+        .expect("Failed to get luma event json response");
+    let event_pfp_url = luma_event["event"]["cover_url"]
+        .as_str()
+        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
     let user_info = client.get_user_info().await.expect("Failed to get user info");
 
     let username = if user_info.username.starts_with("@") {
@@ -248,6 +261,7 @@ pub async fn mint(
         name: user_info.name,
         username,
         pfp_url: user_info.profile_image_url.replace("_normal", "_400x400"),
+        event_pfp_url: event_pfp_url.to_string(),
         nft_id: nft_id.clone(),
     };
 

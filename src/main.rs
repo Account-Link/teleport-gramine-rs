@@ -157,6 +157,7 @@ async fn main() {
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
+    let luma_secret = std::env::var("LUMA_SECRET").expect("LUMA_SECRET not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
 
@@ -225,6 +226,7 @@ async fn main() {
         signer,
         twitter_builder: twitter_builder.clone(),
         nft_action_sender: sender,
+        luma_secret,
 	rpc_url: rpc_url,
     };
 

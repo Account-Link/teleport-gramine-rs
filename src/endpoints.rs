@@ -38,6 +38,8 @@ fn default_str() -> String {
 #[derive(Deserialize)]
 pub struct NewUserQuery {
     address: String,
+    event_id: String,
+    user_email: String,
     frontend_url: Option<String>,
 }
 
@@ -45,6 +47,8 @@ pub struct NewUserQuery {
 pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
+    event_id: String,
+    user_email: String,
     address: String,
     frontend_url: String,
 }
@@ -151,9 +155,11 @@ pub async fn register_or_login<A: TeleportDB>(
     let address = query.address;
 
     let callback_url = format!(
-        "https://{}/callback?address={}&frontend_url={}",
+        "https://{}/callback?address={}&event_id={}&user_email={}&frontend_url={}",
         shared_state.tee_url.clone(),
         address.clone(),
+        query.event_id,
+        query.user_email,
         query.frontend_url.unwrap_or(shared_state.app_url)
     );
 
@@ -209,17 +215,16 @@ pub async fn callback<A: TeleportDB>(
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens);
-        db.add_user(address, oauth_user.clone()).expect("Failed to add user to database");
+        db.add_user(address.clone(), oauth_user.clone()).expect("Failed to add user to database");
         drop(db);
     }
 
-    let msg = format!("nonce={}&x_id={}", 0, x_info.id);
-    let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
-
-    let encoded_x_info =
-        serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-    let url_with_params =
-        format!("{}/create?sig={:?}&success=true&{}", query.frontend_url, sig, encoded_x_info);
+    let url_with_params = format!(
+        "/approve?address={}&policy=anything&event_id={}&user_email={}",
+        address.clone(),
+        query.event_id,
+        query.user_email
+    );
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
@@ -275,9 +280,8 @@ pub async fn mint(
         .json::<serde_json::Value>()
         .await
         .expect("Failed to get luma event json response");
-    let event_pfp_url = luma_event["event"]["cover_url"]
-        .as_str()
-        .ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
+    let event_pfp_url =
+        luma_event["event"]["cover_url"].as_str().ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
     let user_info = client.get_user_info().await.expect("Failed to get user info");
 
     let username = if user_info.username.starts_with("@") {
@@ -305,11 +309,17 @@ pub async fn mint(
     let tx_hash = tx_hash.await.unwrap();
 
     //Approve user on luma
-    let luma_request_query = LumaUserApprovalRequestQuery { event_id: query.event_id.clone(), guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email } };
-    let _= reqwest::Client::new()
+    let luma_request_query = LumaUserApprovalRequestQuery {
+        event_id: query.event_id.clone(),
+        guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email },
+    };
+    let _ = reqwest::Client::new()
         .post("https://api.lu.ma/public/v1/event/update-guest-status")
         .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret.clone())
-        .body(serde_json::to_string(&luma_request_query).expect("Failed to serialize luma request query"))
+        .body(
+            serde_json::to_string(&luma_request_query)
+                .expect("Failed to serialize luma request query"),
+        )
         .send()
         .await
         .expect("Failed to approve user on luma");

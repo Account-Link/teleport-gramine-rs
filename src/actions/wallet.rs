@@ -24,7 +24,6 @@ pub type WalletProvider = FillProvider<
 >;
 
 pub fn get_provider(rpc_url: String, wallet: EthereumWallet) -> WalletProvider {
-    
     ProviderBuilder::new()
         .filler(JoinFill::new(
             GasFiller,

@@ -2,16 +2,19 @@ use std::{net::SocketAddr, path::Path, sync::Arc};
 
 use acme_lib::create_rsa_key;
 use alloy::signers::local::PrivateKeySigner;
-use tokio::{sync::{mpsc,oneshot}, time::Duration};
+use tokio::{
+    sync::{mpsc, oneshot},
+    time::Duration,
+};
 
-use rand::Rng;
-use axum::extract::{State};
+use axum::extract::State;
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
     approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
     SharedState,
 };
-use openssl::pkey::{PKey,Private};
+use openssl::pkey::{PKey, Private};
+use rand::Rng;
 use tokio::{fs, sync::Mutex, time::sleep};
 
 use tower_http::cors::CorsLayer;
@@ -67,13 +70,12 @@ async fn wait_for_cert() -> Vec<u8> {
     log::info!("Waiting for cert ...");
     while !Path::new(CERTIFICATE_PATH).exists() {
         sleep(Duration::from_secs(1)).await;
-        }
+    }
     log::info!("Cert found");
     fs::read(CERTIFICATE_PATH).await.expect("cert not found")
 }
 
 async fn prepare_quote(pkey: &PKey<Private>, address: String) {
-
     // The quote consists of:
     //   - the public key from the cert,
     //   - the signer addres
@@ -85,9 +87,10 @@ async fn prepare_quote(pkey: &PKey<Private>, address: String) {
     }
 }
 
-async fn _handle_shared_key(State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>,
-			    body: String)
-			    -> String {
+async fn _handle_shared_key(
+    State(s): State<Arc<Mutex<Option<oneshot::Sender<String>>>>>,
+    body: String,
+) -> String {
     if let Some(sender) = s.lock().await.take() {
         let _ = sender.send(body);
     }
@@ -97,7 +100,7 @@ async fn _handle_shared_key(State(s): State<Arc<Mutex<Option<oneshot::Sender<Str
 async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
     // Return the key if we already have it sealed
     if std::path::Path::new(SHARED_KEY_PATH).exists() {
-	log::info!("reading from shared key file");
+        log::info!("reading from shared key file");
         let s = fs::read(SHARED_KEY_PATH).await.expect("couldn't read shared key");
         return s;
     }
@@ -109,32 +112,29 @@ async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
 
     // Define the route that handles the shared key
     let receive_app = axum::Router::new()
-	.route("/shared_key", axum::routing::post(_handle_shared_key))
-	.with_state(shutdown_signal);
+        .route("/shared_key", axum::routing::post(_handle_shared_key))
+        .with_state(shutdown_signal);
 
     // Set up the Rustls config
-    let config = RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap())
-        .await
-        .unwrap();
+    let config =
+        RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
 
     // Start the server
     let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
-    let server = axum_server::bind_rustls(addr, config)
-        .serve(receive_app.into_make_service());
+    let server = axum_server::bind_rustls(addr, config).serve(receive_app.into_make_service());
 
     // Spawn the server and stop it as soon as a key is received
     log::info!("waiting to receive shared key");
     let key_hex = tokio::select! {
         _ = server => todo!(),
         key_hex = rx => key_hex
-    }.unwrap();
-    
+    }
+    .unwrap();
+
     // store the key
     log::info!("writing shared key");
     let key_bytes = hex::decode(key_hex).unwrap();
-    fs::write(SHARED_KEY_PATH, &key_bytes)
-        .await
-        .expect("Failed to write shared key to file");
+    fs::write(SHARED_KEY_PATH, &key_bytes).await.expect("Failed to write shared key to file");
     key_bytes
 }
 
@@ -175,26 +175,25 @@ async fn main() {
 
     // Get the shared key
     let shared_key = if do_bootstrap {
-	// If we are bootstrapping, then generate shared secret
-	let mut rng = rand::thread_rng();
-	let mut shared_key = [0u8; 16];
-	rng.fill(&mut shared_key);
-	fs::write(SHARED_KEY_PATH, &shared_key)
-            .await
-            .expect("Failed to write shared key to file");
-	shared_key.to_vec()
+        // If we are bootstrapping, then generate shared secret
+        let mut rng = rand::thread_rng();
+        let mut shared_key = [0u8; 16];
+        rng.fill(&mut shared_key);
+        fs::write(SHARED_KEY_PATH, &shared_key).await.expect("Failed to write shared key to file");
+        shared_key.to_vec()
     } else {
-	// Otherwise start a server and wait to receive it
-	get_shared_key(cert, pkey.clone()).await
+        // Otherwise start a server and wait to receive it
+        get_shared_key(cert, pkey.clone()).await
     };
 
     // Onboard others?
     if do_onboard {
-	log::info!("sending the key to https://{}/shared_key/", tee_url);
-	let url = format!("https://{}/shared_key", tee_url);
-	let c = reqwest::Client::new().post(url).body(hex::encode(shared_key)).send().await.unwrap();
-	log::info!("got: {}", c.text().await.unwrap());
-	return;
+        log::info!("sending the key to https://{}/shared_key/", tee_url);
+        let url = format!("https://{}/shared_key", tee_url);
+        let c =
+            reqwest::Client::new().post(url).body(hex::encode(shared_key)).send().await.unwrap();
+        log::info!("got: {}", c.text().await.unwrap());
+        return;
     }
 
     // Derive keys from the shared secret
@@ -227,7 +226,7 @@ async fn main() {
         twitter_builder: twitter_builder.clone(),
         nft_action_sender: sender,
         luma_secret,
-	rpc_url: rpc_url,
+        rpc_url,
     };
 
     let app = axum::Router::new()

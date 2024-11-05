@@ -315,18 +315,20 @@ pub async fn nft_action_consumer(
                 pfp_url,
                 event_pfp_url,
                 nft_id,
-            } => mint_nft(
-                provider.clone(),
-                recipient,
-                policy,
-                x_id,
-                name,
-                username,
-                pfp_url,
-                event_pfp_url,
-                nft_id,
-            )
-            .await,
+            } => {
+                mint_nft(
+                    provider.clone(),
+                    recipient,
+                    policy,
+                    x_id,
+                    name,
+                    username,
+                    pfp_url,
+                    event_pfp_url,
+                    nft_id,
+                )
+                .await
+            }
         };
 
         if let Ok(tx_hash) = tx_hash {

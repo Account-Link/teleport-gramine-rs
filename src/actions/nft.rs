@@ -387,6 +387,7 @@ mod tests {
             "name".to_string(),
             "username".to_string(),
             "pfp_url".to_string(),
+            "event_pfp_url".to_string(),
             "nft_id".to_string(),
         )
         .await

@@ -38,6 +38,8 @@ fn default_str() -> String {
 #[derive(Deserialize)]
 pub struct NewUserQuery {
     address: String,
+    event_id: String,
+    user_email: String,
     frontend_url: Option<String>,
 }
 
@@ -45,6 +47,8 @@ pub struct NewUserQuery {
 pub struct CallbackQuery {
     oauth_token: String,
     oauth_verifier: String,
+    event_id: String,
+    user_email: String,
     address: String,
     frontend_url: String,
 }
@@ -53,6 +57,27 @@ pub struct CallbackQuery {
 pub struct MintQuery {
     address: String,
     policy: String,
+}
+
+#[derive(Deserialize)]
+pub struct MintEventQuery {
+    event_id: String,
+    address: String,
+    policy: String,
+    user_email: String,
+}
+
+#[serde_with::skip_serializing_none]
+#[derive(Debug, Deserialize, Serialize)]
+struct LumaUserApprovalRequestQuery {
+    event_id: String,
+    guest: LumaUser,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+struct LumaUser {
+    id_type: String,
+    id_value: String,
 }
 
 #[derive(Deserialize)]
@@ -81,6 +106,17 @@ pub struct TxHashResponse {
     pub hash: String,
 }
 
+#[derive(Serialize)]
+pub struct TxHashEventIdResponse {
+    pub hash: String,
+    pub event_id: String,
+}
+
+#[derive(Deserialize, Serialize, Debug, Clone)]
+struct LumaEventQuery {
+    event_id: String,
+}
+
 #[derive(Deserialize)]
 pub struct CheckRedeemQuery {
     pub content: String,
@@ -101,6 +137,7 @@ pub struct SharedState<A: TeleportDB> {
     pub twitter_builder: TwitterBuilder,
     pub nft_action_sender: mpsc::Sender<(NFTAction, oneshot::Sender<String>)>,
     pub rpc_url: String,
+    pub luma_secret: String,
 }
 
 pub async fn cookietest<A: TeleportDB>(
@@ -118,9 +155,11 @@ pub async fn register_or_login<A: TeleportDB>(
     let address = query.address;
 
     let callback_url = format!(
-        "https://{}/callback?address={}&frontend_url={}",
+        "https://{}/callback?address={}&event_id={}&user_email={}&frontend_url={}",
         shared_state.tee_url.clone(),
         address.clone(),
+        query.event_id,
+        query.user_email,
         query.frontend_url.unwrap_or(shared_state.app_url)
     );
 
@@ -176,17 +215,16 @@ pub async fn callback<A: TeleportDB>(
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens);
-        db.add_user(address, oauth_user.clone()).expect("Failed to add user to database");
+        db.add_user(address.clone(), oauth_user.clone()).expect("Failed to add user to database");
         drop(db);
     }
 
-    let msg = format!("nonce={}&x_id={}", 0, x_info.id);
-    let sig = shared_state.signer.sign_message(msg.as_bytes()).await.unwrap();
-
-    let encoded_x_info =
-        serde_urlencoded::to_string(&x_info).expect("Failed to encode x_info as query params");
-    let url_with_params =
-        format!("{}/create?sig={:?}&success=true&{}", query.frontend_url, sig, encoded_x_info);
+    let url_with_params = format!(
+        "/approve?address={}&policy=anything&event_id={}&user_email={}",
+        address.clone(),
+        query.event_id,
+        query.user_email
+    );
     (
         jar.add(
             Cookie::build((SESSION_ID_COOKIE_NAME, session_id))
@@ -202,8 +240,8 @@ pub async fn mint(
     jar: CookieJar,
     headers: HeaderMap,
     State(shared_state): State<SharedState<InMemoryDB>>,
-    Json(query): Json<MintQuery>,
-) -> Result<Json<TxHashResponse>, StatusCode> {
+    Json(query): Json<MintEventQuery>,
+) -> Result<Json<TxHashEventIdResponse>, StatusCode> {
     if let Some(referer) = headers.get("Referer") {
         let referer = referer.to_str().unwrap_or("");
         if !referer.starts_with(&format!("https://{}/approve", shared_state.tee_url)) {
@@ -231,6 +269,19 @@ pub async fn mint(
         .twitter_builder
         .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens").unwrap().into());
 
+    let event_id_query = LumaEventQuery { event_id: query.event_id.clone() };
+    let luma_event = reqwest::Client::new()
+        .get("https://api.lu.ma/public/v1/event/get")
+        .query(&event_id_query)
+        .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret.clone())
+        .send()
+        .await
+        .expect("Failed to get luma event")
+        .json::<serde_json::Value>()
+        .await
+        .expect("Failed to get luma event json response");
+    let event_pfp_url =
+        luma_event["event"]["cover_url"].as_str().ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
     let user_info = client.get_user_info().await.expect("Failed to get user info");
 
     let username = if user_info.username.starts_with("@") {
@@ -248,6 +299,7 @@ pub async fn mint(
         name: user_info.name,
         username,
         pfp_url: user_info.profile_image_url.replace("_normal", "_400x400"),
+        event_pfp_url: event_pfp_url.to_string(),
         nft_id: nft_id.clone(),
     };
 
@@ -256,12 +308,28 @@ pub async fn mint(
     shared_state.nft_action_sender.send((nft_action, sender)).await.unwrap();
     let tx_hash = tx_hash.await.unwrap();
 
+    //Approve user on luma
+    let luma_request_query = LumaUserApprovalRequestQuery {
+        event_id: query.event_id.clone(),
+        guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email },
+    };
+    let _ = reqwest::Client::new()
+        .post("https://api.lu.ma/public/v1/event/update-guest-status")
+        .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret.clone())
+        .body(
+            serde_json::to_string(&luma_request_query)
+                .expect("Failed to serialize luma request query"),
+        )
+        .send()
+        .await
+        .expect("Failed to approve user on luma");
+
     let mut db = shared_state.db.lock().await;
     db.add_pending_nft(tx_hash.clone(), PendingNFT { address: query.address, nft_id })
         .expect("Failed to add pending NFT");
     drop(db);
 
-    Ok(Json(TxHashResponse { hash: tx_hash }))
+    Ok(Json(TxHashEventIdResponse { hash: tx_hash, event_id: query.event_id }))
 }
 
 pub async fn redeem<A: TeleportDB>(

@@ -109,6 +109,8 @@ pub struct TxHashResponse {
 #[derive(Serialize)]
 pub struct TxHashEventIdResponse {
     pub hash: String,
+    pub address: String,
+    pub user_email: String,
     pub event_id: String,
 }
 
@@ -311,7 +313,7 @@ pub async fn mint(
     //Approve user on luma
     let luma_request_query = LumaUserApprovalRequestQuery {
         event_id: query.event_id.clone(),
-        guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email },
+        guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email.clone() },
     };
     let _ = reqwest::Client::new()
         .post("https://api.lu.ma/public/v1/event/update-guest-status")
@@ -325,11 +327,11 @@ pub async fn mint(
         .expect("Failed to approve user on luma");
 
     let mut db = shared_state.db.lock().await;
-    db.add_pending_nft(tx_hash.clone(), PendingNFT { address: query.address, nft_id })
+    db.add_pending_nft(tx_hash.clone(), PendingNFT { address: query.address.clone(), nft_id })
         .expect("Failed to add pending NFT");
     drop(db);
 
-    Ok(Json(TxHashEventIdResponse { hash: tx_hash, event_id: query.event_id }))
+    Ok(Json(TxHashEventIdResponse { hash: tx_hash, address: query.address.clone(), user_email: query.user_email.clone(), event_id: query.event_id.clone()  }))
 }
 
 pub async fn redeem<A: TeleportDB>(

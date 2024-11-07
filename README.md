@@ -64,7 +64,7 @@ We are optimistic about an autonomous future where everyone can share intelligen
 In short, we are _using web2 accounts as the substrate for autonomous agents to run on_.
 
 ## Now what? 
-- Teleport is our project submission to the TEE/acc movement. We thank [Flashbots](https://www.flashbots.net/) and [IC3](https://www.initc3.org/) for their extensive support and collaboration.
+- Teleport is a project in Flashbots X, an initiative for rapid iteration and development of TEEs (for us, unhinged and fun TEE apps). We thank [Flashbots](https://www.flashbots.net/) and [IC3](https://www.initc3.org/) for their extensive support and collaboration.
 - We are staunchly supportive of free open source code. TEEs are for everyone to use. The right to fractionalize and redelegate your web2 accounts belongs to everyone. 
 - Our plan is to earn leadership through accelerated development and public outreach, then use it to stimulate creative and wholesome uses so the technology.
 

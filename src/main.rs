@@ -55,7 +55,7 @@ async fn generate_or_read_privkey() -> PKey<Private> {
     } else {
         let pk = create_rsa_key(2048);
         let pk_bytes = pk.private_key_to_pem_pkcs8().unwrap();
-        fs::write(PRIVATE_KEY_PATH, pk_bytes).await.expect("Failed to write pk to file");
+        fs::write(PRIVATE_KEY_PATH, pk_bytes).await.expect(format!("Failed to write pk to file {}", PRIVATE_KEY_PATH).as_str());
         pk
     };
 

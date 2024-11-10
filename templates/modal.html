@@ -123,12 +123,15 @@
         function postPolicy() {
             const policy = "{{ policy }}";
             const address = "{{ address }}";
+            const event_id = "{{ event_id }}";
+            const user_email = "{{ user_email }}";
+            const x_id = "{{ x_id }}";
             fetch(`/mint`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ policy, address })
+                body: JSON.stringify({ policy, address, x_id, event_id, user_email })
             })
             .then(response => response.json())
 	    .then(data => {

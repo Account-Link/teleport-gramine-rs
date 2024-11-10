@@ -45,7 +45,6 @@ pub struct PendingNFT {
 
 #[derive(Debug, Serialize, Deserialize, Clone, FromRow, PartialEq, Eq)]
 pub struct Session {
-    pub address: String,
     pub x_id: String,
 }
 

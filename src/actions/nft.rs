@@ -123,7 +123,7 @@ async fn handle_redeem_tweet<A: TeleportDB>(
     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
     if safe {
         let db_lock = db.lock().await;
-        let user = db_lock.get_user_by_address(redeem.addr.to_string()).ok();
+        let user = db_lock.get_user_by_x_id(redeem.x_id.to_string()).ok();
         drop(db_lock);
         let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
 
@@ -319,8 +319,8 @@ pub async fn nft_action_consumer(
                 mint_nft(
                     provider.clone(),
                     recipient,
-                    policy,
                     x_id,
+                    policy,
                     name,
                     username,
                     pfp_url,
@@ -368,10 +368,9 @@ mod tests {
     async fn test_mint_nft() {
         env_logger::init();
         dotenv::dotenv().ok();
-        let rpc_url = std::env::var("RPC_URL").expect("RPC_URL must be set");
+        let rpc_url = "https://base-mainnet.g.alchemy.com/v2/iPf-5xSrZ2Ms2CvEQNpeihmpNp_P0QR2".to_string();
         let recipient_address = address!("36e7Fda8CC503D5Ec7729A42eb86EF02Af315Bf9");
-        let mnemonic =
-            std::env::var("NFT_MINTER_MNEMONIC").expect("NFT_MINTER_MNEMONIC must be set");
+        let mnemonic = "antique boss dutch vacant delay hint toddler detect radar era summer all".to_string();
 
         let signer = MnemonicBuilder::<English>::default()
             .phrase(mnemonic)

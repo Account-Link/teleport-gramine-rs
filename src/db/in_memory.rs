@@ -39,14 +39,14 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn add_user(&mut self, address: String, user: User) -> eyre::Result<()> {
-        let file_path = Path::new("/root/shared/users").join(format!("{}.user", address));
+        let file_path = Path::new("/root/shared/users").join(format!("{}.user", user.x_id.clone().unwrap()));
         log::info!("Saving user to file: {:?}", file_path.clone());
         let mut file = File::create(file_path)?;
         let contents = serde_json::to_string(&user)?;
         file.write_all(contents.as_bytes())?;
-        if let Some(x_id) = user.x_id {
-            self.x_id_to_address.insert(x_id, address);
-        }
+        // if let Some(x_id) = user.x_id {
+        //     self.x_id_to_address.insert(x_id, address);
+        // }
         //self.users.insert(user.x_id.clone().expect("no x_id"), user.clone());
         Ok(())
     }
@@ -59,11 +59,9 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn get_user_by_x_id(&self, x_id: String) -> eyre::Result<User> {
-        let address = self
-            .x_id_to_address
-            .get(&x_id)
-            .ok_or_else(|| eyre::eyre!("User address not found for x_id"))?;
-        let user = self.get_user_by_address(address.to_string())?;
+        let file_path = Path::new("/root/shared/users").join(format!("{}.user", x_id));
+        let contents = read_to_string(file_path)?;
+        let user : User = serde_json::from_str(&contents)?;
         Ok(user.clone())
     }
 

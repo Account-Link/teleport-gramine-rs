@@ -18,7 +18,7 @@ use tokio_postgres_rustls::MakeRustlsConnect;
 
 use crate::{
     actions::nft::{get_token_id, NFTAction},
-    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB},
+    db::{in_memory::InMemoryDB, AccessTokens, PendingNFT, Session, TeleportDB, User},
     oai,
     templates::{HtmlTemplate, PolicyTemplate},
     twitter::builder::TwitterBuilder,
@@ -61,6 +61,7 @@ pub struct MintQuery {
 
 #[derive(Deserialize)]
 pub struct MintEventQuery {
+    x_id: String,
     event_id: String,
     address: String,
     policy: String,
@@ -70,14 +71,15 @@ pub struct MintEventQuery {
 #[serde_with::skip_serializing_none]
 #[derive(Debug, Deserialize, Serialize)]
 struct LumaUserApprovalRequestQuery {
-    event_id: String,
+    event_api_id: String,
     guest: LumaUser,
+    status: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]
 struct LumaUser {
-    id_type: String,
-    id_value: String,
+    r#type: String,
+    email: String,
 }
 
 #[derive(Deserialize)]
@@ -116,7 +118,7 @@ pub struct TxHashEventIdResponse {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 struct LumaEventQuery {
-    event_id: String,
+    api_id: String,
 }
 
 #[derive(Deserialize)]
@@ -172,9 +174,9 @@ pub async fn register_or_login<A: TeleportDB>(
         .expect("Failed to request oauth token");
 
     let mut db = shared_state.db.lock().await;
-    let mut existing_user = db.get_user_by_address(address.clone()).ok().unwrap_or_default();
-    existing_user.oauth_tokens = oauth_tokens.clone().into();
-    db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
+    // let mut existing_user = db.get_user_by_address(address.clone()).ok().unwrap_or_default();
+    // existing_user.oauth_tokens = oauth_tokens.clone().into();
+    db.add_oauth(oauth_tokens.token.clone(), oauth_tokens.secret).expect("Failed to add oauth tokens to database");
 
     let url =
         format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
@@ -192,15 +194,18 @@ pub async fn callback<A: TeleportDB>(
     let address = query.address;
 
     let mut db = shared_state.db.lock().await;
-    let mut oauth_user =
-        db.get_user_by_address(address.clone()).expect("Failed to get oauth tokens");
-    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
+    // let mut oauth_user =
+    //     db.get_user_by_address(address.clone()).expect("Failed to get oauth tokens");
+    let secret = db.get_oauth(oauth_token.clone()).expect("no oauth");
+    log::info!("oauth_tokens: {:?}", secret);
+    // assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
+    let oauth_tokens = AccessTokens { token: oauth_token.clone(), secret: secret };
     let token_pair = shared_state
         .twitter_builder
         .authorize_token(
-            oauth_user.oauth_tokens.token.clone(),
-            oauth_user.oauth_tokens.secret.clone(),
+            oauth_tokens.token.clone(),
+            oauth_tokens.secret.clone(),
             oauth_verifier,
         )
         .await
@@ -211,19 +216,31 @@ pub async fn callback<A: TeleportDB>(
     let x_info = twitter_client.get_user_info().await.expect("Failed to get user info");
 
     let session_id = db
-        .add_session(Session { x_id: x_info.id.clone(), address: address.clone() })
+        .add_session(Session { x_id: x_info.id.clone() })
         .expect("Failed to add session to database");
+
+    let existing_user = User {
+        x_id: Some(x_info.id.clone()),
+        oauth_tokens: oauth_tokens.clone(),
+        access_tokens: Some(access_tokens.clone()) };
+    db.add_user("".to_string(), existing_user)
+        .expect("Failed to add oauth tokens to database");
+
+    let mut oauth_user =
+    db.get_user_by_x_id(x_info.id.clone()).expect("Failed to get oauth tokens");
+    assert_eq!(oauth_token, oauth_user.oauth_tokens.token);
 
     if oauth_user.x_id.is_none() {
         oauth_user.x_id = Some(x_info.id.clone());
         oauth_user.access_tokens = Some(access_tokens);
-        db.add_user(address.clone(), oauth_user.clone()).expect("Failed to add user to database");
+        db.add_user("".to_string(), oauth_user.clone()).expect("Failed to add user to database");
         drop(db);
     }
 
     let url_with_params = format!(
-        "/approve?address={}&policy=anything&event_id={}&user_email={}",
+        "/approve?address={}&policy=anything&x_id={}&event_id={}&user_email={}",
         address.clone(),
+        x_info.id.clone(),
         query.event_id,
         query.user_email
     );
@@ -254,7 +271,7 @@ pub async fn mint(
     }
     let db = shared_state.db.lock().await;
     let user =
-        db.get_user_by_address(query.address.clone()).expect("Failed to get user by address");
+        db.get_user_by_x_id(query.x_id.clone()).expect("Failed to get user by x_id");
 
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
@@ -271,17 +288,20 @@ pub async fn mint(
         .twitter_builder
         .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens").unwrap().into());
 
-    let event_id_query = LumaEventQuery { event_id: query.event_id.clone() };
+    const LUMA_SECRET_HEADER: &str = "x-luma-api-key";
+    log::info!("luma_event_id: {}", query.event_id.clone());
+    let event_id_query = LumaEventQuery { api_id: query.event_id.clone() };
     let luma_event = reqwest::Client::new()
         .get("https://api.lu.ma/public/v1/event/get")
         .query(&event_id_query)
-        .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret.clone())
+        .header(LUMA_SECRET_HEADER, shared_state.luma_secret.clone())
         .send()
         .await
         .expect("Failed to get luma event")
         .json::<serde_json::Value>()
         .await
         .expect("Failed to get luma event json response");
+    log::info!("luma_event: {}", luma_event);
     let event_pfp_url =
         luma_event["event"]["cover_url"].as_str().ok_or(StatusCode::INTERNAL_SERVER_ERROR)?;
     let user_info = client.get_user_info().await.expect("Failed to get user info");
@@ -293,6 +313,8 @@ pub async fn mint(
     };
 
     let nft_id = format!("{:032x}", rand::random::<u128>());
+
+    log::info!("event_pfp_url: {}", event_pfp_url.to_string());
 
     let nft_action = NFTAction::Mint {
         recipient: Address::from_str(&query.address).expect("Failed to parse user address"),
@@ -312,12 +334,13 @@ pub async fn mint(
 
     //Approve user on luma
     let luma_request_query = LumaUserApprovalRequestQuery {
-        event_id: query.event_id.clone(),
-        guest: LumaUser { id_type: "email".to_string(), id_value: query.user_email.clone() },
+        event_api_id: query.event_id.clone(),
+        guest: LumaUser { r#type: "email".to_string(), email: query.user_email.clone() },
+        status: "approved".to_string(),
     };
     let _ = reqwest::Client::new()
         .post("https://api.lu.ma/public/v1/event/update-guest-status")
-        .header(reqwest::header::AUTHORIZATION, shared_state.luma_secret.clone())
+        .header(LUMA_SECRET_HEADER, shared_state.luma_secret.clone())
         .body(
             serde_json::to_string(&luma_request_query)
                 .expect("Failed to serialize luma request query"),
@@ -393,23 +416,19 @@ pub async fn get_tweet_id<A: TeleportDB>(
 
 pub async fn approve_mint<A: TeleportDB>(
     State(shared_state): State<SharedState<A>>,
-    Query(query): Query<MintQuery>,
+    Query(query): Query<MintEventQuery>,
     jar: CookieJar,
 ) -> impl IntoResponse {
     if let Some(session_id) = jar.get(SESSION_ID_COOKIE_NAME) {
         let session_id = session_id.value();
         let db = shared_state.db.lock().await;
         let session = db.get_session(session_id.to_string()).expect("Failed to get session");
-        if session.address != query.address {
-            log::info!("Session address does not match");
-            return Err(StatusCode::UNAUTHORIZED);
-        }
     } else {
         log::info!("No session found");
         return Err(StatusCode::UNAUTHORIZED);
     }
     let template =
-        PolicyTemplate { policy: query.policy, address: query.address, x_id: "".to_string() };
+        PolicyTemplate { policy: query.policy, address: query.address, x_id: query.x_id, event_id: query.event_id, user_email: query.user_email };
     Ok(HtmlTemplate(template))
 }
 

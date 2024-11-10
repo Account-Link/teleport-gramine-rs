@@ -8,6 +8,8 @@ pub struct PolicyTemplate {
     pub policy: String,
     pub address: String,
     pub x_id: String,
+    pub event_id: String,
+    pub user_email: String,
 }
 
 pub struct HtmlTemplate<T>(pub T);

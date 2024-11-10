@@ -237,12 +237,21 @@ pub async fn mint_nft(
     username: String,
     pfp_url: String,
     nft_id: String,
+    uses_left: u64,
 ) -> eyre::Result<String> {
     let nft_address = get_nft_address()?;
     let nft = NFT::new(nft_address, provider);
     let nftid_hash = keccak256(nft_id.as_bytes());
-    let mint =
-        nft.mintTo(recipient, Uint::from_str(&x_id)?, policy, name, username, pfp_url, nftid_hash);
+    let mint = nft.mintTo(
+        recipient,
+        Uint::from_str(&x_id)?,
+        policy,
+        name,
+        username,
+        pfp_url,
+        nftid_hash,
+        Uint::from(uses_left),
+    );
     let tx = mint.send().await?;
 
     let tx_hash = tx.tx_hash();
@@ -283,6 +292,7 @@ pub enum NFTAction {
         username: String,
         pfp_url: String,
         nft_id: String,
+        uses_left: u64,
     },
 }
 
@@ -296,9 +306,28 @@ pub async fn nft_action_consumer(
             NFTAction::Redeem { token_id, content } => {
                 redeem_nft(provider.clone(), token_id, content).await
             }
-            NFTAction::Mint { recipient, policy, x_id, name, username, pfp_url, nft_id } => {
-                mint_nft(provider.clone(), recipient, x_id, policy, name, username, pfp_url, nft_id)
-                    .await
+            NFTAction::Mint {
+                recipient,
+                policy,
+                x_id,
+                name,
+                username,
+                pfp_url,
+                nft_id,
+                uses_left,
+            } => {
+                mint_nft(
+                    provider.clone(),
+                    recipient,
+                    x_id,
+                    policy,
+                    name,
+                    username,
+                    pfp_url,
+                    nft_id,
+                    uses_left,
+                )
+                .await
             }
         };
 
@@ -361,6 +390,7 @@ mod tests {
             "username".to_string(),
             "pfp_url".to_string(),
             "nft_id".to_string(),
+            1,
         )
         .await
         .unwrap();

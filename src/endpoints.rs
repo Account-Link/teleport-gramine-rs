@@ -53,6 +53,7 @@ pub struct CallbackQuery {
 pub struct MintQuery {
     address: String,
     policy: String,
+    headless: Option<bool>,
 }
 
 #[derive(Deserialize)]
@@ -249,6 +250,7 @@ pub async fn mint(
         username,
         pfp_url: user_info.profile_image_url.replace("_normal", "_400x400"),
         nft_id: nft_id.clone(),
+        uses_left: 1,
     };
 
     let (sender, tx_hash) = oneshot::channel();

@@ -205,13 +205,15 @@ pub async fn mint(
     State(shared_state): State<SharedState<InMemoryDB>>,
     Json(query): Json<MintQuery>,
 ) -> Result<Json<TxHashResponse>, StatusCode> {
-    if let Some(referer) = headers.get("Referer") {
-        let referer = referer.to_str().unwrap_or("");
-        if !referer.starts_with(&format!("https://{}/approve", shared_state.tee_url)) {
+    if !query.headless.unwrap_or(false) {
+        if let Some(referer) = headers.get("Referer") {
+            let referer = referer.to_str().unwrap_or("");
+            if !referer.starts_with(&format!("https://{}/approve", shared_state.tee_url)) {
+                return Err(StatusCode::FORBIDDEN);
+            }
+        } else {
             return Err(StatusCode::FORBIDDEN);
         }
-    } else {
-        return Err(StatusCode::FORBIDDEN);
     }
     let db = shared_state.db.lock().await;
     let user =

@@ -150,23 +150,24 @@ async fn handle_redeem_tweet<A: TeleportDB>(
             let tweet_id = client.raw_tweet(tweet).await?;
 
             let mut db = db.lock().await;
-            db.add_tweet(redeem.tokenId.to_string(), tweet_id)?;
+            db.add_tweet(redeem.tokenId.to_string(), tweet_id.clone())?;
             drop(db);
-        }
 
-        let token_id = redeem.tokenId.to_string();
-        let token_owner = client_db.get_token_owner(token_id.clone()).await?;
-        client_db
-            .add_redeemed_tweet(
-                token_owner.clone(),
-                token_id.clone(),
-                tweet_content.text,
-                redeem.policy,
-            )
-            .await?;
-        client_db.increment_user_redeemed(token_owner.user_id).await?;
-        client_db.delete_token(token_id).await?;
-        log::info!("NFT {} deleted on postgresdb.", redeem.tokenId.to_string());
+            let token_id = redeem.tokenId.to_string();
+            let token_owner = client_db.get_token_owner(token_id.clone()).await?;
+            client_db
+                .add_redeemed_tweet(
+                    token_owner.clone(),
+                    token_id.clone(),
+                    tweet_id,
+                    tweet_content.text,
+                    redeem.policy,
+                )
+                .await?;
+            client_db.increment_user_redeemed(token_owner.user_id).await?;
+            client_db.delete_token(token_id).await?;
+            log::info!("NFT {} deleted on postgresdb.", redeem.tokenId.to_string());
+        }
     }
     Ok(())
 }

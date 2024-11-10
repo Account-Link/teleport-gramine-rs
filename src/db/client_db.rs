@@ -48,6 +48,7 @@ impl ClientDB {
         &self,
         token_owner: TokenOwner,
         token_id: String,
+        tweet_id: String,
         content: String,
         safeguard: String,
     ) -> eyre::Result<()> {
@@ -56,7 +57,7 @@ impl ClientDB {
 
         self.client().await?.execute(
             "INSERT INTO \"RedeemedIndex\" (\"id\", \"creatorUserId\", \"tokenId\", \"tweetId\", \"twitterUserName\", \"safeguard\", \"content\") VALUES ($1, $2, $3, $4, $5, $6, $7)",
-            &[&id, &token_owner.user_id, &token_id_int, &"".to_string(), &token_owner.twitter_user_name, &safeguard, &content],
+            &[&id, &token_owner.user_id, &token_id_int, &tweet_id, &token_owner.twitter_user_name, &safeguard, &content],
         )
         .await?;
         Ok(())

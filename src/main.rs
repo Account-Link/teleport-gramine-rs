@@ -5,7 +5,7 @@ use alloy::signers::local::PrivateKeySigner;
 use tokio::{sync::{mpsc,oneshot}, time::Duration};
 
 use rand::Rng;
-use axum::extract::{State};
+use axum::{extract::State, Router};
 use axum_server::tls_rustls::RustlsConfig;
 use endpoints::{
     approve_mint, callback, cookietest, get_tweet_id, hello_world, mint, redeem, register_or_login,
@@ -142,7 +142,7 @@ async fn get_shared_key(cert: Vec<u8>, pkey: PKey<Private>) -> Vec<u8> {
 async fn main() {
     env_logger::init();
     dotenv::dotenv().ok();
-    dotenv::from_filename("/teleport.env").ok();
+    dotenv::from_filename("./private.env").ok();
 
     // Published values
     let ws_rpc_url = std::env::var("WS_RPC_URL").expect("WS_RPC_URL not set");
@@ -150,68 +150,71 @@ async fn main() {
     let tee_url = std::env::var("TEE_URL").expect("TEE_URL not set");
 
     // Private API values
-    let do_bootstrap = std::env::var("BOOTSTRAP").is_ok();
-    let do_onboard = std::env::var("ONBOARD").is_ok();
+    // let do_bootstrap = std::env::var("BOOTSTRAP").is_ok();
+    // let do_onboard = std::env::var("ONBOARD").is_ok();
+    let oauth_token = std::env::var("OAUTH_TOKEN").expect("OAUTH_TOKEN not set");
+    let oauth_token_secret = std::env::var("OAUTH_TOKEN_SECRET").expect("OAUTH_TOKEN_SECRET not set");
     let rpc_key = std::env::var("RPC_KEY").expect("RPC_KEY not set");
     let db_path = std::env::var("DB_PATH").expect("DB_PATH not set");
     let app_url = std::env::var("APP_URL").expect("APP_URL not set");
+    let wallet_key = std::env::var("WALLET_KEY").expect("WALLET_KEY not set");
     let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL not set");
     let app_key = std::env::var("TWITTER_CONSUMER_KEY").expect("TWITTER_CONSUMER_KEY not set");
     let app_secret =
         std::env::var("TWITTER_CONSUMER_SECRET").expect("TWITTER_CONSUMER_SECRET not set");
 
-    let twitter_builder = TwitterBuilder::new(app_key, app_secret);
+    let twitter_builder = TwitterBuilder::new(app_key, app_secret, oauth_token, oauth_token_secret);
 
     let ws_rpc_url = ws_rpc_url + &rpc_key;
     let rpc_url = rpc_url + &rpc_key;
 
-    // TLS registration
-    // Generate a private key and a fresh CSR
-    let pkey = generate_or_read_privkey().await;
+    // // TLS registration
+    // // Generate a private key and a fresh CSR
+    // let pkey = generate_or_read_privkey().await;
 
-    // We need to wait for the certificate before we can receive the key
-    let cert = wait_for_cert().await;
+    // // We need to wait for the certificate before we can receive the key
+    // let cert = wait_for_cert().await;
 
-    // Get the shared key
-    let shared_key = if do_bootstrap {
-	// If we are bootstrapping, then generate shared secret
-	let mut rng = rand::thread_rng();
-	let mut shared_key = [0u8; 16];
-	rng.fill(&mut shared_key);
-	fs::write(SHARED_KEY_PATH, &shared_key)
-            .await
-            .expect("Failed to write shared key to file");
-	shared_key.to_vec()
-    } else {
-	// Otherwise start a server and wait to receive it
-	get_shared_key(cert, pkey.clone()).await
-    };
+    // // Get the shared key
+    // let shared_key = if do_bootstrap {
+	// // If we are bootstrapping, then generate shared secret
+	// let mut rng = rand::thread_rng();
+	// let mut shared_key = [0u8; 16];
+	// rng.fill(&mut shared_key);
+	// fs::write(SHARED_KEY_PATH, &shared_key)
+    //         .await
+    //         .expect("Failed to write shared key to file");
+	// shared_key.to_vec()
+    // } else {
+	// // Otherwise start a server and wait to receive it
+	// get_shared_key(cert, pkey.clone()).await
+    // };
 
-    // Onboard others?
-    if do_onboard {
-	log::info!("sending the key to https://{}/shared_key/", tee_url);
-	let url = format!("https://{}/shared_key", tee_url);
-	let c = reqwest::Client::new().post(url).body(hex::encode(shared_key)).send().await.unwrap();
-	log::info!("got: {}", c.text().await.unwrap());
-	return;
-    }
+    // // Onboard others?
+    // if do_onboard {
+	// log::info!("sending the key to https://{}/shared_key/", tee_url);
+	// let url = format!("https://{}/shared_key", tee_url);
+	// let c = reqwest::Client::new().post(url).body(hex::encode(shared_key)).send().await.unwrap();
+	// log::info!("got: {}", c.text().await.unwrap());
+	// return;
+    // }
 
-    // Derive keys from the shared secret
-    let hkdf = hkdf::Hkdf::<sha2::Sha256>::new(None, shared_key.as_slice());
-    let mut seal_key = [0u8; 16];
-    hkdf.expand(b"seal_key", &mut seal_key).unwrap();
-    let mut wallet_key = [0u8; 32];
-    hkdf.expand(b"wallet", &mut wallet_key).unwrap();
+    // // Derive keys from the shared secret
+    // let hkdf = hkdf::Hkdf::<sha2::Sha256>::new(None, shared_key.as_slice());
+    // let mut seal_key = [0u8; 16];
+    // hkdf.expand(b"seal_key", &mut seal_key).unwrap();
+    // let mut wallet_key = [0u8; 32];
+    // hkdf.expand(b"wallet", &mut wallet_key).unwrap();
 
-    // Unlock the encrypted files using the shared key
-    fs::write("/dev/attestation/keys/shared", seal_key).await.expect("couldn't write to seal key");
+    // // Unlock the encrypted files using the shared key
+    // fs::write("/dev/attestation/keys/shared", seal_key).await.expect("couldn't write to seal key");
 
-    // Derive the signing key
-    let signer = PrivateKeySigner::from_slice(&wallet_key).unwrap();
+    // // Derive the signing key
+    let signer = wallet_key.parse::<PrivateKeySigner>().unwrap();
     log::info!("Signer address:{}", signer.address());
 
-    // Now we're loaded up, write the quote
-    prepare_quote(&pkey, signer.address().to_string()).await;
+    // // Now we're loaded up, write the quote
+    // prepare_quote(&pkey, signer.address().to_string()).await;
 
     let provider = get_provider(rpc_url.clone(), signer.clone().into());
 
@@ -228,37 +231,37 @@ async fn main() {
 	rpc_url: rpc_url,
     };
 
-    let app = axum::Router::new()
-        .route("/new", axum::routing::get(register_or_login))
-        .route("/approve", axum::routing::get(approve_mint))
-        .route("/callback", axum::routing::get(callback))
-        .route("/cookietest", axum::routing::get(cookietest))
-        .route("/mint", axum::routing::post(mint))
-        .route("/redeem", axum::routing::post(redeem))
+    let _app: Router = axum::Router::new()
+        // .route("/new", axum::routing::get(register_or_login))
+        // .route("/approve", axum::routing::get(approve_mint))
+        // .route("/callback", axum::routing::get(callback))
+        // .route("/cookietest", axum::routing::get(cookietest))
+        // .route("/mint", axum::routing::post(mint))
+        // .route("/redeem", axum::routing::post(redeem))
         .route("/checkRedeem", axum::routing::post(check_redeem))
         .route("/tweetId", axum::routing::get(get_tweet_id))
         .route("/", axum::routing::get(hello_world))
         .layer(CorsLayer::permissive())
         .with_state(shared_state);
 
-    #[cfg(feature = "https")]
-    {
-        let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
-        let config =
-            RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
-        let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
-        tokio::spawn(async move {
-            axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
-        });
-    }
+    // #[cfg(feature = "https")]
+    // {
+    //     let cert = fs::read(CERTIFICATE_PATH).await.expect("cert not found");
+    //     let config =
+    //         RustlsConfig::from_pem(cert, pkey.private_key_to_pem_pkcs8().unwrap()).await.unwrap();
+    //     let addr = SocketAddr::from(([0, 0, 0, 0], 8001));
+    //     tokio::spawn(async move {
+    //         axum_server::bind_rustls(addr, config).serve(app.into_make_service()).await.unwrap();
+    //     });
+    // }
 
-    #[cfg(not(feature = "https"))]
-    {
-        let listener = tokio::net::TcpListener::bind("0.0.0.0:3000").await.unwrap();
+    // #[cfg(not(feature = "https"))]
+    // {
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await.unwrap();
         tokio::spawn(async move {
-            axum::serve(listener, app).await.unwrap();
+            axum::serve(listener, _app).await.unwrap();
         });
-    }
+    // }
 
     let db_clone = db.clone();
     tokio::spawn(async move {

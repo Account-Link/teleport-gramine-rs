@@ -7,6 +7,8 @@ use super::auth::{self, TwitterTokenPair};
 pub struct TwitterBuilder {
     pub consumer_key: String,
     pub consumer_secret: String,
+    pub oauth_token: String,
+    pub oauth_token_secret: String,
 }
 
 pub struct TwitterClient<'a> {
@@ -14,8 +16,13 @@ pub struct TwitterClient<'a> {
 }
 
 impl TwitterBuilder {
-    pub fn new(consumer_key: String, consumer_secret: String) -> Self {
-        Self { consumer_key, consumer_secret }
+    pub fn new(
+        consumer_key: String,
+        consumer_secret: String,
+        oauth_token: String,
+        oauth_token_secret: String,
+    ) -> Self {
+        Self { consumer_key, consumer_secret, oauth_token, oauth_token_secret }
     }
 
     pub async fn request_oauth_token(
@@ -56,6 +63,13 @@ impl TwitterBuilder {
 
         let client = reqwest::Client::new();
         // client.oauth1(secrets)
+        TwitterClient { client: client.oauth1(secrets) }
+    }
+
+    pub fn build_client(&self) -> TwitterClient {
+        let secrets = Secrets::new(self.consumer_key.clone(), self.consumer_secret.clone())
+            .token(self.oauth_token.clone(), self.oauth_token_secret.clone());
+        let client = reqwest::Client::new();
         TwitterClient { client: client.oauth1(secrets) }
     }
 }

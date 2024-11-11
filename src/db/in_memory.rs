@@ -95,6 +95,7 @@ impl TeleportDB for InMemoryDB {
     }
 
     fn add_tweet(&mut self, token_id: String, tweet_id: String) -> eyre::Result<()> {
+        log::info!("Tweet id added to db: {}", tweet_id);
         self.tweets.insert(token_id, tweet_id);
         Ok(())
     }

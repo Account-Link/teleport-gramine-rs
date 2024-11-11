@@ -18,7 +18,10 @@ use self::NFT::{NewTokenData, RedeemTweet, Transfer};
 
 use super::wallet::WalletProvider;
 use crate::{
-    db::{client_db::ClientDB, TeleportDB},
+    db::{
+        client_db::{ClientDB, TokenOwner},
+        TeleportDB,
+    },
     oai,
     twitter::{builder::TwitterBuilder, tweet::Tweet},
 };
@@ -122,52 +125,55 @@ async fn handle_redeem_tweet<A: TeleportDB>(
 ) -> eyre::Result<()> {
     let safe = oai::is_tweet_safe(&redeem.content, &redeem.policy).await;
     if safe {
-        let db_lock = db.lock().await;
-        let user = db_lock.get_user_by_address(redeem.addr.to_string()).ok();
-        drop(db_lock);
+        // let db_lock = db.lock().await;
+        // let user = db_lock.get_user_by_address(redeem.addr.to_string()).ok();
+        // drop(db_lock);
         let mut tweet_content = TweetContent { text: redeem.content.clone(), media_url: None };
 
-        if let Some(user) = user {
-            let client = twitter_builder
-                .with_auth(user.access_tokens.ok_or_eyre("User has no access tokens")?.into());
+        // if let Some(user) = user {
+        let client = twitter_builder.build_client();
 
-            // to be backwards compatible for now
-            if let Ok(parsed_tweet_content) = serde_json::from_str::<TweetContent>(&redeem.content)
-            {
-                tweet_content.text = parsed_tweet_content.text;
-                if let Some(media_url) = parsed_tweet_content.media_url {
-                    let media_bytes = reqwest::get(media_url).await?.bytes().await?.to_vec();
-                    let media_id = client.upload_media(media_bytes, None).await?;
-                    tweet_content.media_url = Some(media_id);
-                }
+        // to be backwards compatible for now
+        if let Ok(parsed_tweet_content) = serde_json::from_str::<TweetContent>(&redeem.content) {
+            tweet_content.text = parsed_tweet_content.text;
+            if let Some(media_url) = parsed_tweet_content.media_url {
+                let media_bytes = reqwest::get(media_url).await?.bytes().await?.to_vec();
+                let media_id = client.upload_media(media_bytes, None).await?;
+                tweet_content.media_url = Some(media_id);
             }
-
-            let mut tweet = Tweet::new(tweet_content.text.clone());
-            if let Some(media_id) = tweet_content.media_url {
-                tweet.set_media_ids(vec![media_id]);
-            }
-
-            let tweet_id = client.raw_tweet(tweet).await?;
-
-            let mut db = db.lock().await;
-            db.add_tweet(redeem.tokenId.to_string(), tweet_id.clone())?;
-            drop(db);
-
-            let token_id = redeem.tokenId.to_string();
-            let token_owner = client_db.get_token_owner(token_id.clone()).await?;
-            client_db
-                .add_redeemed_tweet(
-                    token_owner.clone(),
-                    token_id.clone(),
-                    tweet_id,
-                    tweet_content.text,
-                    redeem.policy,
-                )
-                .await?;
-            client_db.increment_user_redeemed(token_owner.user_id).await?;
-            client_db.delete_token(token_id).await?;
-            log::info!("NFT {} deleted on postgresdb.", redeem.tokenId.to_string());
         }
+
+        let mut tweet = Tweet::new(tweet_content.text.clone());
+        if let Some(media_id) = tweet_content.media_url {
+            tweet.set_media_ids(vec![media_id]);
+        }
+
+        let tweet_id = client.raw_tweet(tweet).await?;
+        let tweet_id_copy = tweet_id.to_string();
+
+        let mut db = db.lock().await;
+        db.add_tweet(redeem.tokenId.to_string(), tweet_id)?;
+        drop(db);
+        // }
+
+        let token_id = redeem.tokenId.to_string();
+        // let token_owner = client_db.get_token_owner(token_id.clone()).await?;
+        let token_owner = TokenOwner {
+            user_id: "1853810993891041280".to_string(),
+            twitter_user_name: "OverheardX".to_string(),
+        };
+        client_db
+            .add_redeemed_tweet(
+                token_owner.clone(),
+                token_id.clone(),
+                tweet_id_copy.clone(),
+                tweet_content.text,
+                redeem.policy,
+            )
+            .await?;
+        // client_db.increment_user_redeemed(token_owner.user_id).await?;
+        // client_db.delete_token(token_id).await?;
+        log::info!("Twitter tweet id added to db: {}", tweet_id_copy);
     }
     Ok(())
 }

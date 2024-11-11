@@ -3,7 +3,7 @@ use alloy::{
     signers::{k256::ecdsa::SigningKey, local::LocalSigner},
 };
 use http::HeaderMap;
-use std::{str::FromStr, sync::Arc};
+use std::{collections::{HashMap, HashSet}, io::{BufRead, BufReader}, str::FromStr, sync::Arc};
 
 use axum::{
     extract::{Query, State},
@@ -84,13 +84,14 @@ pub struct TxHashResponse {
 
 #[derive(Deserialize)]
 pub struct CheckRedeemQuery {
+    pub nft_id: String,
     pub content: String,
-    pub policy: String,
 }
 
 #[derive(Serialize)]
 pub struct CheckRedeemResponse {
-    pub safe: bool,
+    pub exists: bool,
+    pub tx_hash: Option<String>,
 }
 
 #[derive(Clone)]
@@ -287,12 +288,38 @@ pub async fn redeem<A: TeleportDB>(
     Json(TxHashResponse { hash: tx_hash })
 }
 
+
 pub async fn check_redeem<A: TeleportDB>(
-    State(_): State<SharedState<A>>,
+    State(shared_state): State<SharedState<A>>,
     Json(query): Json<CheckRedeemQuery>,
 ) -> Json<CheckRedeemResponse> {
-    let safe = oai::is_tweet_safe(&query.content, &query.policy).await;
-    Json(CheckRedeemResponse { safe })
+    // let safe = oai::is_tweet_safe(&query.content, &query.policy).await;
+    let bu_reader = BufReader::new("./nft_ids.txt".as_bytes());
+    let nft_ids = bu_reader
+        .lines()
+        .enumerate()
+        .map(|(index, line)| (line.unwrap(), index))
+        .collect::<HashMap<String, usize>>();
+    if nft_ids.contains_key(&query.nft_id) {
+        // Continue to redeem
+        let token_id = get_token_id(shared_state.rpc_url, query.nft_id.clone())
+            .await
+            .unwrap_or_else(|_| panic!("Failed to get NFT by id {}", query.nft_id));
+        log::info!("redeem token_id: {}", token_id);
+
+        let nft_action = NFTAction::Redeem { token_id, content: query.content };
+
+        let (sender, tx_hash) = oneshot::channel();
+
+        shared_state.nft_action_sender.send((nft_action, sender)).await.unwrap();
+        let tx_hash = tx_hash.await.unwrap();
+        Json(CheckRedeemResponse {
+            exists: true,
+            tx_hash: Some(tx_hash),
+        })
+    } else {
+        Json(CheckRedeemResponse { exists: false, tx_hash: None })
+    }
 }
 
 pub async fn get_tweet_id<A: TeleportDB>(

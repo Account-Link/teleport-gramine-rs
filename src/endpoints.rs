@@ -112,6 +112,7 @@ pub async fn cookietest<A: TeleportDB>(
 }
 
 pub async fn register_or_login<A: TeleportDB>(
+    headers: HeaderMap,
     State(shared_state): State<SharedState<A>>,
     Query(query): Query<NewUserQuery>,
 ) -> Redirect {
@@ -135,8 +136,15 @@ pub async fn register_or_login<A: TeleportDB>(
     existing_user.oauth_tokens = oauth_tokens.clone().into();
     db.add_user(address.clone(), existing_user).expect("Failed to add oauth tokens to database");
 
-    let url =
-        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token);
+    let user_agent_str = headers.get("User-Agent").unwrap().to_str().unwrap();
+    //Redirect only works on Android with latest version of the X app
+    let is_mobile = user_agent_str.contains("Mobile") || user_agent_str.contains("Android");
+
+    let url = if is_mobile {
+        format!("twitter://oauth2/authorize?oauth_token={}", oauth_tokens.token)
+    } else {
+        format!("https://api.twitter.com/oauth/authenticate?oauth_token={}", oauth_tokens.token)
+    };
 
     Redirect::temporary(&url)
 }
